@@ -1,0 +1,112 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "apply": "Apply",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "id": "ID",
+    "type": "Type",
+    "model": "Model",
+    "manufacturer": "Manufacturer"
+  },
+  "navbar": {
+    "title": "Onboarding Platform",
+    "devices": "Devices"
+  },
+  "devices": {
+    "title": "Devices",
+    "noDevices": "No devices available",
+    "loadingDevices": "Loading devices...",
+    "errorLoadingDevices": "Error loading devices",
+    "viewDetails": "View Details",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "device": {
+    "management": "Device Management",
+    "passport": {
+      "title": "Digital Passport",
+      "loading": "Loading digital passport...",
+      "error": "Error loading passport",
+      "noData": "No passport data available"
+    },
+    "mud": {
+      "title": "MUD File",
+      "version": "Version",
+      "url": "URL",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "lastUpdate": "Last Update",
+      "noData": "No MUD file available"
+    },
+    "tabs": {
+      "passport": "Digital Passport",
+      "mud": "MUD File",
+      "policies": "Applied Policies",
+      "apply": "Apply New Policy"
+    }
+  },
+  "policies": {
+    "title": "Applied Policies",
+    "noPolicies": "No policies applied",
+    "loading": "Loading policies...",
+    "error": "Error loading policies",
+    "id": "ID",
+    "status": "Status",
+    "enforcement": "Enforcement",
+    "appliedAt": "Applied",
+    "viewXml": "View XML of the policy",
+    "applyIdsp2": {
+      "title": "Apply IDSP2",
+      "label": "IDSP2 ID:",
+      "placeholder": "Enter the IDSP2 ID",
+      "applying": "Applying...",
+      "button": "Apply IDSP2",
+      "error": "Please enter an IDSP2 ID"
+    },
+    "createEdit": {
+      "title": "Create/Edit MSPL Policy",
+      "applyButton": "Apply Policy",
+      "loadingSchema": "Loading schema...",
+      "success": "Policy applied successfully",
+      "error": "Error applying policy"
+    }
+  },
+  "enforcement": {
+    "title": "Enforcement Status",
+    "status": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "error": "Error",
+      "unknown": "Unknown"
+    }
+  },
+  "policyBuilder": {
+    "backTo": "Back to",
+    "goTo": "Go to",
+    "addField": "Add",
+    "selectSubtype": "Select subtype",
+    "chooseOne": "Choose one...",
+    "removeField": "Remove field"
+  },
+  "xmlViewer": {
+    "title": "XML view",
+    "noData": "No data yet",
+    "invalidData": "No valid data"
+  },
+  "jsonViewer": {
+    "title": "JSON Data",
+    "noData": "No data to display"
+  }
+}
+

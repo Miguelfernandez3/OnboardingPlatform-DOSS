@@ -1,93 +1,229 @@
-# GUI
+# Onboarding Platform GUI
 
+Interfaz de usuario para la plataforma de onboarding de dispositivos IoT. Permite gestionar dispositivos, visualizar pasaportes digitales, archivos MUD, políticas MSPL y aplicar nuevas políticas de seguridad.
 
+## Arquitectura
 
-## Getting started
+Este proyecto sigue una **arquitectura hexagonal (ports & adapters)** que permite:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- **Modularidad**: El API client es completamente modular mediante adapters intercambiables
+- **Escalabilidad**: Fácil agregar nuevos adapters para diferentes proyectos
+- **Independencia**: No depende de otros proyectos (frontend-bastion, mg_tester)
+- **Testabilidad**: Mock API client para desarrollo sin backend
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### Estructura del Proyecto
 
 ```
-cd existing_repo
-git remote add origin https://ants-gitlab.inf.um.es/doss/gui.git
-git branch -M main
-git push -uf origin main
+src/
+├── core/                    # Capa de dominio (hexagonal)
+│   ├── domain/             # Entidades y servicios de negocio
+│   ├── ports/              # Interfaces/contratos
+│   └── adapters/           # Implementaciones (API clients)
+├── infrastructure/          # Infraestructura (mock API, schemas)
+└── presentation/            # Capa de presentación (React)
+    ├── pages/              # Páginas principales
+    ├── components/         # Componentes reutilizables
+    └── hooks/              # Hooks personalizados
 ```
 
-## Integrate with your tools
+## Características
 
-- [ ] [Set up project integrations](https://ants-gitlab.inf.um.es/doss/gui/-/settings/integrations)
+- **Lista de Dispositivos**: Visualización de todos los dispositivos registrados
+- **Pasaporte Digital**: Visualización del pasaporte digital del dispositivo (JSON)
+- **Archivos MUD**: Consulta y visualización de archivos MUD
+- **Políticas MSPL**: 
+  - Visualización de políticas aplicadas actualmente
+  - Editor visual para crear/editar políticas MSPL
+  - Aplicación de políticas directamente o mediante IDSP2 ID
+- **Estado de Enforcement**: Monitoreo del estado de aplicación de políticas
 
-## Collaborate with your team
+## Instalación
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+```bash
+npm install
+```
 
-## Test and Deploy
+## Desarrollo
 
-Use the built-in continuous integration in GitLab.
+```bash
+npm run dev
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+La aplicación se ejecutará en `http://localhost:3001`
 
-***
+## Type Checking
 
-# Editing this README
+```bash
+npm run type-check
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Verifica los tipos TypeScript sin compilar.
 
-## Suggestions for a good README
+## Configuración
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Variables de Entorno
 
-## Name
-Choose a self-explaining name for your project.
+Crea un archivo `.env` en la raíz del proyecto:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```env
+# Tipo de adapter a usar: 'doss' o 'mock'
+VITE_API_ADAPTER=mock
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# URL base de la API (solo para adapter 'doss')
+VITE_API_BASE_URL=http://localhost:3000/api
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Adapters Disponibles
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+- **mock**: Mock API client para desarrollo (por defecto)
+- **doss**: Adapter para API DOSS
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Modularidad - Cambiar el API Client
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Para usar esta GUI en otro proyecto con diferentes datos/endpoints:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+1. **Crear nuevo adapter** en `src/core/adapters/api/[nuevo-proyecto]/`:
+   - Crear `[Proyecto]ApiAdapter.js` que extienda `BaseApiClient`
+   - Crear `[proyecto].config.js` con la configuración de endpoints
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+2. **Registrar el adapter** en `src/core/adapters/api/index.js`:
+   ```javascript
+   case 'nuevo-proyecto':
+     return new NuevoProyectoApiAdapter();
+   ```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+3. **Cambiar variable de entorno**:
+   ```env
+   VITE_API_ADAPTER=nuevo-proyecto
+   ```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+4. **La GUI y componentes UI permanecen iguales** - solo cambia el adapter
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Uso
 
-## License
-For open source projects, say how it is licensed.
+### Listar Dispositivos
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Navega a `/devices` para ver todos los dispositivos disponibles.
+
+### Gestionar un Dispositivo
+
+1. Haz clic en "Ver Detalles" en cualquier dispositivo
+2. Se abrirá la página de gestión con 4 tabs:
+   - **Pasaporte Digital**: Muestra el JSON del pasaporte
+   - **Archivo MUD**: Visualiza el archivo MUD del dispositivo
+   - **Políticas Aplicadas**: Lista las políticas MSPL actuales
+   - **Aplicar Nueva Política**: 
+     - Subir IDSP2 ID
+     - Crear/editar política MSPL con el editor visual
+
+### Aplicar Política MSPL
+
+1. Ve al tab "Aplicar Nueva Política"
+2. Usa el editor visual para construir la política MSPL
+3. El XML se genera automáticamente en tiempo real
+4. Haz clic en "Aplicar Política" para enviarla al dispositivo
+
+### Aplicar IDSP2
+
+1. Ve al tab "Aplicar Nueva Política"
+2. Ingresa el IDSP2 ID en el campo correspondiente
+3. Haz clic en "Aplicar IDSP2"
+
+## API Endpoints (Placeholders)
+
+Los siguientes endpoints están definidos como placeholders y deben ser implementados en el backend:
+
+- `GET /api/devices` - Lista dispositivos
+- `GET /api/devices/:id` - Detalles dispositivo
+- `GET /api/devices/:id/passport` - Pasaporte digital
+- `GET /api/devices/:id/mud` - Archivo MUD
+- `GET /api/devices/:id/policies` - Políticas aplicadas
+- `POST /api/devices/:id/apply-idsp2` - Aplicar IDSP2 ID
+- `POST /api/devices/:id/apply-policy` - Aplicar política MSPL
+- `GET /api/devices/:id/enforcement-status` - Estado de enforcement
+
+## Tecnologías
+
+- **TypeScript**: Lenguaje de programación con tipado estático
+- **React 18**: Framework UI
+- **React Router**: Navegación
+- **Vite**: Build tool
+- **react-ace**: Editor XML
+- **xmlbuilder2**: Generación XML
+- **react-syntax-highlighter**: Syntax highlighting
+- **i18next & react-i18next**: Internacionalización (i18n) - Soporte para español e inglés
+
+## Estructura de Componentes
+
+### Componentes MSPL
+
+- `PolicyBuilder`: Constructor visual de políticas MSPL
+- `XmlViewer`: Visualizador de XML con syntax highlighting
+- `MSPLEditor`: Combina PolicyBuilder + XmlViewer
+- `MSPLViewer`: Visualizador simple de XML MSPL
+
+### Componentes de Políticas
+
+- `PolicyList`: Lista políticas aplicadas
+- `IDSP2Uploader`: Componente para aplicar IDSP2 ID
+- `EnforcementStatus`: Muestra estado de enforcement
+
+### Componentes Comunes
+
+- `JsonViewer`: Visualizador JSON genérico
+- `LoadingSpinner`: Spinner de carga
+- `MUDViewer`: Visualizador de archivos MUD
+
+## Flujo de Datos
+
+```
+UI Components → Hooks → API Client (Adapter) → Backend API
+                ↓
+         Domain Services
+                ↓
+         Domain Entities
+```
+
+Los componentes UI usan hooks que consumen el API client a través de la interfaz `IApiClient`. El adapter concreto (DossApiAdapter, MockApiClient, etc.) se inyecta mediante el factory en `config.js`.
+
+## Desarrollo sin Backend
+
+Por defecto, la aplicación usa el `MockApiClient` que proporciona datos de ejemplo. Esto permite desarrollar y probar la GUI sin necesidad de un backend funcionando.
+
+Para cambiar al adapter DOSS:
+
+```env
+VITE_API_ADAPTER=doss
+VITE_API_BASE_URL=http://localhost:3000/api
+```
+
+## Internacionalización (i18n)
+
+La aplicación soporta múltiples idiomas mediante i18next. Actualmente disponible:
+
+- **Inglés (en)**: Idioma por defecto
+- **Español (es)**
+
+### Cambiar Idioma
+
+El selector de idioma está disponible en la barra de navegación. El idioma seleccionado se guarda en `localStorage` y se mantiene entre sesiones.
+
+### Agregar Nuevos Idiomas
+
+1. Crear archivo de traducción en `src/i18n/locales/[codigo-idioma].json`
+2. Agregar el recurso en `src/i18n/config.ts`
+3. Agregar botón en `LanguageSelector.tsx` si se desea
+
+### Estructura de Traducciones
+
+Las traducciones están organizadas por secciones:
+- `common`: Textos comunes (botones, estados, etc.)
+- `navbar`: Navegación
+- `devices`: Lista de dispositivos
+- `device`: Gestión de dispositivo individual
+- `policies`: Políticas MSPL
+- `enforcement`: Estado de enforcement
+- `policyBuilder`: Editor de políticas
+- `xmlViewer`: Visualizador XML
+- `jsonViewer`: Visualizador JSON
+

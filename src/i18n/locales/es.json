@@ -1,0 +1,112 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "apply": "Aplicar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "close": "Cerrar",
+    "actions": "Acciones",
+    "status": "Estado",
+    "name": "Nombre",
+    "id": "ID",
+    "type": "Tipo",
+    "model": "Modelo",
+    "manufacturer": "Fabricante"
+  },
+  "navbar": {
+    "title": "Plataforma de Onboarding",
+    "devices": "Dispositivos"
+  },
+  "devices": {
+    "title": "Dispositivos",
+    "noDevices": "No hay dispositivos disponibles",
+    "loadingDevices": "Cargando dispositivos...",
+    "errorLoadingDevices": "Error al cargar dispositivos",
+    "viewDetails": "Ver Detalles",
+    "active": "Activo",
+    "inactive": "Inactivo"
+  },
+  "device": {
+    "management": "Gestión de Dispositivo",
+    "passport": {
+      "title": "Pasaporte Digital",
+      "loading": "Cargando pasaporte digital...",
+      "error": "Error al cargar pasaporte",
+      "noData": "No hay datos de pasaporte disponibles"
+    },
+    "mud": {
+      "title": "Archivo MUD",
+      "version": "Versión",
+      "url": "URL",
+      "manufacturer": "Fabricante",
+      "model": "Modelo",
+      "lastUpdate": "Última actualización",
+      "noData": "No hay archivo MUD disponible"
+    },
+    "tabs": {
+      "passport": "Pasaporte Digital",
+      "mud": "Archivo MUD",
+      "policies": "Políticas Aplicadas",
+      "apply": "Aplicar Nueva Política"
+    }
+  },
+  "policies": {
+    "title": "Políticas Aplicadas",
+    "noPolicies": "No hay políticas aplicadas",
+    "loading": "Cargando políticas...",
+    "error": "Error al cargar políticas",
+    "id": "ID",
+    "status": "Estado",
+    "enforcement": "Enforcement",
+    "appliedAt": "Aplicada",
+    "viewXml": "Ver XML de la política",
+    "applyIdsp2": {
+      "title": "Aplicar IDSP2",
+      "label": "IDSP2 ID:",
+      "placeholder": "Ingresa el IDSP2 ID",
+      "applying": "Aplicando...",
+      "button": "Aplicar IDSP2",
+      "error": "Por favor ingresa un IDSP2 ID"
+    },
+    "createEdit": {
+      "title": "Crear/Editar Política MSPL",
+      "applyButton": "Aplicar Política",
+      "loadingSchema": "Cargando esquema...",
+      "success": "Política aplicada correctamente",
+      "error": "Error al aplicar política"
+    }
+  },
+  "enforcement": {
+    "title": "Estado de Enforcement",
+    "status": {
+      "pending": "Pendiente",
+      "completed": "Completado",
+      "error": "Error",
+      "unknown": "Desconocido"
+    }
+  },
+  "policyBuilder": {
+    "backTo": "Volver a",
+    "goTo": "Ir a",
+    "addField": "Añadir",
+    "selectSubtype": "Seleccionar subtipo",
+    "chooseOne": "Elige uno...",
+    "removeField": "Eliminar campo"
+  },
+  "xmlViewer": {
+    "title": "Vista XML",
+    "noData": "No hay datos aún",
+    "invalidData": "No hay datos válidos"
+  },
+  "jsonViewer": {
+    "title": "Datos JSON",
+    "noData": "No hay datos para mostrar"
+  }
+}
+
