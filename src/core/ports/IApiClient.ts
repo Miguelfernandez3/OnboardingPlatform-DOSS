@@ -1,9 +1,4 @@
-import { Device } from '../domain/entities/Device';
-import { Policy } from '../domain/entities/Policy';
-import { MUD } from '../domain/entities/MUD';
-import { Passport } from '../domain/entities/Passport';
-import { Threat } from '../domain/entities/Threat';
-import { Mitigation } from '../domain/entities/Mitigation';
+import { Device, Policy, MUD, Passport, Threat, Mitigation } from '../domain';
 
 export interface ApplyResult {
   status: string;

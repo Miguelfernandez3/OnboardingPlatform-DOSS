@@ -1,10 +1,5 @@
 import { IApiClient, ApplyResult, EnforcementStatus } from '../../../core/ports/IApiClient';
-import { Device } from '../../../core/domain/entities/Device';
-import { Policy } from '../../../core/domain/entities/Policy';
-import { MUD } from '../../../core/domain/entities/MUD';
-import { Passport } from '../../../core/domain/entities/Passport';
-import { Threat } from '../../../core/domain/entities/Threat';
-import { Mitigation } from '../../../core/domain/entities/Mitigation';
+import { Device, Policy, MUD, Passport, Threat, Mitigation } from '../../../core/domain';
 
 interface MockDeviceData {
   id: string;

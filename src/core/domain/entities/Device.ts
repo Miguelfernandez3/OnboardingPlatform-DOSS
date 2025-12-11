@@ -1,7 +1,7 @@
 /**
  * Device Entity
  * Representa un dispositivo en el sistema
- * Compatible con estructura legacy y Domain-Manager
+ * Compatible con estructura Domain-Manager
  */
 export interface DeviceData {
   id: string;
