@@ -70,7 +70,7 @@ Crea un archivo `.env` en la raíz del proyecto:
 VITE_API_ADAPTER=json-server
 
 # URL base de la API (solo para adapter 'doss' o 'json-server')
-VITE_API_BASE_URL=http://localhost:3000/api
+VITE_API_BASE_URL=http://localhost:3000
 ```
 
 ### Adapters Disponibles
