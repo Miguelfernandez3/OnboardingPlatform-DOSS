@@ -199,9 +199,9 @@ export class JsonServerApiClient extends BaseApiClient {
   }
 
   async enforceMitigation(deviceId: string, mitigationId: string): Promise<Mitigation> {
-    // Obtener la mitigación actual directamente por ID
+    // Obtener la mitigación actual directamente por ID usando request con endpoint relativo
     const mitigation = await this.request<MitigationData>(
-      `${this.config.getApiBaseUrl()}/mitigations/${mitigationId}`,
+      `/mitigations/${mitigationId}`,
       { method: 'GET' }
     );
     
@@ -209,26 +209,24 @@ export class JsonServerApiClient extends BaseApiClient {
       throw new Error(`Mitigation with id ${mitigationId} not found`);
     }
     
-    // Actualizar con PATCH (JSON Server soporta PATCH)
-    const updatedMitigation = await this.request<MitigationData>(
-      `${this.config.getApiBaseUrl()}/mitigations/${mitigationId}`,
+    // Actualizar con PATCH usando el método helper de BaseApiClient
+    const updatedMitigation = await this.patch<MitigationData>(
+      'enforceMitigation',
       {
-        method: 'PATCH',
-        data: {
-          is_enforced: true,
-          enforcement_timestamp: new Date().toISOString(),
-          last_enforced: new Date().toISOString()
-        }
-      }
+        is_enforced: true,
+        enforcement_timestamp: new Date().toISOString(),
+        last_enforced: new Date().toISOString()
+      },
+      { mitigationId }
     );
     
     return Mitigation.fromJSON({ ...updatedMitigation, deviceId });
   }
 
   async revokeMitigation(deviceId: string, mitigationId: string): Promise<Mitigation> {
-    // Obtener la mitigación actual directamente por ID
+    // Obtener la mitigación actual directamente por ID usando request con endpoint relativo
     const mitigation = await this.request<MitigationData>(
-      `${this.config.getApiBaseUrl()}/mitigations/${mitigationId}`,
+      `/mitigations/${mitigationId}`,
       { method: 'GET' }
     );
     
@@ -236,17 +234,15 @@ export class JsonServerApiClient extends BaseApiClient {
       throw new Error(`Mitigation with id ${mitigationId} not found`);
     }
     
-    // Actualizar con PATCH (JSON Server soporta PATCH)
-    const updatedMitigation = await this.request<MitigationData>(
-      `${this.config.getApiBaseUrl()}/mitigations/${mitigationId}`,
+    // Actualizar con PATCH usando el método helper de BaseApiClient
+    const updatedMitigation = await this.patch<MitigationData>(
+      'revokeMitigation',
       {
-        method: 'PATCH',
-        data: {
-          is_enforced: false,
-          enforcement_timestamp: null,
-          last_enforced: null
-        }
-      }
+        is_enforced: false,
+        enforcement_timestamp: null,
+        last_enforced: null
+      },
+      { mitigationId }
     );
     
     return Mitigation.fromJSON({ ...updatedMitigation, deviceId });

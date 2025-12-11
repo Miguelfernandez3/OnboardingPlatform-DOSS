@@ -91,7 +91,9 @@
       "noThreats": "No threats associated with this device",
       "identifier": "Identifier",
       "threatMudUrl": "Threat MUD URL",
-      "viewMud": "View MUD"
+      "viewMud": "View MUD",
+      "mudModalTitle": "Threat MUD File",
+      "threatMudFile": "Threat MUD File Content"
     },
     "mitigations": {
       "title": "Mitigations",

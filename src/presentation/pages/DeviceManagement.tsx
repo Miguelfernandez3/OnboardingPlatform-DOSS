@@ -4,17 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { apiClient } from '../../config';
 import { Passport } from '../../core/domain/entities/Passport';
 import { MUD } from '../../core/domain/entities/MUD';
-import { usePolicies } from '../hooks/usePolicies';
-import { useDevice } from '../hooks/useDevice';
-import { useThreats } from '../hooks/useThreats';
-import { useMitigations } from '../hooks/useMitigations';
-import PolicyList from '../components/policies/PolicyList';
-import EnforcementStatus from '../components/policies/EnforcementStatus';
-import LoadingSpinner from '../components/common/LoadingSpinner';
-import DeviceInfo from '../components/device/DeviceInfo';
-import DeviceEditForm from '../components/device/DeviceEditForm';
-import ThreatList from '../components/threats/ThreatList';
-import MitigationList from '../components/mitigations/MitigationList';
+import { usePolicies, useDevice, useThreats, useMitigations } from '../hooks';
+import { PolicyList, EnforcementStatus, LoadingSpinner, DeviceInfo, DeviceEditForm, ThreatList, MitigationList } from '../components';
 
 interface Tab {
   id: string;
@@ -39,10 +30,8 @@ export default function DeviceManagement(): JSX.Element {
   const { 
     device,
     loading: deviceLoading,
-    error: deviceError,
     updateDevice,
     deleteDevice,
-    refresh: refreshDevice
   } = useDevice(id);
 
   const { 
@@ -50,8 +39,6 @@ export default function DeviceManagement(): JSX.Element {
     loading: policiesLoading, 
     error: policiesError,
     enforcementStatus,
-    applyPolicy,
-    applyIDSP2
   } = usePolicies(id);
 
   const {
@@ -141,7 +128,7 @@ export default function DeviceManagement(): JSX.Element {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>{t('device.management')} {id}</h1>
+      <h1>{t('device.management')} {device?.name || id}</h1>
 
       {error && (
         <div style={{
@@ -160,13 +147,16 @@ export default function DeviceManagement(): JSX.Element {
       <div style={{
         display: 'flex',
         borderBottom: '2px solid #dee2e6',
-        marginBottom: '2rem'
+        marginBottom: '2rem',
+        justifyContent: 'space-between', // distribuye los botones a lo largo del ancho
+        width: '100%'
       }}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
+              flex: 1, // cada botón toma el mismo tamaño y se distribuyen
               padding: '1rem 2rem',
               border: 'none',
               backgroundColor: 'transparent',
@@ -174,7 +164,8 @@ export default function DeviceManagement(): JSX.Element {
               color: activeTab === tab.id ? '#007bff' : '#6c757d',
               fontWeight: activeTab === tab.id ? 'bold' : 'normal',
               cursor: 'pointer',
-              fontSize: '1rem'
+              fontSize: '1rem',
+              textAlign: 'center'
             }}
           >
             {tab.label}

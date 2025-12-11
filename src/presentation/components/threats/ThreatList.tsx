@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Threat } from '../../../core/domain/entities/Threat';
 import LoadingSpinner from '../common/LoadingSpinner';
+import ThreatMudModal from './ThreatMudModal';
 
 interface ThreatListProps {
   threats: Threat[];
@@ -13,6 +15,7 @@ interface ThreatListProps {
  */
 export default function ThreatList({ threats, loading, error }: ThreatListProps): JSX.Element {
   const { t } = useTranslation();
+  const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null);
 
   if (loading) {
     return <LoadingSpinner message={t('device.threats.loading')} />;
@@ -81,32 +84,7 @@ export default function ThreatList({ threats, loading, error }: ThreatListProps)
               <td style={{ padding: '0.75rem' }}>
                 {threat.threat_mud_file && (
                   <button
-                    onClick={() => {
-                      // Abrir modal o expandir para ver MUD file
-                      const newWindow = window.open();
-                      if (newWindow) {
-                        try {
-                          const parsed = JSON.parse(threat.threat_mud_file || '{}');
-                          newWindow.document.write(`
-                            <html>
-                              <head><title>Threat MUD File</title></head>
-                              <body style="font-family: monospace; padding: 2rem;">
-                                <pre>${JSON.stringify(parsed, null, 2)}</pre>
-                              </body>
-                            </html>
-                          `);
-                        } catch {
-                          newWindow.document.write(`
-                            <html>
-                              <head><title>Threat MUD File</title></head>
-                              <body style="font-family: monospace; padding: 2rem;">
-                                <pre>${threat.threat_mud_file}</pre>
-                              </body>
-                            </html>
-                          `);
-                        }
-                      }
-                    }}
+                    onClick={() => setSelectedThreat(threat)}
                     style={{
                       padding: '0.25rem 0.5rem',
                       backgroundColor: '#007bff',
@@ -125,6 +103,14 @@ export default function ThreatList({ threats, loading, error }: ThreatListProps)
           ))}
         </tbody>
       </table>
+
+      {selectedThreat && selectedThreat.threat_mud_file && (
+        <ThreatMudModal
+          threatMudFile={selectedThreat.threat_mud_file}
+          threatIdentifier={selectedThreat.identifier}
+          onClose={() => setSelectedThreat(null)}
+        />
+      )}
     </div>
   );
 }

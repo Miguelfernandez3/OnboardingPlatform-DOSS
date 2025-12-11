@@ -22,6 +22,16 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   const validateIP = (ip: string): boolean => {
     if (!ip) return true; // Opcional
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
@@ -61,28 +71,42 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
     }
   };
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+    if (e.target === e.currentTarget && !loading) {
+      onCancel();
+    }
+  };
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        padding: '2rem',
-        maxWidth: '500px',
-        width: '90%',
-        maxHeight: '90vh',
-        overflowY: 'auto'
-      }}>
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        overflow: 'hidden'
+      }}
+      onClick={handleOverlayClick}
+    >
+      <div 
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          padding: '2rem',
+          maxWidth: '500px',
+          width: '90%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          position: 'relative'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 style={{ marginTop: 0 }}>{t('device.info.editTitle')}</h2>
 
         {error && (
@@ -109,6 +133,9 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
                 value={formData.ip}
                 onChange={(e) => setFormData({ ...formData, ip: e.target.value })}
                 placeholder="192.168.1.100"
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
                 style={{
                   width: '100%',
                   padding: '0.5rem',
@@ -128,6 +155,9 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
                 value={formData.mac}
                 onChange={(e) => setFormData({ ...formData, mac: e.target.value })}
                 placeholder="00:1B:44:11:3A:B7"
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
                 style={{
                   width: '100%',
                   padding: '0.5rem',
@@ -147,6 +177,9 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                 required
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
                 style={{
                   width: '100%',
                   padding: '0.5rem',
@@ -166,6 +199,9 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
                 value={formData.mudurl}
                 onChange={(e) => setFormData({ ...formData, mudurl: e.target.value })}
                 placeholder="https://example.com/mud/device.json"
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
                 style={{
                   width: '100%',
                   padding: '0.5rem',

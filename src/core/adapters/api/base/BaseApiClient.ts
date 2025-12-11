@@ -95,6 +95,18 @@ export abstract class BaseApiClient extends IApiClient {
   }
 
   /**
+   * Realiza una petición PATCH
+   * @protected
+   */
+  protected async patch<T>(endpoint: string, data: unknown, params: Record<string, string> = {}): Promise<T> {
+    const resolvedEndpoint = this.config.resolveEndpoint(endpoint, params);
+    return await this.request<T>(resolvedEndpoint, {
+      method: 'PATCH',
+      data: data
+    });
+  }
+
+  /**
    * Realiza una petición DELETE
    * @protected
    */

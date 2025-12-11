@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { apiClient } from '../../config';
-import { PolicyService } from '../../core/domain/services/PolicyService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../infrastructure/query/queryKeys';
+import { policyServiceActions } from '../../infrastructure/services/policyService';
 import { Policy } from '../../core/domain/entities/Policy';
 import { ApplyResult, EnforcementStatus } from '../../core/ports/IApiClient';
 
@@ -11,90 +11,99 @@ interface UsePoliciesReturn {
   enforcementStatus: EnforcementStatus | null;
   applyPolicy: (msplXml: string) => Promise<ApplyResult>;
   applyIDSP2: (idsp2Id: string) => Promise<ApplyResult>;
-  refresh: () => Promise<void>;
 }
 
 /**
  * Hook para gestionar políticas de un dispositivo
+ * Usa TanStack Query para cacheo automático y mutations
  */
 export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
-  const [policies, setPolicies] = useState<Policy[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [enforcementStatus, setEnforcementStatus] = useState<EnforcementStatus | null>(null);
+  const queryClient = useQueryClient();
 
-  const policyService = new PolicyService(apiClient);
+  // Query para obtener políticas
+  const {
+    data: policies = [],
+    isLoading: policiesLoading,
+    isError: policiesError,
+    error: policiesErrorData,
+  } = useQuery({
+    queryKey: deviceId ? queryKeys.devices.policies(deviceId) : ['policies', 'invalid'],
+    queryFn: () => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return policyServiceActions.getDevicePolicies(deviceId);
+    },
+    enabled: !!deviceId,
+  });
 
-  const fetchPolicies = useCallback(async (): Promise<void> => {
-    if (!deviceId) {
-      setLoading(false);
-      return;
-    }
+  // Query para obtener estado de enforcement
+  const {
+    data: enforcementStatus = null,
+    isLoading: enforcementLoading,
+  } = useQuery({
+    queryKey: deviceId ? queryKeys.devices.enforcementStatus(deviceId) : ['enforcement', 'invalid'],
+    queryFn: () => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return policyServiceActions.getEnforcementStatus(deviceId);
+    },
+    enabled: !!deviceId,
+    staleTime: 1000 * 60 * 2, // 2 minutos
+  });
 
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await policyService.getDevicePolicies(deviceId);
-      setPolicies(data);
-    } catch (err) {
-      setError((err as Error).message || 'Error al cargar políticas');
-    } finally {
-      setLoading(false);
-    }
-  }, [deviceId]);
+  // Mutation para aplicar política
+  const applyPolicyMutation = useMutation({
+    mutationFn: (msplXml: string) => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return policyServiceActions.applyPolicy(deviceId, msplXml);
+    },
+    onSuccess: () => {
+      // Invalidar cache de políticas y enforcement status
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.policies(deviceId!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.enforcementStatus(deviceId!) });
+    },
+    onError: (err) => {
+      console.error('Error al aplicar política:', err);
+    },
+  });
 
-  const fetchEnforcementStatus = useCallback(async (): Promise<void> => {
-    if (!deviceId) return;
-
-    try {
-      const status = await policyService.getEnforcementStatus(deviceId);
-      setEnforcementStatus(status);
-    } catch (err) {
-      console.error('Error al obtener estado de enforcement:', err);
-    }
-  }, [deviceId]);
-
-  useEffect(() => {
-    fetchPolicies();
-    fetchEnforcementStatus();
-  }, [fetchPolicies, fetchEnforcementStatus]);
+  // Mutation para aplicar IDSP2
+  const applyIDSP2Mutation = useMutation({
+    mutationFn: (idsp2Id: string) => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return policyServiceActions.applyIDSP2(deviceId, idsp2Id);
+    },
+    onSuccess: () => {
+      // Invalidar cache de políticas y enforcement status
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.policies(deviceId!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.enforcementStatus(deviceId!) });
+    },
+    onError: (err) => {
+      console.error('Error al aplicar IDSP2:', err);
+    },
+  });
 
   const applyPolicy = async (msplXml: string): Promise<ApplyResult> => {
-    if (!deviceId) throw new Error('Device ID is required');
     try {
-      setError(null);
-      const result = await policyService.applyPolicy(deviceId, msplXml);
-      await fetchPolicies();
-      await fetchEnforcementStatus();
-      return result;
+      return await applyPolicyMutation.mutateAsync(msplXml);
     } catch (err) {
-      setError((err as Error).message || 'Error al aplicar política');
       throw err;
     }
   };
 
   const applyIDSP2 = async (idsp2Id: string): Promise<ApplyResult> => {
-    if (!deviceId) throw new Error('Device ID is required');
     try {
-      setError(null);
-      const result = await policyService.applyIDSP2(deviceId, idsp2Id);
-      await fetchPolicies();
-      await fetchEnforcementStatus();
-      return result;
+      return await applyIDSP2Mutation.mutateAsync(idsp2Id);
     } catch (err) {
-      setError((err as Error).message || 'Error al aplicar IDSP2');
       throw err;
     }
   };
 
   return {
     policies,
-    loading,
-    error,
+    loading: policiesLoading || enforcementLoading,
+    error: policiesError ? (policiesErrorData as Error)?.message || 'Error al cargar políticas' : null,
     enforcementStatus,
     applyPolicy,
     applyIDSP2,
-    refresh: fetchPolicies
   };
 }
 

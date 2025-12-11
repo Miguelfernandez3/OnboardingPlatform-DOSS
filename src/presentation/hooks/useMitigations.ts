@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { apiClient } from '../../config';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../infrastructure/query/queryKeys';
+import { mitigationService } from '../../infrastructure/services/mitigationService';
 import { Mitigation } from '../../core/domain/entities/Mitigation';
 
 interface UseMitigationsReturn {
@@ -8,102 +9,170 @@ interface UseMitigationsReturn {
   error: string | null;
   enforceMitigation: (mitigationId: string) => Promise<void>;
   revokeMitigation: (mitigationId: string) => Promise<void>;
-  refreshMitigations: () => Promise<void>;
 }
 
 /**
  * Hook para gestionar mitigations de un dispositivo
- * Incluye optimistic updates para mejor UX
+ * Usa TanStack Query con optimistic updates para mejor UX
  */
 export function useMitigations(deviceId: string | undefined): UseMitigationsReturn {
-  const [mitigations, setMitigations] = useState<Mitigation[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchMitigations = useCallback(async (): Promise<void> => {
-    if (!deviceId) {
-      setLoading(false);
-      return;
-    }
+  // Query para obtener mitigations
+  const {
+    data: mitigations = [],
+    isLoading,
+    isError,
+    error,
+    
+  } = useQuery({
+    queryKey: deviceId ? queryKeys.devices.mitigations(deviceId) : ['mitigations', 'invalid'],
+    queryFn: () => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return mitigationService.getDeviceMitigations(deviceId);
+    },
+    enabled: !!deviceId,
+    staleTime: 1000 * 60 * 3, // 3 minutos
+  });
 
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await apiClient.getDeviceMitigations(deviceId);
-      setMitigations(data);
-    } catch (err) {
-      setError((err as Error).message || 'Error al cargar mitigations');
-    } finally {
-      setLoading(false);
-    }
-  }, [deviceId]);
+  // Mutation para aplicar (enforce) mitigación
+  const enforceMutation = useMutation({
+    mutationFn: (mitigationId: string) => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return mitigationService.enforceMitigation(deviceId, mitigationId);
+    },
+    onMutate: async (mitigationId) => {
+      // Cancelar queries en progreso
+      await queryClient.cancelQueries({ queryKey: queryKeys.devices.mitigations(deviceId!) });
 
-  useEffect(() => {
-    fetchMitigations();
-  }, [fetchMitigations]);
+      // Snapshot del valor anterior
+      const previousMitigations = queryClient.getQueryData<Mitigation[]>(
+        queryKeys.devices.mitigations(deviceId!)
+      );
 
-  const enforceMitigation = useCallback(async (mitigationId: string): Promise<void> => {
-    if (!deviceId) {
-      throw new Error('Device ID is required');
-    }
+      // Optimistic update
+      queryClient.setQueryData<Mitigation[]>(
+        queryKeys.devices.mitigations(deviceId!),
+        (old) => {
+          if (!old) return [];
+          return old.map((m) =>
+            m.id === mitigationId
+              ? {
+                  ...m,
+                  is_enforced: true,
+                  enforcement_timestamp: new Date().toISOString(),
+                  last_enforced: new Date().toISOString(),
+                } as Mitigation
+              : m
+          );
+        }
+      );
 
-    // Optimistic update
-    const previousMitigations = [...mitigations];
-    setMitigations(prev => prev.map(m => 
-      m.id === mitigationId 
-        ? { ...m, is_enforced: true, enforcement_timestamp: new Date().toISOString(), last_enforced: new Date().toISOString() }
-        : m
-    ));
-
-    try {
-      setError(null);
-      const updatedMitigation = await apiClient.enforceMitigation(deviceId, mitigationId);
-      // Actualizar con la respuesta del servidor
-      setMitigations(prev => prev.map(m => 
-        m.id === mitigationId ? updatedMitigation : m
-      ));
-    } catch (err) {
+      return { previousMitigations };
+    },
+    onError: (err, _, context) => {
       // Rollback en caso de error
-      setMitigations(previousMitigations);
-      setError((err as Error).message || 'Error al aplicar mitigation');
+      if (context?.previousMitigations) {
+        queryClient.setQueryData(
+          queryKeys.devices.mitigations(deviceId!),
+          context.previousMitigations
+        );
+      }
+      console.error('Error al aplicar mitigation:', err);
+    },
+    onSuccess: (updatedMitigation) => {
+      // Actualizar cache con respuesta del servidor
+      queryClient.setQueryData<Mitigation[]>(
+        queryKeys.devices.mitigations(deviceId!),
+        (old) => {
+          if (!old) return [updatedMitigation];
+          return old.map((m) => (m.id === updatedMitigation.id ? updatedMitigation : m));
+        }
+      );
+    },
+  });
+
+  // Mutation para revocar (revoke) mitigación
+  const revokeMutation = useMutation({
+    mutationFn: (mitigationId: string) => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return mitigationService.revokeMitigation(deviceId, mitigationId);
+    },
+    onMutate: async (mitigationId) => {
+      // Cancelar queries en progreso
+      await queryClient.cancelQueries({ queryKey: queryKeys.devices.mitigations(deviceId!) });
+
+      // Snapshot del valor anterior
+      const previousMitigations = queryClient.getQueryData<Mitigation[]>(
+        queryKeys.devices.mitigations(deviceId!)
+      );
+
+      // Optimistic update
+      queryClient.setQueryData<Mitigation[]>(
+        queryKeys.devices.mitigations(deviceId!),
+        (old) => {
+          if (!old) return old;
+          return old.map((m) =>
+            m.id === mitigationId ? new Mitigation({
+              id: m.id,
+              deviceId: m.deviceId,
+              threatId: m.threatId,
+              name: m.name,
+              description: m.description,
+              mitigation_actions: m.mitigation_actions,
+              is_enforced: false,
+              last_enforced: undefined,
+              enforcement_timestamp: undefined,
+            }) : m
+          );
+        }
+      );
+
+      return { previousMitigations };
+    },
+    onError: (err, _, context) => {
+      // Rollback en caso de error
+      if (context?.previousMitigations) {
+        queryClient.setQueryData(
+          queryKeys.devices.mitigations(deviceId!),
+          context.previousMitigations
+        );
+      }
+      console.error('Error al revocar mitigation:', err);
+    },
+    onSuccess: (updatedMitigation) => {
+      // Actualizar cache con respuesta del servidor
+      queryClient.setQueryData<Mitigation[]>(
+        queryKeys.devices.mitigations(deviceId!),
+        (old) => {
+          if (!old) return [updatedMitigation];
+          return old.map((m) => (m.id === updatedMitigation.id ? updatedMitigation : m));
+        }
+      );
+    },
+  });
+
+  const enforceMitigation = async (mitigationId: string): Promise<void> => {
+    try {
+      await enforceMutation.mutateAsync(mitigationId);
+    } catch (err) {
       throw err;
     }
-  }, [deviceId, mitigations]);
+  };
 
-  const revokeMitigation = useCallback(async (mitigationId: string): Promise<void> => {
-    if (!deviceId) {
-      throw new Error('Device ID is required');
-    }
-
-    // Optimistic update
-    const previousMitigations = [...mitigations];
-    setMitigations(prev => prev.map(m => 
-      m.id === mitigationId 
-        ? { ...m, is_enforced: false, enforcement_timestamp: undefined, last_enforced: undefined }
-        : m
-    ));
-
+  const revokeMitigation = async (mitigationId: string): Promise<void> => {
     try {
-      setError(null);
-      const updatedMitigation = await apiClient.revokeMitigation(deviceId, mitigationId);
-      // Actualizar con la respuesta del servidor
-      setMitigations(prev => prev.map(m => 
-        m.id === mitigationId ? updatedMitigation : m
-      ));
+      await revokeMutation.mutateAsync(mitigationId);
     } catch (err) {
-      // Rollback en caso de error
-      setMitigations(previousMitigations);
-      setError((err as Error).message || 'Error al revocar mitigation');
       throw err;
     }
-  }, [deviceId, mitigations]);
+  };
 
   return {
     mitigations,
-    loading,
-    error,
+    loading: isLoading,
+    error: isError ? (error as Error)?.message || 'Error al cargar mitigations' : null,
     enforceMitigation,
     revokeMitigation,
-    refreshMitigations: fetchMitigations
   };
 }

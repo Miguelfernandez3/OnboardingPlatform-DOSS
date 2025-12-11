@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { useDevices } from '../hooks/useDevices';
+import { queryKeys } from '../../infrastructure/query/queryKeys';
+import { deviceService } from '../../infrastructure/services/deviceService';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 /**
@@ -10,6 +13,16 @@ export default function DeviceList(): JSX.Element {
   const { t } = useTranslation();
   const { devices, loading, error } = useDevices();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Prefetch device data on hover
+  const handleDevicePrefetch = (deviceId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.devices.detail(deviceId),
+      queryFn: () => deviceService.getDevice(deviceId),
+      staleTime: 1000 * 60 * 5, // 5 minutos
+    });
+  };
 
   if (loading) {
     return <LoadingSpinner message={t('devices.loadingDevices')} />;
@@ -77,6 +90,7 @@ export default function DeviceList(): JSX.Element {
                 </td>
                 <td style={{ padding: '0.75rem' }}>
                   <button
+                    onMouseEnter={() => handleDevicePrefetch(device.id)}
                     onClick={() => navigate(`/devices/${device.id}`)}
                     style={{
                       padding: '0.5rem 1rem',
