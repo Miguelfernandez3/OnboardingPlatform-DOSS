@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../../../core/domain/entities/Device';
+import { Passport } from '../../../core/domain/entities/Passport';
+import { MUD } from '../../../core/domain/entities/MUD';
+import JsonViewer from '../common/JsonViewer';
+import MUDViewer from '../mud/MUDViewer';
 
 interface DeviceInfoProps {
   device: Device;
+  passport?: Passport | null;
+  mud?: MUD | null;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -11,7 +17,7 @@ interface DeviceInfoProps {
 /**
  * DeviceInfo - Componente para mostrar información completa del dispositivo
  */
-export default function DeviceInfo({ device, onEdit, onDelete }: DeviceInfoProps): JSX.Element {
+export default function DeviceInfo({ device, passport, mud, onEdit, onDelete }: DeviceInfoProps): JSX.Element {
   const { t } = useTranslation();
   const [showEdk, setShowEdk] = useState<boolean>(false);
 
@@ -226,6 +232,40 @@ export default function DeviceInfo({ device, onEdit, onDelete }: DeviceInfoProps
           </div>
         </div>
       </div>
+
+      {/* Digital Passport Section */}
+      {passport && (
+        <div style={{ marginTop: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
+            {t('device.info.passportSection')}
+          </h3>
+          <div style={{
+            padding: '1rem',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '4px',
+            border: '1px solid #dee2e6'
+          }}>
+            <JsonViewer data={passport.toJSON()} title={t('device.passport.title')} />
+          </div>
+        </div>
+      )}
+
+      {/* MUD File Section */}
+      {mud && (
+        <div style={{ marginTop: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
+            {t('device.info.mudSection')}
+          </h3>
+          <div style={{
+            padding: '1rem',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '4px',
+            border: '1px solid #dee2e6'
+          }}>
+            <MUDViewer mud={mud} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

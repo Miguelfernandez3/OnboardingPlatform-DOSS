@@ -1,0 +1,247 @@
+{
+  "devices": [
+    {
+      "id": "device-1",
+      "name": "IoT Sensor 001",
+      "type": "sensor",
+      "manufacturer": "TechCorp",
+      "model": "TC-SENSOR-V2",
+      "status": "active",
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-20T14:30:00Z",
+      "ip": "192.168.1.100",
+      "mac": "00:1B:44:11:3A:B7",
+      "identifier": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+      "mudurl": "https://example.com/mud/device-1.json",
+      "inventory_id": "INV-001"
+    },
+    {
+      "id": "device-2",
+      "name": "Smart Camera 002",
+      "type": "camera",
+      "manufacturer": "SecureCam",
+      "model": "SC-IP-CAM-4K",
+      "status": "active",
+      "createdAt": "2024-01-16T09:00:00Z",
+      "updatedAt": "2024-01-21T11:20:00Z",
+      "ip": "192.168.1.101",
+      "mac": "00:1B:44:11:3A:B8",
+      "identifier": "b2c3d4e5-f6a7-8901-2345-678901bcdefg",
+      "mudurl": "https://example.com/mud/device-2.json",
+      "inventory_id": "INV-002"
+    },
+    {
+      "id": "device-3",
+      "name": "Gateway Router 003",
+      "type": "gateway",
+      "manufacturer": "NetWorks",
+      "model": "NW-GW-PRO",
+      "status": "active",
+      "createdAt": "2024-01-17T08:00:00Z",
+      "updatedAt": "2024-01-22T16:45:00Z",
+      "ip": "192.168.1.1",
+      "mac": "00:1B:44:11:3A:B9",
+      "identifier": "c3d4e5f6-a7b8-9012-3456-789012cdefgh",
+      "mudurl": "https://example.com/mud/device-3.json",
+      "inventory_id": "INV-003"
+    }
+  ],
+  "policies": [
+    {
+      "id": "policy-1",
+      "deviceId": "device-1",
+      "name": "Firewall Policy",
+      "msplXml": "<ITResourceOrchestration id=\"omspl_123\"><ITResource id=\"mspl_456\"/></ITResourceOrchestration>",
+      "status": "active",
+      "appliedAt": "2024-01-20T14:30:00Z",
+      "enforcementStatus": "completed"
+    }
+  ],
+  "threats": [
+    {
+      "id": "threat-1",
+      "deviceId": "device-1",
+      "identifier": "CVE-2024-0001",
+      "threat_mud_url": "https://example.com/threats/cve-2024-0001.json",
+      "threat_mud_file": "{\"ietf-threatmud:mud\": {\"threat-description\": \"Example threat\"}}",
+      "mitigation_actions": "<mitigation>Example mitigation</mitigation>"
+    }
+  ],
+  "mitigations": [
+    {
+      "id": "mitigation-1",
+      "deviceId": "device-1",
+      "threatId": "threat-1",
+      "name": "Firewall Rule Block",
+      "description": "Block malicious traffic from threat source",
+      "mitigation_actions": "<configuration-action><firewall><block>true</block></firewall></configuration-action>",
+      "is_enforced": false,
+      "last_enforced": null,
+      "enforcement_timestamp": null
+    },
+    {
+      "id": "mitigation-2",
+      "deviceId": "device-1",
+      "threatId": "threat-1",
+      "name": "Port Filtering",
+      "description": "Filter specific ports",
+      "mitigation_actions": "{\"action\": \"filter\", \"ports\": [8080, 8443]}",
+      "is_enforced": true,
+      "last_enforced": "2024-01-20T14:30:00Z",
+      "enforcement_timestamp": "2024-01-20T14:30:00Z"
+    }
+  ],
+  "passports": [
+    {
+      "deviceId": "device-1",
+      "data": {
+        "deviceId": "device-1",
+        "serialNumber": "SN-DEVICE-1",
+        "firmwareVersion": "1.2.3",
+        "hardwareVersion": "2.0",
+        "manufacturer": "TechCorp",
+        "model": "TC-SENSOR-V2",
+        "certification": "CE-2024",
+        "productionDate": "2024-01-01",
+        "metadata": {
+          "onboardingDate": "2024-01-15",
+          "lastUpdate": "2024-01-20"
+        }
+      }
+    },
+    {
+      "deviceId": "device-2",
+      "data": {
+        "deviceId": "device-2",
+        "serialNumber": "SN-DEVICE-2",
+        "firmwareVersion": "2.1.0",
+        "hardwareVersion": "3.0",
+        "manufacturer": "SecureCam",
+        "model": "SC-IP-CAM-4K",
+        "certification": "CE-2024",
+        "productionDate": "2024-01-05",
+        "metadata": {
+          "onboardingDate": "2024-01-16",
+          "lastUpdate": "2024-01-21"
+        }
+      }
+    },
+    {
+      "deviceId": "device-3",
+      "data": {
+        "deviceId": "device-3",
+        "serialNumber": "SN-DEVICE-3",
+        "firmwareVersion": "1.5.2",
+        "hardwareVersion": "2.5",
+        "manufacturer": "NetWorks",
+        "model": "NW-GW-PRO",
+        "certification": "CE-2024",
+        "productionDate": "2024-01-10",
+        "metadata": {
+          "onboardingDate": "2024-01-17",
+          "lastUpdate": "2024-01-22"
+        }
+      }
+    }
+  ],
+  "muds": [
+    {
+      "id": "mud-device-1",
+      "deviceId": "device-1",
+      "mudVersion": 1,
+      "mudUrl": "https://example.com/mud/device-1",
+      "lastUpdate": "2024-01-20T14:30:00Z",
+      "cacheValidity": 48,
+      "isSupported": true,
+      "systeminfo": "Linux 5.4.0",
+      "mfgName": "TechCorp",
+      "documentation": "https://example.com/docs",
+      "modelName": "TC-SENSOR-V2",
+      "mudData": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "https://example.com/mud/device-1",
+          "last-update": "2024-01-20T14:30:00Z",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Linux 5.4.0",
+          "mfg-name": "TechCorp",
+          "documentation": "https://example.com/docs",
+          "model-name": "TC-SENSOR-V2"
+        }
+      }
+    },
+    {
+      "id": "mud-device-2",
+      "deviceId": "device-2",
+      "mudVersion": 1,
+      "mudUrl": "https://example.com/mud/device-2",
+      "lastUpdate": "2024-01-21T11:20:00Z",
+      "cacheValidity": 48,
+      "isSupported": true,
+      "systeminfo": "Linux 5.4.0",
+      "mfgName": "SecureCam",
+      "documentation": "https://example.com/docs",
+      "modelName": "SC-IP-CAM-4K",
+      "mudData": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "https://example.com/mud/device-2",
+          "last-update": "2024-01-21T11:20:00Z",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Linux 5.4.0",
+          "mfg-name": "SecureCam",
+          "documentation": "https://example.com/docs",
+          "model-name": "SC-IP-CAM-4K"
+        }
+      }
+    },
+    {
+      "id": "mud-device-3",
+      "deviceId": "device-3",
+      "mudVersion": 1,
+      "mudUrl": "https://example.com/mud/device-3",
+      "lastUpdate": "2024-01-22T16:45:00Z",
+      "cacheValidity": 48,
+      "isSupported": true,
+      "systeminfo": "Linux 5.4.0",
+      "mfgName": "NetWorks",
+      "documentation": "https://example.com/docs",
+      "modelName": "NW-GW-PRO",
+      "mudData": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "https://example.com/mud/device-3",
+          "last-update": "2024-01-22T16:45:00Z",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Linux 5.4.0",
+          "mfg-name": "NetWorks",
+          "documentation": "https://example.com/docs",
+          "model-name": "NW-GW-PRO"
+        }
+      }
+    }
+  ],
+  "enforcementStatuses": [
+    {
+      "deviceId": "device-1",
+      "status": "completed",
+      "message": "Enforcement status: completed",
+      "timestamp": "2024-01-20T14:30:00Z"
+    },
+    {
+      "deviceId": "device-2",
+      "status": "pending",
+      "message": "Enforcement status: pending",
+      "timestamp": "2024-01-21T11:20:00Z"
+    },
+    {
+      "deviceId": "device-3",
+      "status": "pending",
+      "message": "Enforcement status: pending",
+      "timestamp": "2024-01-22T16:45:00Z"
+    }
+  ]
+}

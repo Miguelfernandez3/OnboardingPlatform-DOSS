@@ -1,0 +1,8 @@
+{
+  "/devices/:id/policies": "/policies?deviceId=:id",
+  "/devices/:id/threats": "/threats?deviceId=:id",
+  "/devices/:id/mitigations": "/mitigations?deviceId=:id",
+  "/devices/:id/passport": "/passports?deviceId=:id",
+  "/devices/:id/mud": "/muds?deviceId=:id",
+  "/devices/:id/enforcement-status": "/enforcementStatuses?deviceId=:id"
+}

@@ -4,21 +4,75 @@ import MSPLViewer from '../mspl/MSPLViewer';
 
 interface PolicyListProps {
   policies: Policy[];
+  onCreateNew?: () => void;
 }
 
 /**
  * PolicyList - Componente para listar políticas aplicadas
  */
-export default function PolicyList({ policies }: PolicyListProps): JSX.Element {
+export default function PolicyList({ policies, onCreateNew }: PolicyListProps): JSX.Element {
   const { t } = useTranslation();
-
-  if (!policies || policies.length === 0) {
-    return <p>{t('policies.noPolicies')}</p>;
-  }
 
   return (
     <div>
-      <h2>{t('policies.title')}</h2>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '1.5rem'
+      }}>
+        <h2 style={{ margin: 0 }}>{t('policies.title')}</h2>
+        {onCreateNew && (
+          <button
+            onClick={onCreateNew}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <span>+</span>
+            {t('policies.createNew')}
+          </button>
+        )}
+      </div>
+
+      {!policies || policies.length === 0 ? (
+        <div style={{
+          padding: '3rem',
+          textAlign: 'center',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          border: '1px solid #dee2e6'
+        }}>
+          <p style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>{t('policies.noPolicies')}</p>
+          {onCreateNew && (
+            <button
+              onClick={onCreateNew}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: 'bold'
+              }}
+            >
+              {t('policies.createNew')}
+            </button>
+          )}
+        </div>
+      ) : (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {policies.map((policy) => (
           <div 
@@ -72,6 +126,7 @@ export default function PolicyList({ policies }: PolicyListProps): JSX.Element {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

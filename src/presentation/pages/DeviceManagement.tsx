@@ -8,11 +8,7 @@ import { usePolicies } from '../hooks/usePolicies';
 import { useDevice } from '../hooks/useDevice';
 import { useThreats } from '../hooks/useThreats';
 import { useMitigations } from '../hooks/useMitigations';
-import JsonViewer from '../components/common/JsonViewer';
-import MUDViewer from '../components/mud/MUDViewer';
 import PolicyList from '../components/policies/PolicyList';
-import IDSP2Uploader from '../components/policies/IDSP2Uploader';
-import MSPLEditor from '../components/mspl/MSPLEditor';
 import EnforcementStatus from '../components/policies/EnforcementStatus';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import DeviceInfo from '../components/device/DeviceInfo';
@@ -102,12 +98,9 @@ export default function DeviceManagement(): JSX.Element {
 
   const tabs: Tab[] = [
     { id: 'info', label: t('device.tabs.info') },
-    { id: 'passport', label: t('device.tabs.passport') },
-    { id: 'mud', label: t('device.tabs.mud') },
     { id: 'threats', label: t('device.tabs.threats') },
     { id: 'mitigations', label: t('device.tabs.mitigations') },
-    { id: 'policies', label: t('device.tabs.policies') },
-    { id: 'apply', label: t('device.tabs.apply') }
+    { id: 'policies', label: t('device.tabs.policies') }
   ];
 
   const handleEdit = (): void => {
@@ -136,6 +129,10 @@ export default function DeviceManagement(): JSX.Element {
     } catch (err) {
       alert(`${t('common.error')}: ${(err as Error).message}`);
     }
+  };
+
+  const handleCreatePolicy = (): void => {
+    navigate(`/devices/${id}/policies/create`);
   };
 
   if (loading || deviceLoading) {
@@ -192,7 +189,9 @@ export default function DeviceManagement(): JSX.Element {
             {device ? (
               <>
                 <DeviceInfo 
-                  device={device} 
+                  device={device}
+                  passport={passport}
+                  mud={mud}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -232,26 +231,6 @@ export default function DeviceManagement(): JSX.Element {
           </div>
         )}
 
-        {activeTab === 'passport' && (
-          <div>
-            {passport ? (
-              <JsonViewer data={passport.toJSON()} title={t('device.passport.title')} />
-            ) : (
-              <p>{t('device.passport.noData')}</p>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'mud' && (
-          <div>
-            {mud ? (
-              <MUDViewer mud={mud} />
-            ) : (
-              <p>{t('device.mud.noData')}</p>
-            )}
-          </div>
-        )}
-
         {activeTab === 'policies' && (
           <div>
             {enforcementStatus && (
@@ -275,30 +254,11 @@ export default function DeviceManagement(): JSX.Element {
                 <strong>{t('common.error')}:</strong> {policiesError}
               </div>
             ) : (
-              <PolicyList policies={policies} />
-            )}
-          </div>
-        )}
-
-        {activeTab === 'apply' && (
-          <div>
-            <div style={{ marginBottom: '2rem' }}>
-              <IDSP2Uploader deviceId={id || ''} onApply={applyIDSP2} />
-            </div>
-            
-            <div style={{ marginTop: '3rem', borderTop: '2px solid #dee2e6', paddingTop: '2rem' }}>
-              <h2>{t('policies.createEdit.title')}</h2>
-              <MSPLEditor
-                onApply={async (msplXml: string) => {
-                  try {
-                    await applyPolicy(msplXml);
-                    alert(t('policies.createEdit.success'));
-                  } catch (err) {
-                    alert(`${t('policies.createEdit.error')}: ${(err as Error).message}`);
-                  }
-                }}
+              <PolicyList 
+                policies={policies}
+                onCreateNew={handleCreatePolicy}
               />
-            </div>
+            )}
           </div>
         )}
       </div>

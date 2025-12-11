@@ -51,12 +51,9 @@
     },
     "tabs": {
       "info": "Información",
-      "passport": "Pasaporte Digital",
-      "mud": "Archivo MUD",
       "threats": "Threats",
       "mitigations": "Mitigations",
-      "policies": "Políticas Aplicadas",
-      "apply": "Aplicar Nueva Política"
+      "policies": "Políticas Aplicadas"
     },
     "info": {
       "title": "Información del Dispositivo",
@@ -84,7 +81,9 @@
       "saveSuccess": "Dispositivo actualizado correctamente",
       "deleteConfirm": "¿Está seguro de que desea eliminar este dispositivo?",
       "deleteSuccess": "Dispositivo eliminado correctamente",
-      "noData": "No hay información del dispositivo disponible"
+      "noData": "No hay información del dispositivo disponible",
+      "passportSection": "Pasaporte Digital",
+      "mudSection": "Archivo MUD"
     },
     "threats": {
       "title": "Threats",
@@ -127,12 +126,20 @@
       "button": "Aplicar IDSP2",
       "error": "Por favor ingresa un IDSP2 ID"
     },
+    "createNew": "Crear Nueva Política",
     "createEdit": {
       "title": "Crear/Editar Política MSPL",
       "applyButton": "Aplicar Política",
       "loadingSchema": "Cargando esquema...",
       "success": "Política aplicada correctamente",
       "error": "Error al aplicar política"
+    },
+    "createPage": {
+      "title": "Crear Nueva Política",
+      "back": "Volver",
+      "cancel": "Cancelar",
+      "idsp2Section": "Aplicar por IDSP2 ID",
+      "msplSection": "Crear Política MSPL"
     }
   },
   "enforcement": {

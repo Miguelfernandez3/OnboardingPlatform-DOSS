@@ -1,5 +1,5 @@
 import { DossApiAdapter } from './doss/DossApiAdapter';
-import { MockApiClient } from '../../../infrastructure/api/mock/MockApiClient';
+import { JsonServerApiClient } from '../../../infrastructure/api/mock/JsonServerApiClient';
 import { IApiClient } from '../../ports/IApiClient';
 
 /**
@@ -10,8 +10,8 @@ export function createApiClient(adapterType: string = 'doss'): IApiClient {
   switch (adapterType) {
     case 'doss':
       return new DossApiAdapter();
-    case 'mock':
-      return new MockApiClient();
+    case 'json-server':
+      return new JsonServerApiClient();
     default:
       throw new Error(`Unknown adapter type: ${adapterType}`);
   }
