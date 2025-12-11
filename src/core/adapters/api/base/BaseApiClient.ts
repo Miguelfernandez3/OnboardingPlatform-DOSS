@@ -82,6 +82,29 @@ export abstract class BaseApiClient extends IApiClient {
     });
   }
 
+  /**
+   * Realiza una petición PUT
+   * @protected
+   */
+  protected async put<T>(endpoint: string, data: unknown, params: Record<string, string> = {}): Promise<T> {
+    const resolvedEndpoint = this.config.resolveEndpoint(endpoint, params);
+    return await this.request<T>(resolvedEndpoint, {
+      method: 'PUT',
+      data: data
+    });
+  }
+
+  /**
+   * Realiza una petición DELETE
+   * @protected
+   */
+  protected async delete<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+    const resolvedEndpoint = this.config.resolveEndpoint(endpoint, params);
+    return await this.request<T>(resolvedEndpoint, {
+      method: 'DELETE'
+    });
+  }
+
   // Métodos abstractos que deben ser implementados por las clases hijas
   abstract getDevices(): Promise<Device[]>;
   abstract getDevice(id: string): Promise<Device>;

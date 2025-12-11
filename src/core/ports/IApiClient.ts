@@ -2,6 +2,8 @@ import { Device } from '../domain/entities/Device';
 import { Policy } from '../domain/entities/Policy';
 import { MUD } from '../domain/entities/MUD';
 import { Passport } from '../domain/entities/Passport';
+import { Threat } from '../domain/entities/Threat';
+import { Mitigation } from '../domain/entities/Mitigation';
 
 export interface ApplyResult {
   status: string;
@@ -58,5 +60,35 @@ export abstract class IApiClient {
    * Obtiene el estado de enforcement de un dispositivo
    */
   abstract getEnforcementStatus(deviceId: string): Promise<EnforcementStatus>;
+
+  /**
+   * Obtiene las threats asociadas a un dispositivo
+   */
+  abstract getDeviceThreats(deviceId: string): Promise<Threat[]>;
+
+  /**
+   * Obtiene las mitigations asociadas a un dispositivo
+   */
+  abstract getDeviceMitigations(deviceId: string): Promise<Mitigation[]>;
+
+  /**
+   * Aplica (enforce) una mitigación en un dispositivo
+   */
+  abstract enforceMitigation(deviceId: string, mitigationId: string): Promise<Mitigation>;
+
+  /**
+   * Revoca (revoke) una mitigación en un dispositivo
+   */
+  abstract revokeMitigation(deviceId: string, mitigationId: string): Promise<Mitigation>;
+
+  /**
+   * Actualiza información de un dispositivo
+   */
+  abstract updateDevice(deviceId: string, data: Partial<Device>): Promise<Device>;
+
+  /**
+   * Elimina un dispositivo
+   */
+  abstract deleteDevice(deviceId: string): Promise<void>;
 }
 

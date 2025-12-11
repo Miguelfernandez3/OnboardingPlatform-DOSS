@@ -29,7 +29,7 @@ export default function Navbar(): JSX.Element {
           gap: '2rem'
         }}>
           <Link 
-            to="/" 
+            to="/devices" 
             style={{
               color: 'white',
               textDecoration: 'none',

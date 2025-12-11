@@ -1,7 +1,7 @@
 import { BaseApiClient } from '../base/BaseApiClient';
 import { ConfigProvider } from '../../config/ConfigProvider';
 import { dossConfig } from './doss.config';
-import { Device, DeviceData, Policy, PolicyData, MUD, Passport, PassportData } from '../../../domain';
+import { Device, DeviceData, Policy, PolicyData, MUD, Passport, PassportData, Threat, ThreatData, Mitigation, MitigationData } from '../../../domain';
 import { ApplyResult, EnforcementStatus } from '../../../ports';
 
 /**
@@ -52,6 +52,21 @@ interface EnforcementStatusApiResponse {
   status: string;
   message: string;
   timestamp: string;
+}
+
+interface ThreatsApiResponse {
+  threats?: ThreatData[];
+  data?: ThreatData[];
+}
+
+interface MitigationsApiResponse {
+  mitigations?: MitigationData[];
+  data?: MitigationData[];
+}
+
+interface MitigationApiResponse {
+  mitigation?: MitigationData;
+  data?: MitigationData;
 }
 
 /**
@@ -130,6 +145,77 @@ export class DossApiAdapter extends BaseApiClient {
       message: data.message || '',
       timestamp: data.timestamp || new Date().toISOString()
     };
+  }
+
+  async getDeviceThreats(deviceId: string): Promise<Threat[]> {
+    const data = await this.get<ThreatsApiResponse>('threats', { id: deviceId });
+    const threats = data.threats || data.data || [];
+    
+    if (!Array.isArray(threats)) {
+      return [];
+    }
+    
+    return threats.map(threat => Threat.fromJSON({ ...threat, deviceId }));
+  }
+
+  async getDeviceMitigations(deviceId: string): Promise<Mitigation[]> {
+    const data = await this.get<MitigationsApiResponse>('mitigations', { id: deviceId });
+    const mitigations = data.mitigations || data.data || [];
+    
+    if (!Array.isArray(mitigations)) {
+      return [];
+    }
+    
+    return mitigations.map(mitigation => Mitigation.fromJSON({ ...mitigation, deviceId }));
+  }
+
+  async enforceMitigation(deviceId: string, mitigationId: string): Promise<Mitigation> {
+    const data = await this.post<MitigationApiResponse>(
+      'enforceMitigation',
+      {},
+      { id: deviceId, mitigationId }
+    );
+    const mitigation = data.mitigation || data.data;
+    
+    if (!mitigation) {
+      throw new Error(`Mitigation with id ${mitigationId} not found`);
+    }
+    
+    return Mitigation.fromJSON({ ...mitigation, deviceId });
+  }
+
+  async revokeMitigation(deviceId: string, mitigationId: string): Promise<Mitigation> {
+    const data = await this.post<MitigationApiResponse>(
+      'revokeMitigation',
+      {},
+      { id: deviceId, mitigationId }
+    );
+    const mitigation = data.mitigation || data.data;
+    
+    if (!mitigation) {
+      throw new Error(`Mitigation with id ${mitigationId} not found`);
+    }
+    
+    return Mitigation.fromJSON({ ...mitigation, deviceId });
+  }
+
+  async updateDevice(deviceId: string, data: Partial<Device>): Promise<Device> {
+    const updateData = await this.put<DeviceApiResponse>(
+      'updateDevice',
+      data.toJSON ? data.toJSON() : data,
+      { id: deviceId }
+    );
+    const device = updateData.device || updateData.data;
+    
+    if (!device) {
+      throw new Error(`Device with id ${deviceId} not found`);
+    }
+    
+    return Device.fromJSON(device);
+  }
+
+  async deleteDevice(deviceId: string): Promise<void> {
+    await this.delete<void>('deleteDevice', { id: deviceId });
   }
 }
 

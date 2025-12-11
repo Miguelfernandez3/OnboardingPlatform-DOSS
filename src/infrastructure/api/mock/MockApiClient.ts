@@ -3,6 +3,8 @@ import { Device } from '../../../core/domain/entities/Device';
 import { Policy } from '../../../core/domain/entities/Policy';
 import { MUD } from '../../../core/domain/entities/MUD';
 import { Passport } from '../../../core/domain/entities/Passport';
+import { Threat } from '../../../core/domain/entities/Threat';
+import { Mitigation } from '../../../core/domain/entities/Mitigation';
 
 interface MockDeviceData {
   id: string;
@@ -13,6 +15,14 @@ interface MockDeviceData {
   status: string;
   createdAt: string;
   updatedAt: string;
+  ip?: string;
+  mac?: string;
+  identifier?: string;
+  mudurl?: string;
+  mudfile?: string;
+  mitigation_actions?: string;
+  inventory_id?: string;
+  edk?: string;
 }
 
 interface MockPolicyData {
@@ -32,6 +42,8 @@ interface MockPolicyData {
 export class MockApiClient extends IApiClient {
   private mockDevices: MockDeviceData[];
   private mockPolicies: Record<string, MockPolicyData[]>;
+  private mockThreats: Record<string, any[]>;
+  private mockMitigations: Record<string, any[]>;
 
   constructor() {
     super();
@@ -44,7 +56,12 @@ export class MockApiClient extends IApiClient {
         model: 'TC-SENSOR-V2',
         status: 'active',
         createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-20T14:30:00Z'
+        updatedAt: '2024-01-20T14:30:00Z',
+        ip: '192.168.1.100',
+        mac: '00:1B:44:11:3A:B7',
+        identifier: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+        mudurl: 'https://example.com/mud/device-1.json',
+        inventory_id: 'INV-001'
       },
       {
         id: 'device-2',
@@ -54,7 +71,12 @@ export class MockApiClient extends IApiClient {
         model: 'SC-IP-CAM-4K',
         status: 'active',
         createdAt: '2024-01-16T09:00:00Z',
-        updatedAt: '2024-01-21T11:20:00Z'
+        updatedAt: '2024-01-21T11:20:00Z',
+        ip: '192.168.1.101',
+        mac: '00:1B:44:11:3A:B8',
+        identifier: 'b2c3d4e5-f6a7-8901-2345-678901bcdefg',
+        mudurl: 'https://example.com/mud/device-2.json',
+        inventory_id: 'INV-002'
       },
       {
         id: 'device-3',
@@ -64,7 +86,12 @@ export class MockApiClient extends IApiClient {
         model: 'NW-GW-PRO',
         status: 'active',
         createdAt: '2024-01-17T08:00:00Z',
-        updatedAt: '2024-01-22T16:45:00Z'
+        updatedAt: '2024-01-22T16:45:00Z',
+        ip: '192.168.1.1',
+        mac: '00:1B:44:11:3A:B9',
+        identifier: 'c3d4e5f6-a7b8-9012-3456-789012cdefgh',
+        mudurl: 'https://example.com/mud/device-3.json',
+        inventory_id: 'INV-003'
       }
     ];
 
@@ -78,6 +105,49 @@ export class MockApiClient extends IApiClient {
           status: 'active',
           appliedAt: '2024-01-20T14:30:00Z',
           enforcementStatus: 'completed'
+        }
+      ],
+      'device-2': [],
+      'device-3': []
+    };
+
+    this.mockThreats = {
+      'device-1': [
+        {
+          id: 'threat-1',
+          identifier: 'CVE-2024-0001',
+          threat_mud_url: 'https://example.com/threats/cve-2024-0001.json',
+          threat_mud_file: '{"ietf-threatmud:mud": {"threat-description": "Example threat"}}',
+          mitigation_actions: '<mitigation>Example mitigation</mitigation>'
+        }
+      ],
+      'device-2': [],
+      'device-3': []
+    };
+
+    this.mockMitigations = {
+      'device-1': [
+        {
+          id: 'mitigation-1',
+          deviceId: 'device-1',
+          threatId: 'threat-1',
+          name: 'Firewall Rule Block',
+          description: 'Block malicious traffic from threat source',
+          mitigation_actions: '<configuration-action><firewall><block>true</block></firewall></configuration-action>',
+          is_enforced: false,
+          last_enforced: undefined,
+          enforcement_timestamp: undefined
+        },
+        {
+          id: 'mitigation-2',
+          deviceId: 'device-1',
+          threatId: 'threat-1',
+          name: 'Port Filtering',
+          description: 'Filter specific ports',
+          mitigation_actions: '{"action": "filter", "ports": [8080, 8443]}',
+          is_enforced: true,
+          last_enforced: '2024-01-20T14:30:00Z',
+          enforcement_timestamp: '2024-01-20T14:30:00Z'
         }
       ],
       'device-2': [],
@@ -211,6 +281,90 @@ export class MockApiClient extends IApiClient {
       message: `Enforcement status: ${randomStatus}`,
       timestamp: new Date().toISOString()
     };
+  }
+
+  async getDeviceThreats(deviceId: string): Promise<Threat[]> {
+    await this.delay(300);
+    console.log('getDeviceThreats', deviceId);
+    const threats = this.mockThreats[deviceId] || [];
+    return threats.map(threat => Threat.fromJSON({ ...threat, deviceId }));
+  }
+
+  async getDeviceMitigations(deviceId: string): Promise<Mitigation[]> {
+    await this.delay(300);
+    console.log('getDeviceMitigations', deviceId);
+    const mitigations = this.mockMitigations[deviceId] || [];
+    return mitigations.map(mitigation => Mitigation.fromJSON(mitigation));
+  }
+
+  async enforceMitigation(deviceId: string, mitigationId: string): Promise<Mitigation> {
+    await this.delay(800);
+    console.log('enforceMitigation', deviceId, mitigationId);
+    const mitigations = this.mockMitigations[deviceId] || [];
+    const mitigation = mitigations.find(m => m.id === mitigationId);
+    
+    if (!mitigation) {
+      throw new Error(`Mitigation with id ${mitigationId} not found`);
+    }
+
+    // Actualizar estado
+    mitigation.is_enforced = true;
+    mitigation.enforcement_timestamp = new Date().toISOString();
+    mitigation.last_enforced = new Date().toISOString();
+
+    return Mitigation.fromJSON(mitigation);
+  }
+
+  async revokeMitigation(deviceId: string, mitigationId: string): Promise<Mitigation> {
+    await this.delay(800);
+    console.log('revokeMitigation', deviceId, mitigationId);
+    const mitigations = this.mockMitigations[deviceId] || [];
+    const mitigation = mitigations.find(m => m.id === mitigationId);
+    
+    if (!mitigation) {
+      throw new Error(`Mitigation with id ${mitigationId} not found`);
+    }
+
+    // Actualizar estado
+    mitigation.is_enforced = false;
+    mitigation.enforcement_timestamp = undefined;
+    mitigation.last_enforced = undefined;
+
+    return Mitigation.fromJSON(mitigation);
+  }
+
+  async updateDevice(deviceId: string, data: Partial<Device>): Promise<Device> {
+    await this.delay(500);
+    console.log('updateDevice', deviceId, data);
+    const device = this.mockDevices.find(d => d.id === deviceId);
+    
+    if (!device) {
+      throw new Error(`Device with id ${deviceId} not found`);
+    }
+
+    // Actualizar campos permitidos
+    if (data.ip !== undefined) device.ip = data.ip;
+    if (data.mac !== undefined) device.mac = data.mac;
+    if (data.model !== undefined) device.model = data.model;
+    if (data.mudurl !== undefined) device.mudurl = data.mudurl;
+    device.updatedAt = new Date().toISOString();
+
+    return Device.fromJSON(device as any);
+  }
+
+  async deleteDevice(deviceId: string): Promise<void> {
+    await this.delay(500);
+    console.log('deleteDevice', deviceId);
+    const index = this.mockDevices.findIndex(d => d.id === deviceId);
+    
+    if (index === -1) {
+      throw new Error(`Device with id ${deviceId} not found`);
+    }
+
+    this.mockDevices.splice(index, 1);
+    delete this.mockPolicies[deviceId];
+    delete this.mockThreats[deviceId];
+    delete this.mockMitigations[deviceId];
   }
 }
 

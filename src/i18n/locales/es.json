@@ -50,10 +50,63 @@
       "noData": "No hay archivo MUD disponible"
     },
     "tabs": {
+      "info": "Información",
       "passport": "Pasaporte Digital",
       "mud": "Archivo MUD",
+      "threats": "Threats",
+      "mitigations": "Mitigations",
       "policies": "Políticas Aplicadas",
       "apply": "Aplicar Nueva Política"
+    },
+    "info": {
+      "title": "Información del Dispositivo",
+      "basicInfo": "Información Básica",
+      "networkInfo": "Información de Red",
+      "securityInfo": "Información de Seguridad",
+      "timestamps": "Fechas",
+      "id": "ID",
+      "identifier": "UUID",
+      "ip": "Dirección IP",
+      "mac": "Dirección MAC",
+      "mudUrl": "URL MUD",
+      "inventoryId": "ID de Inventario",
+      "edk": "EDK",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "createdAt": "Creado",
+      "updatedAt": "Actualizado",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "editTitle": "Editar Dispositivo",
+      "invalidIP": "Dirección IP inválida",
+      "invalidMAC": "Dirección MAC inválida",
+      "saveError": "Error al guardar dispositivo",
+      "saveSuccess": "Dispositivo actualizado correctamente",
+      "deleteConfirm": "¿Está seguro de que desea eliminar este dispositivo?",
+      "deleteSuccess": "Dispositivo eliminado correctamente",
+      "noData": "No hay información del dispositivo disponible"
+    },
+    "threats": {
+      "title": "Threats",
+      "loading": "Cargando threats...",
+      "noThreats": "No hay threats asociados a este dispositivo",
+      "identifier": "Identificador",
+      "threatMudUrl": "URL Threat MUD",
+      "viewMud": "Ver MUD"
+    },
+    "mitigations": {
+      "title": "Mitigations",
+      "loading": "Cargando mitigations...",
+      "noMitigations": "No hay mitigations asociadas a este dispositivo",
+      "enforce": "Aplicar",
+      "revoke": "Revocar",
+      "enforced": "Aplicada",
+      "notEnforced": "No Aplicada",
+      "lastEnforced": "Última Aplicación",
+      "showDetails": "Ver Detalles",
+      "hideDetails": "Ocultar Detalles",
+      "actions": "Acciones",
+      "mitigationActions": "Acciones de Mitigation"
     }
   },
   "policies": {

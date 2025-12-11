@@ -15,7 +15,13 @@ export const dossConfig: AdapterConfig = {
     policies: '/devices/:id/policies',
     applyIdsp2: '/devices/:id/apply-idsp2',
     applyPolicy: '/devices/:id/apply-policy',
-    enforcementStatus: '/devices/:id/enforcement-status'
+    enforcementStatus: '/devices/:id/enforcement-status',
+    threats: '/devices/:id/threats',
+    mitigations: '/devices/:id/mitigations',
+    enforceMitigation: '/devices/:id/mitigations/:mitigationId/enforce',
+    revokeMitigation: '/devices/:id/mitigations/:mitigationId/revoke',
+    updateDevice: '/devices/:id',
+    deleteDevice: '/devices/:id'
   }
 };
 
