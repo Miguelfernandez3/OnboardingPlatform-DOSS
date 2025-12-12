@@ -1,8 +1,8 @@
 import { BaseApiClient } from '../base/BaseApiClient';
-import { ConfigProvider } from '../../config/ConfigProvider';
+import { ConfigProvider } from '../../../core/adapters/config/ConfigProvider';
 import { dossConfig } from './doss.config';
-import { Device, DeviceData, Policy, PolicyData, MUD, Passport, PassportData, Threat, ThreatData, Mitigation, MitigationData } from '../../../domain';
-import { ApplyResult, EnforcementStatus } from '../../../ports';
+import { Device, DeviceData, Policy, PolicyData, MUD, Passport, PassportData, Threat, ThreatData, Mitigation, MitigationData } from '../../../core/domain';
+import { ApplyResult, EnforcementStatus } from '../../../core/ports';
 
 /**
  * Interfaces para las respuestas de la API DOSS
@@ -130,8 +130,14 @@ export class DossApiAdapter extends BaseApiClient {
     };
   }
 
-  async applyPolicy(deviceId: string, msplXml: string): Promise<ApplyResult> {
-    const data = await this.postXml<ApplyResultApiResponse>('applyPolicy', msplXml, { id: deviceId });
+  async applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult> {
+    // Si se proporciona un nombre, incluirlo en los parámetros de la petición
+    const params: Record<string, string> = { id: deviceId };
+    if (name) {
+      params.name = name;
+    }
+    
+    const data = await this.postXml<ApplyResultApiResponse>('applyPolicy', msplXml, params);
     return {
       status: data.status || 'pending',
       message: data.message || 'Policy application initiated'

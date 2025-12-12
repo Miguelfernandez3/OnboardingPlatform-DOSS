@@ -1,4 +1,4 @@
-import { createApiClient } from './core/adapters/api/index';
+import { createApiClient } from './infrastructure/api/index';
 import { IApiClient } from './core/ports/IApiClient';
 
 /**

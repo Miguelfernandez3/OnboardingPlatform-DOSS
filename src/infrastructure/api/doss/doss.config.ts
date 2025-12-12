@@ -1,4 +1,4 @@
-import { AdapterConfig } from '../../config/ConfigProvider';
+import { AdapterConfig } from '../../../core/adapters/config/ConfigProvider';
 
 /**
  * DOSS API Configuration

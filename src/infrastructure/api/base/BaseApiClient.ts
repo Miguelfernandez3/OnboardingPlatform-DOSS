@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
-import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../ports';
-import { Device, Policy, MUD, Passport } from '../../../domain';
+import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../core/ports';
+import { Device, Policy, MUD, Passport } from '../../../core/domain';
 
 /**
  * BaseApiClient - Clase base abstracta para adapters de API
@@ -124,7 +124,7 @@ export abstract class BaseApiClient extends IApiClient {
   abstract getDeviceMUD(id: string): Promise<MUD>;
   abstract getDevicePolicies(id: string): Promise<Policy[]>;
   abstract applyIDSP2(deviceId: string, idsp2Id: string): Promise<ApplyResult>;
-  abstract applyPolicy(deviceId: string, msplXml: string): Promise<ApplyResult>;
+  abstract applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult>;
   abstract getEnforcementStatus(deviceId: string): Promise<EnforcementStatus>;
 }
 

@@ -9,7 +9,7 @@ interface UsePoliciesReturn {
   loading: boolean;
   error: string | null;
   enforcementStatus: EnforcementStatus | null;
-  applyPolicy: (msplXml: string) => Promise<ApplyResult>;
+  applyPolicy: (msplXml: string, name?: string) => Promise<ApplyResult>;
   applyIDSP2: (idsp2Id: string) => Promise<ApplyResult>;
 }
 
@@ -51,9 +51,9 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
 
   // Mutation para aplicar política
   const applyPolicyMutation = useMutation({
-    mutationFn: (msplXml: string) => {
+    mutationFn: ({ msplXml, name }: { msplXml: string; name?: string }) => {
       if (!deviceId) throw new Error('Device ID is required');
-      return policyServiceActions.applyPolicy(deviceId, msplXml);
+      return policyServiceActions.applyPolicy(deviceId, msplXml, name);
     },
     onSuccess: () => {
       // Invalidar cache de políticas y enforcement status
@@ -81,9 +81,9 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
     },
   });
 
-  const applyPolicy = async (msplXml: string): Promise<ApplyResult> => {
+  const applyPolicy = async (msplXml: string, name?: string): Promise<ApplyResult> => {
     try {
-      return await applyPolicyMutation.mutateAsync(msplXml);
+      return await applyPolicyMutation.mutateAsync({ msplXml, name });
     } catch (err) {
       throw err;
     }

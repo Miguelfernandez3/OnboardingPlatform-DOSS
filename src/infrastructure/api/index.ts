@@ -1,6 +1,6 @@
 import { DossApiAdapter } from './doss/DossApiAdapter';
-import { JsonServerApiClient } from '../../../infrastructure/api/mock/JsonServerApiClient';
-import { IApiClient } from '../../ports/IApiClient';
+import { JsonServerApiClient } from './mock/JsonServerApiClient';
+import { IApiClient } from '../../core/ports/IApiClient';
 
 /**
  * Factory para crear adapters de API

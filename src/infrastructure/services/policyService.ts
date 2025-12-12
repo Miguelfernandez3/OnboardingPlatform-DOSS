@@ -21,8 +21,8 @@ export const policyServiceActions = {
   /**
    * Aplica una política MSPL a un dispositivo
    */
-  applyPolicy: async (deviceId: string, msplXml: string): Promise<ApplyResult> => {
-    return await policyService.applyPolicy(deviceId, msplXml);
+  applyPolicy: async (deviceId: string, msplXml: string, name?: string): Promise<ApplyResult> => {
+    return await policyService.applyPolicy(deviceId, msplXml, name);
   },
 
   /**

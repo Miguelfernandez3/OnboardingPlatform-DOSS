@@ -48,8 +48,11 @@ export abstract class IApiClient {
 
   /**
    * Aplica una política MSPL directamente a un dispositivo
+   * @param deviceId ID del dispositivo
+   * @param msplXml XML de la política MSPL
+   * @param name Nombre opcional de la política
    */
-  abstract applyPolicy(deviceId: string, msplXml: string): Promise<ApplyResult>;
+  abstract applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult>;
 
   /**
    * Obtiene el estado de enforcement de un dispositivo

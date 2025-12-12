@@ -1,4 +1,4 @@
-import { BaseApiClient } from '../../../core/adapters/api/base/BaseApiClient';
+import { BaseApiClient } from '../base/BaseApiClient';
 import { ConfigProvider } from '../../../core/adapters/config/ConfigProvider';
 import { jsonServerConfig } from './json-server.config';
 import { Device, DeviceData, Policy, PolicyData, MUD, MUDData, Passport, PassportData, Threat, ThreatData, Mitigation, MitigationData } from '../../../core/domain';
@@ -136,12 +136,12 @@ export class JsonServerApiClient extends BaseApiClient {
     };
   }
 
-  async applyPolicy(deviceId: string, msplXml: string): Promise<ApplyResult> {
+  async applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult> {
     // Crear nueva política en JSON Server
     const newPolicy: PolicyData = {
       id: `policy-${Date.now()}`,
       deviceId,
-      name: 'New Policy',
+      name: name || 'New Policy',
       msplXml,
       status: 'pending',
       appliedAt: new Date().toISOString(),
