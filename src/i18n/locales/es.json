@@ -51,8 +51,8 @@
     },
     "tabs": {
       "info": "Información",
-      "threats": "Threats",
-      "mitigations": "Mitigations",
+      "threats": "Amenazas",
+      "mitigations": "Mitigaciones",
       "policies": "Políticas Aplicadas"
     },
     "info": {
@@ -86,19 +86,19 @@
       "mudSection": "Archivo MUD"
     },
     "threats": {
-      "title": "Threats",
-      "loading": "Cargando threats...",
-      "noThreats": "No hay threats asociados a este dispositivo",
+      "title": "Amenazas",
+      "loading": "Cargando amenazas...",
+      "noThreats": "No hay amenazas asociadas a este dispositivo",
       "identifier": "Identificador",
       "threatMudUrl": "URL Threat MUD",
       "viewMud": "Ver MUD",
-      "mudModalTitle": "Archivo MUD del Threat",
-      "threatMudFile": "Contenido del Threat MUD File"
+      "mudModalTitle": "Archivo Threat MUD",
+      "threatMudFile": "Contenido del Archivo Threat MUD"
     },
     "mitigations": {
-      "title": "Mitigations",
-      "loading": "Cargando mitigations...",
-      "noMitigations": "No hay mitigations asociadas a este dispositivo",
+      "title": "Mitigaciones",
+      "loading": "Cargando mitigaciones...",
+      "noMitigations": "No hay mitigaciones asociadas a este dispositivo",
       "enforce": "Aplicar",
       "revoke": "Revocar",
       "enforced": "Aplicada",
@@ -107,7 +107,7 @@
       "showDetails": "Ver Detalles",
       "hideDetails": "Ocultar Detalles",
       "actions": "Acciones",
-      "mitigationActions": "Acciones de Mitigation"
+      "mitigationActions": "Acciones de Mitigación"
     }
   },
   "policies": {
