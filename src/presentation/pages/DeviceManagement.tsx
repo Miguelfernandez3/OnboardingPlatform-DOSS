@@ -20,7 +20,15 @@ export default function DeviceManagement(): JSX.Element {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<string>('info');
+  
+  // Inicializar el tab activo desde el hash de la URL o por defecto 'info'
+  const getInitialTab = (): string => {
+    const hash = window.location.hash.replace('#', '');
+    const validTabs = ['info', 'threats', 'mitigations', 'policies'];
+    return validTabs.includes(hash) ? hash : 'info';
+  };
+  
+  const [activeTab, setActiveTab] = useState<string>(getInitialTab());
   const [passport, setPassport] = useState<Passport | null>(null);
   const [mud, setMud] = useState<MUD | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -82,6 +90,35 @@ export default function DeviceManagement(): JSX.Element {
 
     fetchData();
   }, [id]);
+
+  // Sincronizar el hash de la URL con el tab activo cuando cambia la URL
+  useEffect(() => {
+    const handleHashChange = (): void => {
+      const hash = window.location.hash.replace('#', '');
+      const validTabs = ['info', 'threats', 'mitigations', 'policies'];
+      if (hash && validTabs.includes(hash)) {
+        setActiveTab(hash);
+      } else if (!hash) {
+        // Si no hay hash, establecer 'info' por defecto
+        setActiveTab('info');
+      }
+    };
+
+    // Verificar el hash inicial
+    handleHashChange();
+
+    // Escuchar cambios en el hash
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [id]); // Ejecutar cuando cambie el id del dispositivo o al montar
+
+  // Actualizar el hash cuando cambia el tab activo
+  const handleTabChange = (tabId: string): void => {
+    setActiveTab(tabId);
+    window.location.hash = tabId;
+  };
 
   const tabs: Tab[] = [
     { id: 'info', label: t('device.tabs.info') },
@@ -154,7 +191,7 @@ export default function DeviceManagement(): JSX.Element {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabChange(tab.id)}
             style={{
               flex: 1, // cada botón toma el mismo tamaño y se distribuyen
               padding: '1rem 2rem',

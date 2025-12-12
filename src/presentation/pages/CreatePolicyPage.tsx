@@ -23,17 +23,17 @@ export default function CreatePolicyPage(): JSX.Element {
     try {
       await applyPolicy(msplXml);
       alert(t('policies.createEdit.success'));
-      navigate(`/devices/${id}`);
+      navigate(`/devices/${id}#policies`);
     } catch (err) {
       alert(`${t('policies.createEdit.error')}: ${(err as Error).message}`);
     }
   };
 
-  const handleApplyIDSP2 = async (deviceId: string, idsp2Id: string) => {
+  const handleApplyIDSP2 = async (_deviceId: string, idsp2Id: string) => {
     try {
       const result = await applyIDSP2(idsp2Id);
       alert(t('policies.createEdit.success'));
-      navigate(`/devices/${id}`);
+      navigate(`/devices/${id}#policies`);
       return result;
     } catch (err) {
       alert(`${t('policies.createEdit.error')}: ${(err as Error).message}`);
@@ -42,7 +42,7 @@ export default function CreatePolicyPage(): JSX.Element {
   };
 
   const handleCancel = (): void => {
-    navigate(`/devices/${id}`);
+    navigate(`/devices/${id}#policies`);
   };
 
   if (policiesLoading) {
@@ -141,4 +141,5 @@ export default function CreatePolicyPage(): JSX.Element {
     </div>
   );
 }
+
 
