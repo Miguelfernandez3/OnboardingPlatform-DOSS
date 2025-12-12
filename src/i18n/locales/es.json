@@ -134,7 +134,9 @@
       "applyButton": "Aplicar Política",
       "loadingSchema": "Cargando esquema...",
       "success": "Política aplicada correctamente",
-      "error": "Error al aplicar política"
+      "error": "Error al aplicar política",
+      "policyName": "Nombre de la política",
+      "policyNamePlaceholder": "Ingrese un nombre para la política (opcional)"
     },
     "createPage": {
       "title": "Crear Nueva Política",
@@ -159,7 +161,9 @@
     "addField": "Añadir",
     "selectSubtype": "Seleccionar subtipo",
     "chooseOne": "Elige uno...",
-    "removeField": "Eliminar campo"
+    "removeField": "Eliminar campo",
+    "expand": "Expandir",
+    "collapse": "Colapsar"
   },
   "xmlViewer": {
     "title": "Vista XML",

@@ -134,7 +134,9 @@
       "applyButton": "Apply Policy",
       "loadingSchema": "Loading schema...",
       "success": "Policy applied successfully",
-      "error": "Error applying policy"
+      "error": "Error applying policy",
+      "policyName": "Policy Name",
+      "policyNamePlaceholder": "Enter a name for the policy (optional)"
     },
     "createPage": {
       "title": "Create New Policy",
@@ -159,7 +161,9 @@
     "addField": "Add",
     "selectSubtype": "Select subtype",
     "chooseOne": "Choose one...",
-    "removeField": "Remove field"
+    "removeField": "Remove field",
+    "expand": "Expand",
+    "collapse": "Collapse"
   },
   "xmlViewer": {
     "title": "XML view",

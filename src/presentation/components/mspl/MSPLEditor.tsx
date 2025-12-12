@@ -11,7 +11,7 @@ interface MSPLEditorProps {
   schema?: Schema;
   initialData?: Record<string, unknown> | string; // Puede ser objeto o XML string
   onChange?: (data: Record<string, unknown>) => void;
-  onApply?: (msplXml: string) => void;
+  onApply?: (msplXml: string, name?: string) => void;
 }
 
 /**
@@ -36,6 +36,7 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
   };
 
   const [formData, setFormData] = useState<Record<string, unknown>>(parseInitialData());
+  const [policyName, setPolicyName] = useState<string>('');
 
   // Cargar esquema si no se proporciona
   const [loadedSchema, setLoadedSchema] = useState<Schema | undefined>(schema);
@@ -78,7 +79,7 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
         prettyPrint: true,
         allowEmptyTags: true,
       });
-      onApply(xmlString);
+      onApply(xmlString, policyName.trim() || undefined);
     }
   };
 
@@ -88,6 +89,40 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
 
   return (
     <div style={{ padding: '2rem' }}>
+      {/* Campo de nombre de la política */}
+      {onApply && (
+        <div style={{ 
+          marginBottom: '2rem', 
+          padding: '1rem', 
+          backgroundColor: '#f8f9fa', 
+          borderRadius: '8px',
+          border: '1px solid #dee2e6'
+        }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '0.5rem', 
+            fontWeight: 'bold',
+            fontSize: '1rem'
+          }}>
+            {t('policies.createEdit.policyName') || 'Nombre de la política'}:
+          </label>
+          <input
+            type="text"
+            value={policyName}
+            onChange={(e) => setPolicyName(e.target.value)}
+            placeholder={t('policies.createEdit.policyNamePlaceholder') || 'Ingrese un nombre para la política (opcional)'}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              fontSize: '1rem',
+              border: '1px solid #ced4da',
+              borderRadius: '4px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+      )}
+      
       <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
         <div style={{ flex: 4, borderRight: '1px solid #ccc', paddingRight: '2rem' }}>
           <PolicyBuilder

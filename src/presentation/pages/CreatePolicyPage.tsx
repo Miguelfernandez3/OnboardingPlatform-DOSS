@@ -19,9 +19,9 @@ export default function CreatePolicyPage(): JSX.Element {
     loading: policiesLoading
   } = usePolicies(id);
 
-  const handleApplyPolicy = async (msplXml: string): Promise<void> => {
+  const handleApplyPolicy = async (msplXml: string, name?: string): Promise<void> => {
     try {
-      await applyPolicy(msplXml);
+      await applyPolicy(msplXml, name);
       alert(t('policies.createEdit.success'));
       navigate(`/devices/${id}#policies`);
     } catch (err) {

@@ -16,12 +16,8 @@ interface PolicyBuilderProps {
   schema: Schema;
   data: Record<string, unknown>;
   onChange: (data: Record<string, unknown>) => void;
-}
-
-interface NavigationItem {
-  parentType: string;
-  parentData: Record<string, unknown>;
-  fieldName: string;
+  level?: number; // Nivel de indentación (para recursión)
+  path?: string; // Ruta del campo para identificar cambios
 }
 
 interface PendingSubType {
@@ -30,71 +26,73 @@ interface PendingSubType {
 }
 
 /**
- * PolicyBuilder - Componente para construir políticas MSPL
- * Adaptado de frontend-bastion
+ * PolicyBuilder - Componente recursivo con desplegables para construir políticas MSPL
+ * Versión mejorada con UI tipo accordion y indentación visual
  */
-export default function PolicyBuilder({ type, schema, data, onChange }: PolicyBuilderProps): JSX.Element {
+export default function PolicyBuilder({ 
+  type, 
+  schema, 
+  data, 
+  onChange, 
+  level = 0,
+  path = 'root'
+}: PolicyBuilderProps): JSX.Element {
   const { t } = useTranslation();
-  const [navigationStack, setNavigationStack] = useState<NavigationItem[]>([]);
-  const [currentType, setCurrentType] = useState<string>(type);
-  const [currentData, setCurrentData] = useState<Record<string, unknown>>(data);
+  const [expandedFields, setExpandedFields] = useState<Set<string>>(new Set());
   const [pendingSubType, setPendingSubType] = useState<PendingSubType | null>(null);
   const [subtypeOptions, setSubtypeOptions] = useState<string[]>([]);
 
   // Tipo efectivo desde @xsi:type si existe
-  const effectiveType = getEffectiveType(currentType, currentData);
-
+  const effectiveType = getEffectiveType(type, data);
   const typeDef = getTypeDefinition(schema, effectiveType);
+  
   if (!typeDef) return <p>No se encontró la definición para {effectiveType}</p>;
 
-  const propagateChangeUp = (newData: Record<string, unknown>): void => {
-    if (navigationStack.length === 0) {
-      onChange(newData);
-    } else {
-      let updated = newData;
-      for (let i = navigationStack.length - 1; i >= 0; i--) {
-        const { fieldName, parentData } = navigationStack[i];
-        updated = { ...parentData, [fieldName]: updated };
+  const toggleField = (fieldName: string): void => {
+    setExpandedFields(prev => {
+      const next = new Set(prev);
+      if (next.has(fieldName)) {
+        next.delete(fieldName);
+      } else {
+        next.add(fieldName);
       }
-      onChange(updated);
-    }
+      return next;
+    });
   };
 
   const handleFieldChange = (fieldName: string, value: string): void => {
-    const newData = { ...currentData, [fieldName]: value };
-    setCurrentData(newData);
-    propagateChangeUp(newData);
+    const newData = { ...data, [fieldName]: value };
+    onChange(newData);
   };
 
   const handleRemoveField = (fieldName: string): void => {
-    const newData = { ...currentData };
+    const newData = { ...data };
     delete newData[fieldName];
-    setCurrentData(newData);
-    propagateChangeUp(newData);
+    onChange(newData);
+    // Cerrar el desplegable si estaba abierto
+    setExpandedFields(prev => {
+      const next = new Set(prev);
+      next.delete(fieldName);
+      return next;
+    });
   };
 
+  const handleNestedChange = (fieldName: string) => (newNestedData: Record<string, unknown>): void => {
+    const newData = { ...data, [fieldName]: newNestedData };
+    onChange(newData);
+  };
 
   const handleAddField = (fieldName: string, isComplex: boolean, rawType: string): void => {
-    let fieldType = cleanTypeName(rawType);
-
-    if (currentData[fieldName]) {
+    // Si el campo ya existe, expandirlo en lugar de recrearlo
+    if (data[fieldName]) {
       if (isComplex) {
-        const fieldValue = currentData[fieldName] as Record<string, unknown>;
-        const subTypeFromValue = fieldValue['@xsi:type'];
-        if (subTypeFromValue) {
-          fieldType = cleanTypeName(String(subTypeFromValue));
-        }
-        setNavigationStack((prev) => [
-          ...prev,
-          { parentType: currentType, parentData: currentData, fieldName },
-        ]);
-        setCurrentType(fieldType);
-        setCurrentData(fieldValue);
+        setExpandedFields(prev => new Set(prev).add(fieldName));
       }
       return;
     }
 
     if (isComplex) {
+      const fieldType = cleanTypeName(rawType);
       const subtypes = getSubtypes(schema, fieldType);
       if (subtypes.length > 0) {
         setPendingSubType({ fieldName, baseType: fieldType });
@@ -103,12 +101,12 @@ export default function PolicyBuilder({ type, schema, data, onChange }: PolicyBu
       }
     }
 
-    createField(fieldName, fieldType, isComplex);
+    createField(fieldName, cleanTypeName(rawType), isComplex);
   };
 
   const createField = (fieldName: string, fieldType: string, isComplex: boolean, chosenSubtype: string | null = null): void => {
     let initialValue: unknown;
-    let actualType = fieldType;
+    
     if (isComplex) {
       if (fieldType === 'ITResourceType') {
         initialValue = {
@@ -120,24 +118,15 @@ export default function PolicyBuilder({ type, schema, data, onChange }: PolicyBu
       }
       if (chosenSubtype) {
         (initialValue as Record<string, unknown>)['@xsi:type'] = chosenSubtype;
-        actualType = cleanTypeName(chosenSubtype);
       }
+      // Auto-expandir campos complejos recién creados
+      setExpandedFields(prev => new Set(prev).add(fieldName));
     } else {
       initialValue = '';
     }
 
-    const newData = { ...currentData, [fieldName]: initialValue };
-    setCurrentData(newData);
-    propagateChangeUp(newData);
-
-    if (isComplex) {
-      setNavigationStack((prev) => [
-        ...prev,
-        { parentType: currentType, parentData: newData, fieldName },
-      ]);
-      setCurrentType(actualType);
-      setCurrentData(initialValue as Record<string, unknown>);
-    }
+    const newData = { ...data, [fieldName]: initialValue };
+    onChange(newData);
   };
 
   const handleSubtypeSelect = (e: React.ChangeEvent<HTMLSelectElement>): void => {
@@ -149,19 +138,10 @@ export default function PolicyBuilder({ type, schema, data, onChange }: PolicyBu
     }
   };
 
-  const handleGoBack = (): void => {
-    const prev = [...navigationStack];
-    const last = prev.pop();
-    if (last) {
-      setCurrentType(last.parentType);
-      setCurrentData(last.parentData);
-      setNavigationStack(prev);
-    }
-  };
-
   const renderField = (field: { name: string; type: string }): JSX.Element => {
     const fieldName = cleanFieldName(field.name);
-    const fieldValue = currentData[field.name];
+    const fieldValue = data[field.name];
+    const isExpanded = expandedFields.has(field.name);
 
     let fieldType = cleanTypeName(field.type);
     if (typeof fieldValue === 'object' && fieldValue && (fieldValue as Record<string, unknown>)['@xsi:type']) {
@@ -169,75 +149,109 @@ export default function PolicyBuilder({ type, schema, data, onChange }: PolicyBu
     }
 
     const isComplex = isComplexType(schema, fieldType);
-    const allowDelete = !(navigationStack.length === 0 && currentType === 'ITResourceOrchestrationType');
+    // Permitir borrar todos los campos excepto el ID en el nivel raíz
+    const allowDelete = !(level === 0 && field.name === 'id');
 
     return (
-      <div className="field-block" key={field.name}>
-        <span className="field-name">{fieldName}</span>
-        {isComplex ? (
-          <button
-            className="small-button"
-            onClick={() => {
-              setNavigationStack((prev) => [
-                ...prev,
-                { parentType: currentType, parentData: currentData, fieldName: field.name },
-              ]);
-              setCurrentType(fieldType);
-              setCurrentData(fieldValue as Record<string, unknown>);
-            }}
-          >
-            ➔ {t('policyBuilder.goTo')} {fieldType}
-          </button>
-        ) : (
-          <input
-            className="input-text"
-            type="text"
-            value={(fieldValue as string) || ''}
-            onChange={(e) => handleFieldChange(field.name, e.target.value)}
-          />
-        )}
-        {allowDelete && (
-          <button
-            className="delete-button"
-            onClick={() => handleRemoveField(field.name)}
-                    title={t('policyBuilder.removeField')}
-          >
-            🗑️
-          </button>
+      <div className={`field-block field-level-${level}`} key={field.name}>
+        <div className="field-header">
+          <span className="field-name">{fieldName}</span>
+          {isComplex ? (
+            <>
+              <button
+                className="expand-button"
+                onClick={() => toggleField(field.name)}
+                title={isExpanded ? t('policyBuilder.collapse') : t('policyBuilder.expand')}
+              >
+                {isExpanded ? '▼' : '▶'} {fieldType}
+              </button>
+              {allowDelete && (
+                <button
+                  className="delete-button"
+                  onClick={() => handleRemoveField(field.name)}
+                  title={t('policyBuilder.removeField')}
+                >
+                  ×
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <input
+                className="input-text"
+                type="text"
+                value={(fieldValue as string) || ''}
+                onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              />
+              {allowDelete && (
+                <button
+                  className="delete-button"
+                  onClick={() => handleRemoveField(field.name)}
+                  title={t('policyBuilder.removeField')}
+                >
+                  ×
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        
+        {isComplex && isExpanded && fieldValue !== null && typeof fieldValue === 'object' && !Array.isArray(fieldValue) && (
+          <div className="field-content">
+            <PolicyBuilder
+              type={fieldType}
+              schema={schema}
+              data={fieldValue as Record<string, unknown>}
+              onChange={handleNestedChange(field.name)}
+              level={level + 1}
+              path={`${path}.${field.name}`}
+            />
+          </div>
         )}
       </div>
     );
   };
 
-  const addedFields = Object.keys(currentData);
+  const addedFields = Object.keys(data).filter(key => !key.startsWith('@') && !key.startsWith('xmlns') && key !== 'xsi:schemaLocation');
   const missingFields = typeDef.fields.filter((f) => !addedFields.includes(f.name));
 
   return (
-    <div className="policy-builder">
-      {navigationStack.length > 0 && (
-        <button className="back-button" onClick={handleGoBack}>
-          ⬅️ {t('policyBuilder.backTo')} {navigationStack[navigationStack.length - 1].parentType}
-        </button>
+    <div className={`policy-builder policy-level-${level}`}>
+      {level === 0 && (
+        <h3 className="builder-title">{effectiveType}</h3>
       )}
 
-      <h3>{effectiveType}</h3>
-
-      {(effectiveType === 'ITResourceOrchestrationType' || effectiveType === 'ITResourceType') && (
-        <div style={{ marginBottom: '1rem' }}>
-          <label>ID:</label>
-          <input
-            className="input-text"
-            type="text"
-            value={(currentData.id as string) || ''}
-            onChange={(e) => handleFieldChange('id', e.target.value)}
-          />
+      {(effectiveType === 'ITResourceOrchestrationType' || effectiveType === 'ITResourceType') && level === 0 && (
+        <div className="field-block field-level-0">
+          <div className="field-header">
+            <span className="field-name">ID</span>
+            <input
+              className="input-text"
+              type="text"
+              value={(data.id as string) || ''}
+              onChange={(e) => handleFieldChange('id', e.target.value)}
+            />
+          </div>
         </div>
       )}
 
       {typeDef.fields.filter((f) => addedFields.includes(f.name)).map(renderField)}
 
-      {missingFields.length > 0 && (
-        <div className="optional-fields">
+      {(missingFields.length > 0 || pendingSubType) && (
+        <div className={`optional-fields optional-level-${level}`}>
+          {pendingSubType && (
+            <div className="subtype-selector">
+              <label>
+                {t('policyBuilder.selectSubtype')} {cleanFieldName(pendingSubType.fieldName)}:
+              </label>
+              <select onChange={handleSubtypeSelect} defaultValue="">
+                <option value="" disabled>{t('policyBuilder.chooseOne')}</option>
+                {subtypeOptions.map((st) => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {missingFields.map((f) => {
             const name = cleanFieldName(f.name);
             const isComplex = isComplexType(schema, f.type);
@@ -251,18 +265,6 @@ export default function PolicyBuilder({ type, schema, data, onChange }: PolicyBu
               </button>
             );
           })}
-        </div>
-      )}
-
-      {pendingSubType && (
-        <div style={{ marginTop: '1rem' }}>
-          <label>{t('policyBuilder.selectSubtype')} {cleanFieldName(pendingSubType.fieldName)}:</label>
-          <select onChange={handleSubtypeSelect} defaultValue="">
-            <option value="" disabled>{t('policyBuilder.chooseOne')}</option>
-            {subtypeOptions.map((st) => (
-              <option key={st} value={st}>{st}</option>
-            ))}
-          </select>
         </div>
       )}
     </div>
