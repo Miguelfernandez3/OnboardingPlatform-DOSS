@@ -125,7 +125,7 @@ export class JsonServerApiClient extends BaseApiClient {
     };
     
     // Crear la política directamente en la colección policies
-    await this.request<PolicyData>(`${this.config.getApiBaseUrl()}/policies`, {
+    await this.request<PolicyData>('/policies', {
       method: 'POST',
       data: newPolicy
     });
@@ -149,7 +149,7 @@ export class JsonServerApiClient extends BaseApiClient {
     };
     
     // Crear la política directamente en la colección policies
-    await this.request<PolicyData>(`${this.config.getApiBaseUrl()}/policies`, {
+    await this.request<PolicyData>('/policies', {
       method: 'POST',
       data: newPolicy
     });
