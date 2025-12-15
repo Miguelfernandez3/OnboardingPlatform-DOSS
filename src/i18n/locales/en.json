@@ -163,7 +163,8 @@
     "chooseOne": "Choose one...",
     "removeField": "Remove field",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "noDefinition": "No definition found for {type}"
   },
   "xmlViewer": {
     "title": "XML view",

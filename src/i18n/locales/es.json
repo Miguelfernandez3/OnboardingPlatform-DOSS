@@ -163,7 +163,8 @@
     "chooseOne": "Elige uno...",
     "removeField": "Eliminar campo",
     "expand": "Expandir",
-    "collapse": "Colapsar"
+    "collapse": "Colapsar",
+    "noDefinition": "No se encontró la definición para {type}"
   },
   "xmlViewer": {
     "title": "Vista XML",

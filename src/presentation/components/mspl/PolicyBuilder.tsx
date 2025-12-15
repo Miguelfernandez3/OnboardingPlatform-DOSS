@@ -46,7 +46,7 @@ export default function PolicyBuilder({
   const effectiveType = getEffectiveType(type, data);
   const typeDef = getTypeDefinition(schema, effectiveType);
   
-  if (!typeDef) return <p>No se encontró la definición para {effectiveType}</p>;
+  if (!typeDef) return <p>{t('policyBuilder.noDefinition', { type: effectiveType })}</p>;
 
   const toggleField = (fieldName: string): void => {
     setExpandedFields(prev => {
