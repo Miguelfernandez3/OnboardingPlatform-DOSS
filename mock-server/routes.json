@@ -4,5 +4,11 @@
   "/devices/:id/mitigations": "/mitigations?deviceId=:id",
   "/devices/:id/passport": "/passports?deviceId=:id",
   "/devices/:id/mud": "/muds?deviceId=:id",
-  "/devices/:id/enforcement-status": "/enforcementStatuses?deviceId=:id"
+  "/devices/:id/enforcement-status": "/enforcementStatuses?deviceId=:id",
+  "/mud-files": "/mudFiles",
+  "/mud-files/:id": "/mudFiles/:id",
+  "/mud-files?type=:type": "/mudFiles?type=:type",
+  "/mspl-files": "/msplFiles",
+  "/mspl-files/:id": "/msplFiles/:id",
+  "/mspl-files?source=:source": "/msplFiles?source=:source"
 }
