@@ -62,7 +62,7 @@
       "id": "threat-1",
       "deviceId": "device-1",
       "identifier": "CVE-2024-0001",
-      "threat_mud_url": "https://example.com/threats/cve-2024-0001.json",
+      "threat_mud_url": "http://localhost:3000/mud-files/mudfile-7",
       "threat_mud_file": "{\"ietf-threatmud:mud\": {\"threat-description\": \"Example threat\"}}",
       "mitigation_actions": "<mitigation>Example mitigation</mitigation>"
     }
@@ -995,7 +995,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://electronThreatMudLocation/CVE-2020-13935",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-7",
           "last-update": "2022-05-12T10:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -1075,7 +1075,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://electronThreatMudLocation/CVE-2020-27813",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-8",
           "last-update": "2022-06-29T05:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -1155,7 +1155,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://electronThreatMudLocation/CVE-2022-25762",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-9",
           "last-update": "2022-06-29T05:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -1251,7 +1251,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://electronThreatMudLocation/CVE-2022-37797",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-10",
           "last-update": "2022-08-03T05:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -1326,7 +1326,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://electronThreatMudLocation/7981c5b7000d876c288e4582c838bb01",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-11",
           "threat-id": "CVE-2022-20685",
           "last-update": "2022-04-26T19:41:00+00:00",
           "cache-validity": 48,
@@ -1474,7 +1474,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://ThreatMudServer/b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-12",
           "threat-id": "b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
           "last-update": "2019-04-17T09:47:00+00:00",
           "cache-validity": 48,
@@ -1639,7 +1639,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://ThreatMudServer/b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-13",
           "threat-id": "b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
           "last-update": "2019-04-17T09:47:00+00:00",
           "cache-validity": 48,
@@ -1723,7 +1723,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://ThreatMudServer/afcf19e3-750b-45ab-adce-b535afe1200d",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-14",
           "threat-id": "afcf19e3-750b-45ab-adce-b535afe1200d",
           "last-update": "2024-02-16T11:35:25+01:00",
           "cache-validity": 48,
@@ -1809,7 +1809,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://ThreatMudServer/cb4d19e3-f51b-15cd-1278-a53533312401",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-15",
           "threat-id": "cb4d19e3-f51b-15cd-1278-a53533312401",
           "last-update": "2024-02-16T11:35:25+01:00",
           "cache-validity": 48,
@@ -1924,7 +1924,7 @@
       "content": {
         "ietf-threatmud:mud": {
           "threat-mud-version": 1,
-          "threat-mud-url": "https://ThreatMudServer/afcf19e3-750b-45ab-adce-b535afe1200d",
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-16",
           "threat-id": "afcf19e3-750b-45ab-adce-b535afe1200d",
           "last-update": "2024-02-16T11:35:25+01:00",
           "cache-validity": 48,
