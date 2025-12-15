@@ -235,10 +235,10 @@ export default function DeviceInfo({ device, passport, mud, onEdit, onDelete }: 
 
       {/* Digital Passport Section */}
       {passport && (
-        <div style={{ marginTop: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
+        <div style={{ marginTop: '1rem' }}>
+          {/* <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
             {t('device.info.passportSection')}
-          </h3>
+          </h3> */}
           <div style={{
             padding: '1rem',
             backgroundColor: '#f8f9fa',
@@ -252,10 +252,10 @@ export default function DeviceInfo({ device, passport, mud, onEdit, onDelete }: 
 
       {/* MUD File Section */}
       {mud && (
-        <div style={{ marginTop: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
+        <div style={{ marginTop: '1rem' }}>
+          {/* <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
             {t('device.info.mudSection')}
-          </h3>
+          </h3> */}
           <div style={{
             padding: '1rem',
             backgroundColor: '#f8f9fa',

@@ -107,7 +107,7 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 style={{ marginTop: 0 }}>{t('device.info.editTitle')}</h2>
+        <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>{t('device.info.editTitle')}</h2>
 
         {error && (
           <div style={{
@@ -125,7 +125,7 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold'}}>
                 {t('device.info.ip')}:
               </label>
               <input

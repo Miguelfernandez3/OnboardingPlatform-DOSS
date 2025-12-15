@@ -15,7 +15,6 @@ export default function Navbar(): JSX.Element {
     <nav style={{
       backgroundColor: '#343a40',
       padding: '1rem 2rem',
-      marginBottom: '2rem'
     }}>
       <div style={{
         display: 'flex',
