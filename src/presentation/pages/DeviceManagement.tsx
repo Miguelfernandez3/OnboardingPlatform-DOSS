@@ -165,7 +165,7 @@ export default function DeviceManagement(): JSX.Element {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>{t('device.management')} {device?.name || id}</h1>
+      <h1>{t('device.management', { deviceName: device?.name || id })}</h1>
 
       {error && (
         <div style={{

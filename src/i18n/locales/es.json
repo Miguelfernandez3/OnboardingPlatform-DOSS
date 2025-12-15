@@ -33,7 +33,7 @@
     "inactive": "Inactivo"
   },
   "device": {
-    "management": "Gestión de Dispositivo",
+    "management": "Gestión de Dispositivo {{deviceName}}",
     "passport": {
       "title": "Pasaporte Digital",
       "loading": "Cargando pasaporte digital...",
@@ -139,7 +139,7 @@
       "policyNamePlaceholder": "Ingrese un nombre para la política (opcional)"
     },
     "createPage": {
-      "title": "Crear Nueva Política",
+      "title": "Crear Nueva Política para dispositivo {{deviceName}}",
       "back": "Volver",
       "cancel": "Cancelar",
       "idsp2Section": "Aplicar por IDSP2 ID",
@@ -164,7 +164,7 @@
     "removeField": "Eliminar campo",
     "expand": "Expandir",
     "collapse": "Colapsar",
-    "noDefinition": "No se encontró la definición para {type}"
+    "noDefinition": "No se encontró la definición para {{type}}"
   },
   "xmlViewer": {
     "title": "Vista XML",

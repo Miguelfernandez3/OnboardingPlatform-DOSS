@@ -33,7 +33,7 @@
     "inactive": "Inactive"
   },
   "device": {
-    "management": "Device Management",
+    "management": "Device Management {{deviceName}}",
     "passport": {
       "title": "Digital Passport",
       "loading": "Loading digital passport...",
@@ -139,7 +139,7 @@
       "policyNamePlaceholder": "Enter a name for the policy (optional)"
     },
     "createPage": {
-      "title": "Create New Policy",
+      "title": "Create New Policy for device {{deviceName}}",
       "back": "Back",
       "cancel": "Cancel",
       "idsp2Section": "Apply by IDSP2 ID",
@@ -164,7 +164,7 @@
     "removeField": "Remove field",
     "expand": "Expand",
     "collapse": "Collapse",
-    "noDefinition": "No definition found for {type}"
+    "noDefinition": "No definition found for {{type}}"
   },
   "xmlViewer": {
     "title": "XML view",

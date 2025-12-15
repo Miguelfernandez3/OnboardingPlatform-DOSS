@@ -42,7 +42,7 @@ export default function IDSP2Uploader({ deviceId, onApply }: IDSP2UploaderProps)
 
   return (
     <div>
-      <h2>{t('policies.applyIdsp2.title')}</h2>
+      {/* <h2>{t('policies.applyIdsp2.title')}</h2> */}
       <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
         <div style={{ marginBottom: '1rem' }}>
           <label htmlFor="idsp2-id" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>

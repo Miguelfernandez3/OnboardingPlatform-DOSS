@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePolicies } from '../hooks/usePolicies';
+import { useDevice } from '../hooks/useDevice';
 import IDSP2Uploader from '../components/policies/IDSP2Uploader';
 import MSPLEditor from '../components/mspl/MSPLEditor';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -12,6 +13,12 @@ export default function CreatePolicyPage(): JSX.Element {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  
+  // Obtener información del dispositivo
+  const { 
+    device,
+    loading: deviceLoading
+  } = useDevice(id);
 
   const {
     applyPolicy,
@@ -45,7 +52,7 @@ export default function CreatePolicyPage(): JSX.Element {
     navigate(`/devices/${id}#policies`);
   };
 
-  if (policiesLoading) {
+  if (policiesLoading || deviceLoading) {
     return <LoadingSpinner message={t('common.loading')} />;
   }
 
@@ -58,7 +65,7 @@ export default function CreatePolicyPage(): JSX.Element {
         alignItems: 'center',
         marginBottom: '2rem'
       }}>
-        <h1>{t('policies.createPage.title')}</h1>
+        <h1>{t('policies.createPage.title', { deviceName: device?.name || id })}</h1>
         <button
           onClick={handleCancel}
           style={{
