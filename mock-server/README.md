@@ -10,13 +10,21 @@ npm install
 
 ## Uso
 
+Inicializar la base de datos (si no existe `db.json`):
+
+```bash
+npm run init-db
+```
+
 Iniciar el servidor:
 
 ```bash
 npm start
 ```
 
-El servidor se ejecutará en `http://localhost:3001`
+El servidor se ejecutará en `http://localhost:3000`
+
+**Nota**: Si `db.json` no existe, se inicializará automáticamente desde `db_example.json` al ejecutar `npm start` o `npm run dev`.
 
 ## Estructura de Datos
 
@@ -67,7 +75,11 @@ El archivo `routes.json` define rutas personalizadas para relaciones REST:
 Para resetear los datos a su estado inicial:
 
 ```bash
-git checkout db.json
+# Opción 1: Copiar manualmente desde el ejemplo
+cp db_example.json db.json
+
+# Opción 2: Eliminar db.json y reiniciar el servidor (se inicializará automáticamente)
+rm db.json && npm start
 ```
 
 O simplemente edita `db.json` manualmente y el servidor se recargará automáticamente.
