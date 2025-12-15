@@ -12,7 +12,7 @@
       "ip": "192.168.1.100",
       "mac": "00:1B:44:11:3A:B7",
       "identifier": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-      "mudurl": "http://mudfileserver.electron-project.eu/linux2632",
+      "mudurl": "http://localhost:3000/mud-files/mudfile-1",
       "inventory_id": "INV-001"
     },
     {
@@ -27,7 +27,7 @@
       "ip": "192.168.1.101",
       "mac": "00:1B:44:11:3A:B8",
       "identifier": "b2c3d4e5-f6a7-8901-2345-678901bcdefg",
-      "mudurl": "https://fronius/iot_devices/fronius1551.json",
+      "mudurl": "http://localhost:3000/mud-files/mudfile-2",
       "inventory_id": "INV-002"
     },
     {
@@ -42,7 +42,7 @@
       "ip": "192.168.1.1",
       "mac": "00:1B:44:11:3A:B9",
       "identifier": "c3d4e5f6-a7b8-9012-3456-789012cdefgh",
-      "mudurl": "http://mudfileserver.electron-project.eu/raspbianpios",
+      "mudurl": "http://localhost:3000/mud-files/mudfile-4",
       "inventory_id": "INV-003"
     }
   ],
@@ -149,7 +149,7 @@
       "id": "mud-device-1",
       "deviceId": "device-1",
       "mudVersion": 1,
-      "mudUrl": "http://mudfileserver.electron-project.eu/linux2632",
+      "mudUrl": "http://localhost:3000/mud-files/mudfile-1",
       "lastUpdate": "2023-09-17T09:47:00+00:00",
       "cacheValidity": 48,
       "isSupported": true,
@@ -160,7 +160,7 @@
       "mudData": {
         "ietf-mud:mud": {
           "mud-version": 1,
-          "mud-url": "http://mudfileserver.electron-project.eu/linux2632",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-1",
           "last-update": "2023-09-17T09:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -212,7 +212,7 @@
       "id": "mud-device-2",
       "deviceId": "device-2",
       "mudVersion": 2,
-      "mudUrl": "https://fronius/iot_devices/fronius1551.json",
+      "mudUrl": "http://localhost:3000/mud-files/mudfile-2",
       "lastUpdate": "2022-04-15T10:00:00+00:00",
       "cacheValidity": 48,
       "isSupported": true,
@@ -223,7 +223,7 @@
       "mudData": {
         "ietf-mud:mud": {
           "mud-version": 2,
-          "mud-url": "https://fronius/iot_devices/fronius1551.json",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-2",
           "last-update": "2022-04-15T10:00:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -366,7 +366,7 @@
       "id": "mud-device-3",
       "deviceId": "device-3",
       "mudVersion": 1,
-      "mudUrl": "http://mudfileserver.electron-project.eu/raspbianpios",
+      "mudUrl": "http://localhost:3000/mud-files/mudfile-4",
       "lastUpdate": "2023-09-17T09:47:00+00:00",
       "cacheValidity": 48,
       "isSupported": true,
@@ -377,7 +377,7 @@
       "mudData": {
         "ietf-mud:mud": {
           "mud-version": 1,
-          "mud-url": "http://mudfileserver.electron-project.eu/raspbianpios",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-4",
           "last-update": "2023-09-17T09:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -475,7 +475,7 @@
       "content": {
         "ietf-mud:mud": {
           "mud-version": 1,
-          "mud-url": "http://mudfileserver.electron-project.eu/linux2632",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-1",
           "last-update": "2023-09-17T09:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -530,7 +530,7 @@
       "content": {
         "ietf-mud:mud": {
           "mud-version": 2,
-          "mud-url": "https://fronius/iot_devices/fronius1551.json",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-2",
           "last-update": "2022-04-15T10:00:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -676,7 +676,7 @@
       "content": {
         "ietf-mud:mud": {
           "mud-version": 1,
-          "mud-url": "https://fronius/iot_devices/fronius1551.json",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-3",
           "last-update": "2022-07-17T09:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -774,7 +774,7 @@
       "content": {
         "ietf-mud:mud": {
           "mud-version": 1,
-          "mud-url": "http://mudfileserver.electron-project.eu/linux2632",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-4",
           "last-update": "2023-09-17T09:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -850,7 +850,7 @@
       "content": {
         "ietf-mud:mud": {
           "mud-version": 1,
-          "mud-url": "https://mudfileserver.electron-project.eu/poweredge650",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-5",
           "last-update": "2023-09-17T09:47:00+00:00",
           "cache-validity": 48,
           "is-supported": true,
@@ -906,7 +906,7 @@
       "content": {
         "ietf-mud:mud": {
           "mud-version": 1,
-          "mud-url": "https://ariamanufacturer.com/device_uuid",
+          "mud-url": "http://localhost:3000/mud-files/mudfile-6",
           "last-update": "2024-02-16T11:35:25+01:00",
           "cache-validity": 48,
           "is-supported": true,
