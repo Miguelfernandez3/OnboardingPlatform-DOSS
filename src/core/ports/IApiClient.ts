@@ -1,7 +1,4 @@
-import { Device } from '../domain/entities/Device';
-import { Policy } from '../domain/entities/Policy';
-import { MUD } from '../domain/entities/MUD';
-import { Passport } from '../domain/entities/Passport';
+import { Device, Policy, MUD, Passport, Threat, Mitigation } from '../domain';
 
 export interface ApplyResult {
   status: string;
@@ -51,12 +48,45 @@ export abstract class IApiClient {
 
   /**
    * Aplica una política MSPL directamente a un dispositivo
+   * @param deviceId ID del dispositivo
+   * @param msplXml XML de la política MSPL
+   * @param name Nombre opcional de la política
    */
-  abstract applyPolicy(deviceId: string, msplXml: string): Promise<ApplyResult>;
+  abstract applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult>;
 
   /**
    * Obtiene el estado de enforcement de un dispositivo
    */
   abstract getEnforcementStatus(deviceId: string): Promise<EnforcementStatus>;
+
+  /**
+   * Obtiene las threats asociadas a un dispositivo
+   */
+  abstract getDeviceThreats(deviceId: string): Promise<Threat[]>;
+
+  /**
+   * Obtiene las mitigations asociadas a un dispositivo
+   */
+  abstract getDeviceMitigations(deviceId: string): Promise<Mitigation[]>;
+
+  /**
+   * Aplica (enforce) una mitigación en un dispositivo
+   */
+  abstract enforceMitigation(deviceId: string, mitigationId: string): Promise<Mitigation>;
+
+  /**
+   * Revoca (revoke) una mitigación en un dispositivo
+   */
+  abstract revokeMitigation(deviceId: string, mitigationId: string): Promise<Mitigation>;
+
+  /**
+   * Actualiza información de un dispositivo
+   */
+  abstract updateDevice(deviceId: string, data: Partial<Device>): Promise<Device>;
+
+  /**
+   * Elimina un dispositivo
+   */
+  abstract deleteDevice(deviceId: string): Promise<void>;
 }
 

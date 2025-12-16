@@ -21,7 +21,7 @@ export default function JsonViewer({ data, title }: JsonViewerProps): JSX.Elemen
   const jsonString = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
 
   return (
-    <div style={{ marginTop: '1rem' }}>
+    <div style={{ marginTop: '0.2rem' }}>
       <h3>{displayTitle}</h3>
       <SyntaxHighlighter 
         language="json" 

@@ -1,0 +1,2057 @@
+{
+  "devices": [
+    {
+      "id": "device-1",
+      "name": "Linux Kernel Device",
+      "type": "sensor",
+      "manufacturer": "Linux Foundation",
+      "model": "Linux",
+      "status": "active",
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-20T14:30:00Z",
+      "ip": "192.168.1.100",
+      "mac": "00:1B:44:11:3A:B7",
+      "identifier": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+      "mudurl": "http://localhost:3000/mud-files/mudfile-1",
+      "inventory_id": "INV-001"
+    },
+    {
+      "id": "device-2",
+      "name": "Fronius Solar IoT Device",
+      "type": "sensor",
+      "manufacturer": "Fronius International GmbH",
+      "model": "iot_broker",
+      "status": "active",
+      "createdAt": "2024-01-16T09:00:00Z",
+      "updatedAt": "2024-01-21T11:20:00Z",
+      "ip": "192.168.1.101",
+      "mac": "00:1B:44:11:3A:B8",
+      "identifier": "b2c3d4e5-f6a7-8901-2345-678901bcdefg",
+      "mudurl": "http://localhost:3000/mud-files/mudfile-2",
+      "inventory_id": "INV-002"
+    },
+    {
+      "id": "device-3",
+      "name": "Raspberry Pi 4B",
+      "type": "gateway",
+      "manufacturer": "Raspberry foundation",
+      "model": "Raspberry pi 4b",
+      "status": "active",
+      "createdAt": "2024-01-17T08:00:00Z",
+      "updatedAt": "2024-01-22T16:45:00Z",
+      "ip": "192.168.1.1",
+      "mac": "00:1B:44:11:3A:B9",
+      "identifier": "c3d4e5f6-a7b8-9012-3456-789012cdefgh",
+      "mudurl": "http://localhost:3000/mud-files/mudfile-4",
+      "inventory_id": "INV-003"
+    }
+  ],
+  "policies": [
+    {
+      "id": "policy-1",
+      "deviceId": "device-1",
+      "name": "Firewall Policy",
+      "msplXml": "<ITResourceOrchestration id=\"omspl_123\"><ITResource id=\"mspl_456\"/></ITResourceOrchestration>",
+      "status": "active",
+      "appliedAt": "2024-01-20T14:30:00Z",
+      "enforcementStatus": "completed"
+    }
+  ],
+  "threats": [
+    {
+      "id": "threat-1",
+      "deviceId": "device-1",
+      "identifier": "CVE-2024-0001",
+      "threat_mud_url": "http://localhost:3000/mud-files/mudfile-7",
+      "threat_mud_file": "{\"ietf-threatmud:mud\": {\"threat-description\": \"Example threat\"}}",
+      "mitigation_actions": "<mitigation>Example mitigation</mitigation>"
+    }
+  ],
+  "mitigations": [
+    {
+      "id": "mitigation-1",
+      "deviceId": "device-1",
+      "threatId": "threat-1",
+      "name": "Firewall Rule Block",
+      "description": "Block malicious traffic from threat source",
+      "mitigation_actions": "<configuration-action><firewall><block>true</block></firewall></configuration-action>",
+      "is_enforced": true,
+      "last_enforced": "2025-12-15T08:53:03.711Z",
+      "enforcement_timestamp": "2025-12-15T08:53:03.711Z"
+    },
+    {
+      "id": "mitigation-2",
+      "deviceId": "device-1",
+      "threatId": "threat-1",
+      "name": "Port Filtering",
+      "description": "Filter specific ports",
+      "mitigation_actions": "{\"action\": \"filter\", \"ports\": [8080, 8443]}",
+      "is_enforced": true,
+      "last_enforced": "2025-12-12T08:56:42.293Z",
+      "enforcement_timestamp": "2025-12-12T08:56:42.293Z"
+    }
+  ],
+  "passports": [
+    {
+      "deviceId": "device-1",
+      "data": {
+        "deviceId": "device-1",
+        "serialNumber": "SN-DEVICE-1",
+        "firmwareVersion": "1.2.3",
+        "hardwareVersion": "2.0",
+        "manufacturer": "TechCorp",
+        "model": "TC-SENSOR-V2",
+        "certification": "CE-2024",
+        "productionDate": "2024-01-01",
+        "metadata": {
+          "onboardingDate": "2024-01-15",
+          "lastUpdate": "2024-01-20"
+        }
+      }
+    },
+    {
+      "deviceId": "device-2",
+      "data": {
+        "deviceId": "device-2",
+        "serialNumber": "SN-DEVICE-2",
+        "firmwareVersion": "2.1.0",
+        "hardwareVersion": "3.0",
+        "manufacturer": "SecureCam",
+        "model": "SC-IP-CAM-4K",
+        "certification": "CE-2024",
+        "productionDate": "2024-01-05",
+        "metadata": {
+          "onboardingDate": "2024-01-16",
+          "lastUpdate": "2024-01-21"
+        }
+      }
+    },
+    {
+      "deviceId": "device-3",
+      "data": {
+        "deviceId": "device-3",
+        "serialNumber": "SN-DEVICE-3",
+        "firmwareVersion": "1.5.2",
+        "hardwareVersion": "2.5",
+        "manufacturer": "NetWorks",
+        "model": "NW-GW-PRO",
+        "certification": "CE-2024",
+        "productionDate": "2024-01-10",
+        "metadata": {
+          "onboardingDate": "2024-01-17",
+          "lastUpdate": "2024-01-22"
+        }
+      }
+    }
+  ],
+  "muds": [
+    {
+      "id": "mud-device-1",
+      "deviceId": "device-1",
+      "mudVersion": 1,
+      "mudUrl": "http://localhost:3000/mud-files/mudfile-1",
+      "lastUpdate": "2023-09-17T09:47:00+00:00",
+      "cacheValidity": 48,
+      "isSupported": true,
+      "systeminfo": "Linux Kernel",
+      "mfgName": "Linux Foundation",
+      "documentation": "https://docs.kernel.org/",
+      "modelName": "Linux",
+      "mudData": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-1",
+          "last-update": "2023-09-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Linux Kernel",
+          "mfg-name": "Linux Foundation",
+          "documentation": "https://docs.kernel.org/",
+          "model-name": "Linux"
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_269bc22c-5933-11ee-8c99-0242ac120002",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_269bc33a-5933-11ee-8c99-0242ac120002",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_269bc65a-5933-11ee-8c99-0242ac120002",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "sofware-protection-action": {
+                          "software-protection-type": "DISABLE",
+                          "software-fixed-version": "Linux kernel version 4.13.2"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Bluetooth stack BlueZ",
+                            "software-version": "Linux kernel version 2.6.32 and up to and including 4.13.1"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mud-device-2",
+      "deviceId": "device-2",
+      "mudVersion": 2,
+      "mudUrl": "http://localhost:3000/mud-files/mudfile-2",
+      "lastUpdate": "2022-04-15T10:00:00+00:00",
+      "cacheValidity": 48,
+      "isSupported": true,
+      "systeminfo": "Fronius Solar IoT device, port update to SECURE MODBUS",
+      "mfgName": "Fronius International GmbH",
+      "documentation": "http://froniusManufacturer_1551.net",
+      "modelName": "iot_broker",
+      "mudData": {
+        "ietf-mud:mud": {
+          "mud-version": 2,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-2",
+          "last-update": "2022-04-15T10:00:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Fronius Solar IoT device, port update to SECURE MODBUS",
+          "mfg-name": "Fronius International GmbH",
+          "documentation": "http://froniusManufacturer_1551.net",
+          "model-name": "iot_broker",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": [
+                {
+                  "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1fr"
+                },
+                {
+                  "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": [
+                {
+                  "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1to"
+                },
+                {
+                  "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": [
+            {
+              "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1to",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-todev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "my-controller": [null]
+                      },
+                      "tcp": {
+                        "destination-port": {
+                          "operator": "eq",
+                          "port": 502
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-frdev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "same-manufacturer": [null]
+                      },
+                      "tcp": {
+                        "source-port": {
+                          "operator": "eq",
+                          "port": 502
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1to",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-todev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "my-controller": [null]
+                      },
+                      "tcp": {
+                        "destination-port": {
+                          "operator": "eq",
+                          "port": 802
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1fr",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-frdev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "same-manufacturer": [null]
+                      },
+                      "tcp": {
+                        "source-port": {
+                          "operator": "eq",
+                          "port": 802
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mud-device-3",
+      "deviceId": "device-3",
+      "mudVersion": 1,
+      "mudUrl": "http://localhost:3000/mud-files/mudfile-4",
+      "lastUpdate": "2023-09-17T09:47:00+00:00",
+      "cacheValidity": 48,
+      "isSupported": true,
+      "systeminfo": "Raspberry pi 4b 2GB",
+      "mfgName": "Raspberry foundation",
+      "documentation": "https://www.raspberrypi.com/documentation/",
+      "modelName": "Raspberry pi 4b",
+      "mudData": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-4",
+          "last-update": "2023-09-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Raspberry pi 4b 2GB",
+          "mfg-name": "Raspberry foundation",
+          "documentation": "https://www.raspberrypi.com/documentation/",
+          "model-name": "Raspberry pi 4b"
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_269bc790-5933-11ee-8c99-0242ac120002",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_269bcf24-5933-11ee-8c99-0242ac120002",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_269bd4ec-5933-11ee-8c99-0242ac120002",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 100
+                      },
+                      "configuration-action": {
+                        "sofware-protection-action": {
+                          "software-protection-type": "CHANGE DEFAULT CREDENTIAL",
+                          "software-fixed-version": "Raspberry Pi OS 5.11"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Raspbian Pi OS",
+                            "software-version": "5.10"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "Rule_269bd6ea-5933-11ee-8c99-0242ac120002",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "sofware-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": "Raspberry Pi OS 5.11"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Raspbian Pi OS",
+                            "software-version": "5.10"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "enforcementStatuses": [
+    {
+      "deviceId": "device-1",
+      "status": "completed",
+      "message": "Enforcement status: completed",
+      "timestamp": "2024-01-20T14:30:00Z"
+    },
+    {
+      "deviceId": "device-2",
+      "status": "pending",
+      "message": "Enforcement status: pending",
+      "timestamp": "2024-01-21T11:20:00Z"
+    },
+    {
+      "deviceId": "device-3",
+      "status": "pending",
+      "message": "Enforcement status: pending",
+      "timestamp": "2024-01-22T16:45:00Z"
+    }
+  ],
+  "mudFiles": [
+    {
+      "id": "mudfile-1",
+      "filename": "linux2632.json",
+      "type": "mud",
+      "content": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-1",
+          "last-update": "2023-09-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Linux Kernel",
+          "mfg-name": "Linux Foundation",
+          "documentation": "https://docs.kernel.org/",
+          "model-name": "Linux"
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_269bc22c-5933-11ee-8c99-0242ac120002",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_269bc33a-5933-11ee-8c99-0242ac120002",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_269bc65a-5933-11ee-8c99-0242ac120002",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "sofware-protection-action": {
+                          "software-protection-type": "DISABLE",
+                          "software-fixed-version": "Linux kernel version 4.13.2"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Bluetooth stack BlueZ",
+                            "software-version": "Linux kernel version 2.6.32 and up to and including 4.13.1"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-2",
+      "filename": "fronius-modbus-seguro-MUD.json",
+      "type": "mud",
+      "content": {
+        "ietf-mud:mud": {
+          "mud-version": 2,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-2",
+          "last-update": "2022-04-15T10:00:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Fronius Solar IoT device, port update to SECURE MODBUS",
+          "mfg-name": "Fronius International GmbH",
+          "documentation": "http://froniusManufacturer_1551.net",
+          "model-name": "iot_broker",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": [
+                {
+                  "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1fr"
+                },
+                {
+                  "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": [
+                {
+                  "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1to"
+                },
+                {
+                  "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": [
+            {
+              "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1to",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-todev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "my-controller": [null]
+                      },
+                      "tcp": {
+                        "destination-port": {
+                          "operator": "eq",
+                          "port": 502
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-frdev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "same-manufacturer": [null]
+                      },
+                      "tcp": {
+                        "source-port": {
+                          "operator": "eq",
+                          "port": 502
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1to",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-todev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "my-controller": [null]
+                      },
+                      "tcp": {
+                        "destination-port": {
+                          "operator": "eq",
+                          "port": 802
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1fr",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-frdev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "same-manufacturer": [null]
+                      },
+                      "tcp": {
+                        "source-port": {
+                          "operator": "eq",
+                          "port": 802
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-3",
+      "filename": "mudfile-fronius.json",
+      "type": "mud",
+      "content": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-3",
+          "last-update": "2022-07-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Fronius Solar IoT device",
+          "mfg-name": "Fronius International GmbH",
+          "documentation": "http://froniusManufacturer_1551.net",
+          "model-name": "iot_broker",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": [
+                {
+                  "name": "mud-1551-v1fr"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": [
+                {
+                  "name": "mud-1551-v1to"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": [
+            {
+              "name": "mud-1551-v1to",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-todev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "my-controller": [null]
+                      },
+                      "ipv6": {
+                        "protocol": 6,
+                        "dst-dnsname": "fronius_solar_api.net"
+                      },
+                      "tcp": {
+                        "destination-port": {
+                          "operator": "eq",
+                          "port": 5683
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "mud-1551-v1fr",
+              "type": "dns-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "ent0-frdev",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "same-manufacturer": [null]
+                      },
+                      "ipv6": {
+                        "protocol": 6,
+                        "source-dnsname": "fronius_solar_api.net"
+                      },
+                      "tcp": {
+                        "source-port": {
+                          "operator": "eq",
+                          "port": 5683
+                        }
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "accept"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-4",
+      "filename": "raspbianpios.json",
+      "type": "mud",
+      "content": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-4",
+          "last-update": "2023-09-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Raspberry pi 4b 2GB",
+          "mfg-name": "Raspberry foundation",
+          "documentation": "https://www.raspberrypi.com/documentation/",
+          "model-name": "Raspberry pi 4b"
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_269bc790-5933-11ee-8c99-0242ac120002",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_269bcf24-5933-11ee-8c99-0242ac120002",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_269bd4ec-5933-11ee-8c99-0242ac120002",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 100
+                      },
+                      "configuration-action": {
+                        "sofware-protection-action": {
+                          "software-protection-type": "CHANGE DEFAULT CREDENTIAL",
+                          "software-fixed-version": "Raspberry Pi OS 5.11"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Raspbian Pi OS",
+                            "software-version": "5.10"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "Rule_269bd6ea-5933-11ee-8c99-0242ac120002",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "sofware-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": "Raspberry Pi OS 5.11"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Raspbian Pi OS",
+                            "software-version": "5.10"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-5",
+      "filename": "poweredge650.json",
+      "type": "mud",
+      "content": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-5",
+          "last-update": "2023-09-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Dell PowerEdge R650",
+          "mfg-name": "Dell Technologies",
+          "documentation": "https://www.dell.com/es-es/shop/servidores-dell-poweredge/poweredge-r650-full-configuration/spd/poweredge-r650/emea_r650",
+          "model-name": "PowerEdge R650"
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_d7134586-591e-11ee-8c99-0242ac120002",
+              "type": "firmware-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_d713481a-591e-11ee-8c99-0242ac120002",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_d713495a-591e-11ee-8c99-0242ac120002",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "firmware-protection-action": {
+                          "firmware-protection-type": "UPDATE",
+                          "firmware-fixed-version": ">=e2010600",
+                          "firmware-fix-url": "https://www.intel.com/content/www/us/en/products/sku/129969/intel-optane-ssd-dc-d4800x-series-375gb-2-5in-pcie-2x2-3d-xpoint/downloads.html"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "firmware-identification-condition": {
+                            "hardware-name": "intel:optane_ssd_dc_p4800x_firmware",
+                            "firmware-version": "<e2010600"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-6",
+      "filename": "MUD_Collins_Bootstrapping.json",
+      "type": "mud",
+      "content": {
+        "ietf-mud:mud": {
+          "mud-version": 1,
+          "mud-url": "http://localhost:3000/mud-files/mudfile-6",
+          "last-update": "2024-02-16T11:35:25+01:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "modelname": "Aria",
+          "systeminfo": "The Aria device Current MUD File",
+          "extensions": [
+            "network-fingerprint",
+            "monitor-mode",
+            "so-hash",
+            "integrity-fingerprint",
+            "mud-signature-certification-authority",
+            "umu-mspl-list:mspls"
+          ],
+          "network-fingerprint": "((PortclSrc-42,UDP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,UDP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,UDP-45)=([2.0,2.0],[1.0,1.0])) AND ((PortclSrc-42,DHCP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,DHCP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,DHCP-45)=([2.0,2.0],[1.0,1.0]))",
+          "monitor-mode": "active",
+          "so-hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "integrity-fingerprint": "{'moore_machine': {'initial-state': '0', 'input-alphabet': ['0', '3', '2', '1'], 'output-alphabet': ['0', '2', '1'], 'output-function': {'0': '0', '1': '0', '10': '2', '11': '2', '12': '0', '13': '2', '14': '2', '15': '2', '16': '2', '17': '2', '18': '2', '19': '2', '2': '0', '20': '2', '21': '0', '22': '0', '23': '0', '24': '0', '25': '0', '26': '0', '3': '0', '4': '0', '5': '2', '6': '2', '7': '2', '8': '2', '9': '1'}, 'states': ['0', '26', '17', '15', '24', '19', '6', '10', '1', '8', '13', '21', '12', '14', '23', '3', '5', '4', '22', '20', '7', '2', '11', '16', '25', '18', '9'], 'transition-function': {'0': {'0': '9', '1': '1', '2': '9', '3': '9'}, '1': {'0': '9', '1': '2', '2': '24', '3': '9'}, '10': {'0': '9', '1': '9', '2': '11', '3': '13'}, '11': {'0': '9', '1': '9', '2': '12', '3': '9'}, '12': {'0': '9', '1': '9', '2': '9', '3': '9'}, '13': {'0': '14', '1': '9', '2': '9', '3': '9'}, '14': {'0': '9', '1': '9', '2': '11', '3': '15'}, '15': {'0': '16', '1': '9', '2': '9', '3': '9'}, '16': {'0': '9', '1': '9', '2': '11', '3': '17'}, '17': {'0': '18', '1': '9', '2': '9', '3': '9'}, '18': {'0': '9', '1': '9', '2': '11', '3': '19'}, '19': {'0': '20', '1': '9', '2': '9', '3': '9'}, '2': {'0': '10', '1': '3', '2': '21', '3': '9'}, '20': {'0': '9', '1': '9', '2': '11', '3': '9'}, '21': {'0': '9', '1': '22', '2': '10', '3': '9'}, '22': {'0': '9', '1': '23', '2': '9', '3': '9'}, '23': {'0': '14', '1': '9', '2': '9', '3': '9'}, '24': {'0': '9', '1': '25', '2': '9', '3': '9'}, '25': {'0': '9', '1': '22', '2': '26', '3': '9'}, '26': {'0': '9', '1': '22', '2': '9', '3': '9'}, '3': {'0': '9', '1': '4', '2': '9', '3': '9'}, '4': {'0': '10', '1': '5', '2': '9', '3': '9'}, '5': {'0': '5', '1': '5', '2': '6', '3': '7'}, '6': {'0': '8', '1': '6', '2': '7', '3': '0'}, '7': {'0': '7', '1': '6', '2': '0', '3': '6'}, '8': {'0': '5', '1': '5', '2': '8', '3': '0'}, '9': {'0': '9', '1': '9', '2': '9', '3': '9'}}}, 'moore_alpha_maps': [{'input-map': {'fclose@plt': '2', 'fopen@plt': '1', 'fread@plt': '0', 'fwrite@plt': '3'}, 'output-map': {'ACCEPT': '0', 'OK': '2', 'REJECT': '1'}}, {'input-map': {'0': 'fread@plt', '1': 'fopen@plt', '2': 'fclose@plt', '3': 'fwrite@plt'}, 'output-map': {'0': 'ACCEPT', '1': 'REJECT', '2': 'OK'}}]}",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_6ccf1735-d981-4e30-87ad-34a43d5f72fa"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_6ccf1735-d981-4e30-87ad-34a43d5f72fa"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": []
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_6ccf1735-d981-4e30-87ad-34a43d5f72fa",
+              "type": "boostrapping-mspl-type",
+              "configuration": {
+                "capability": "bootstrapping",
+                "rule-set-configuration": {
+                  "name": "mspl_set_11868758-2e8f-4674-8a20-685ce351d3d1",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_71405326-8629-42f5-92aa-391b4de1a841",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "bootstrapping-action": {
+                          "bootstrapping-action-type": "BOOTSTRAPPING",
+                          "bootstrapping-model-version": "0.1",
+                          "network-bootstrapping-model": "((PortclSrc-42,UDP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,UDP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,UDP-45)=([2.0,2.0],[1.0,1.0])) AND ((PortclSrc-42,DHCP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,DHCP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,DHCP-45)=([2.0,2.0],[1.0,1.0]))",
+                          "network-bootstrapping-model-signature": "3ca5d818857d9f13efe6d78864f88a37d726d4c71"
+                        }
+                      },
+                      "configuration-condition": {
+                        "bootstrapping-configuration-condition": {}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-7",
+      "filename": "CVE-2020-13935.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-7",
+          "last-update": "2022-05-12T10:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "threat-name": "DoS",
+          "CVEs-associated": ["CVE-2020-13935"],
+          "software-affected-products": ["Apache Tomcat versions 10.0.0-M1 through 10.0.0-M6", "Apache Tomcat versions 9.0.0.M1 through 9.0.36", "Apache Tomcat versions 8.5.0 through 8.5.56", "Apache Tomcat versions 7.0.0 through 7.0.104"],
+          "systeminfo": "The payload length in a WebSocket frame was not correctly validated in Apache Tomcat. Invalid payload lengths could trigger an infinite loop. Multiple requests with invalid payload lengths could lead to a denial of service.",
+          "from-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          }
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_b448ad70-c618-4743-9bd4-c57824684b67",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_255fbb1f-9bcc-5b9e-ab27-a1a56bc59555",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": ">=9.0.37",
+                          "software-fix-url": "https://tomcat.apache.org/download-90.cgi"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Apache tomcat",
+                            "software-version": "<9.0.37"
+                          },
+                          "packet-filter-condition": {
+                            "source-dnsname": "lists.apache.org",
+                            "destination-dnsname": "lists.apache.org",
+                            "source-port": 8080,
+                            "destination-port": 8080
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-8",
+      "filename": "CVE-2020-27813.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-8",
+          "last-update": "2022-06-29T05:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "threat-name": "DoS",
+          "CVEs-associated": ["CVE-2020-27813"],
+          "software-affected-products": ["Debian Linux 9.0 ", "golang-websocket 1.4.0-1+deb10u1"],
+          "systeminfo": "An integer overflow vulnerability exists with the length of websocket frames received via a websocket connection. An attacker would use this flaw to cause a denial of service attack on an HTTP Server allowing websocket connections.",
+          "from-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-6587-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-6587-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          }
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_d975cee8-6587-4019-a14d-84bd66885659",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_b448ad70-c618-6587-9bd4-c70623584b67",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_255fbb1f-6587-42ca-ab27-a1a56bc59555",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": "1.4.0-1+deb10u1.",
+                          "software-fix-url": "https://security-tracker.debian.org/tracker/golang-websocket"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "golang-websocket",
+                            "software-version": "1.4.0-1+deb10u1"
+                          },
+                          "packet-filter-condition": {
+                            "source-dnsname": "https://wiki.debian.org/LTS",
+                            "destination-dnsname": "https://wiki.debian.org/LTS",
+                            "source-port": 80,
+                            "destination-port": 80
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-9",
+      "filename": "CVE-2022-25762.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-9",
+          "last-update": "2022-06-29T05:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "threat-name": "DoS",
+          "CVEs-associated": ["CVE-2022-25762"],
+          "software-affected-products": ["Apache Tomcat 9.0.0.M1 to 9.0.20", "Apache Tomcat 8.5.0 to 8.5.75"],
+          "systeminfo": "If a web application sends a WebSocket message concurrently with the WebSocket connection closing when running on Apache Tomcat 8.5.0 to 8.5.75 or Apache Tomcat 9.0.0.M1 to 9.0.20, it is possible that the application will continue to use the socket after it has been closed",
+          "from-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          }
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_b448ad70-c618-4743-9bd4-c70623584b67",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_255fbb1f-9bcc-42ca-ab27-a1a56bc59555",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": ">=9.0.20",
+                          "software-fix-url": "https://tomcat.apache.org/download-90.cgi"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "packet-filter-condition": {
+                            "source-dnsname": "lists.apache.org",
+                            "destination-dnsname": "lists.apache.org",
+                            "source-port": 8080,
+                            "destination-port": 8080
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "Rule_3001278d-c2e3-4199-98d1-85df8abcb246",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 100
+                      },
+                      "configuration-action": {
+                        "filteringAction": {
+                          "filtering-action-type": "DENY"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "packet-filter-condition": {
+                            "source-address": "0.0.0.0",
+                            "destination-port": 8080
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-10",
+      "filename": "CVE-2022-37797.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-10",
+          "last-update": "2022-08-03T05:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "threat-name": "DoS",
+          "CVEs-associated": ["CVE-2022-37797"],
+          "systeminfo": "There's a null pointer dereference bug that crashes the whole server if mod_wstunnel is enabled and the server receives invalid HTTP Websocket Handshake request. This issue could be abused by a remote attacker to cause Denial of Service condition.",
+          "from-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_d975cee8-a389-4019-a14d-84bd66885659"
+                }
+              ]
+            }
+          }
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_d975cee8-a389-4019-ac6e-84bd66885659",
+              "type": "software-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_b448ad70-c618-4743-ac6e-c70623584b67",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_255fbb1f-9bcc-42ca-ac6e-a1a56bc59555",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": ">=1.4.67",
+                          "software-fix-url": "https://download.lighttpd.net/lighttpd/releases-1.4.x/"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "packet-filter-condition": {
+                            "source-dnsname": "lighttpd.net",
+                            "destination-dnsname": "lighttpd.net",
+                            "source-port": 80,
+                            "destination-port": 80
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-11",
+      "filename": "scada-threatmud-CVE-2022-20685.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-11",
+          "threat-id": "CVE-2022-20685",
+          "last-update": "2022-04-26T19:41:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "threat-name": "DDoS",
+          "CVEs-associated": ["CVE-2022-20685"],
+          "systeminfo": "A vulnerability in the Modbus preprocessor of the Snort detection engine could allow an unauthenticated, remote attacker to cause a denial of service (DoS) condition on an affected device.This vulnerability affects all open source Snort project releases earlier than Release 2.9.19 and Release 3.1.11.0",
+          "type": "software",
+          "software-affected-products": ["Cyber Vision Software", "FirePOWER Services Software - All platforms", "Firepower Threat Defense (FTD) Software - All platforms", "Meraki MX Series Software"],
+          "hardware-affected-products": ["1000 Series Integrated Services Routers (ISRs)", "4000 Series Integrated Services Routers (ISRs)", "Catalyst 8000V Edge Software", "Catalyst 8200 Series Edge Platforms", "Catalyst 8300 Series Edge Platforms", "Catalyst 8500 Series Edge Platforms", "Catalyst 8500L Series Edge Platforms", "Cloud Services Routers 1000V", "Integrated Services Virtual Routers (ISRv)"],
+          "from-device-policy": {
+            "access-lists": {},
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_fc551117-b12d-41e3-8169-2740c80e4951"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {},
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_fc551117-b12d-41e3-8169-2740c80e4951"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": []
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_fc551117-b12d-41e3-8169-2740c80e4951",
+              "type": "ipv4-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_56d3ec6e-5891-4ca2-a700-643b76503581",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_503be6e8-a4fd-4afb-aeaf-fed481044131",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": ["4.0.2"],
+                          "software-fix-url": ["https://software.cisco.com/download/home/286325414/type/286325316/release/4.0.2?catid=268438162"]
+                        }
+                      },
+                      "configuration-condition": {
+                        "software-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Cyber Vision Software",
+                            "software-version": ["<=3.2", "4.0"]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "Rule_05614dc4-b684-44a8-9d05-a1e80c76f5b3",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": ["MX16.16"],
+                          "software-fix-url": []
+                        }
+                      },
+                      "configuration-condition": {
+                        "software-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Meraki MX Software",
+                            "software-version": ["MX14", "MX15", "MX16"]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "Rule_40dea24a-ff6b-4c85-b125-1021f30889a4",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": ["16.12", "17.3.5", "17.6.2"],
+                          "software-fix-url": []
+                        }
+                      },
+                      "configuration-condition": {
+                        "software-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "UTD Software",
+                            "software-version": ["16.12", "17.3", "17.6"]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "Rule_61a19faa-820a-4d0a-a5ca-337d3c72a7bf",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "software-protection-action": {
+                          "software-protection-type": "UPDATE",
+                          "software-fixed-version": ["2.9.19", "3.1.11.0"],
+                          "software-fix-url": ["https://www.snort.org/downloads", "https://www.snort.org/downloads/snort/snort-2.9.20-1.f35.x86_64.rpm", "https://www.snort.org/downloads/snort/snort-2.9.20-1.src.rpm", "https://www.snort.org/downloads/snort/snort-openappid-2.9.20-1.f35.x86_64.rpm", "https://www.snort.org/downloads/snort/snort-2.9.20-1.centos.x86_64.rpm"]
+                        }
+                      },
+                      "configuration-condition": {
+                        "software-configuration-condition": {
+                          "software-identification-condition": {
+                            "software-name": "Snort Software",
+                            "software-version": ["2.x", "3.x"]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-12",
+      "filename": "forCERTIFY1.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-12",
+          "threat-id": "b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
+          "last-update": "2019-04-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "models-affected": "ABC1234",
+          "Threat-Intelligence-Providers": ["IP or identifier of threat explorer", "some other threat explorer"],
+          "cvss-vector": "¿?",
+          "systeminfo": "Dangerous behaviour, seems DGA domain that can contain malware",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_62eed5de-5710-49d5-b7a0-bb88433404cf"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": [
+                {
+                  "name": "threatmud_42c0f156-6ee5-4e86-93d9-bfe568d267ae-to"
+                }
+              ]
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": [
+            {
+              "name": "threatmud_62eed5de-5710-49d5-b7a0-bb88433404cf-fr",
+              "type": "ipv4-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "Rule_380ce769-ddd8-4ef3-b260-953a4ae3136b",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "my-controller": [null]
+                      },
+                      "ipv4": {
+                        "protocol": 6,
+                        "src-dnsname": "mtb-user8login.viewdns.net"
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "deny"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "threatmud_42c0f156-6ee5-4e86-93d9-bfe568d267ae-to",
+              "type": "ipv4-acl-type",
+              "aces": {
+                "ace": [
+                  {
+                    "name": "Rule_d748f2a9-ed32-4b4d-bd87-a1cf5e9854f5",
+                    "matches": {
+                      "ietf-mud:mud": {
+                        "my-controller": [null]
+                      },
+                      "ipv4": {
+                        "protocol": 6,
+                        "dst-dnsname": "mtb-user8login.viewdns.net"
+                      }
+                    },
+                    "actions": {
+                      "forwarding": "deny"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_62eed5de-5710-49d5-b7a0-bb88433404cf",
+              "type": "ipv4-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_d3802715-2abd-440b-8220-aa1be8dcd7d5",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_380ce769-ddd8-4ef3-b260-953a4ae3136b",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "filteringAction": {
+                          "filtering-action-type": "DENY"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "packet-filter-condition": {
+                            "source-dnsname": "mtb-user8login.viewdns.net",
+                            "source-port": 6031
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae",
+              "type": "ipv4-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_653cb05e-1a92-4ce7-bafe-01f265436ff3",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_d748f2a9-ed32-4b4d-bd87-a1cf5e9854f5",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "filteringAction": {
+                          "filtering-action-type": "DENY"
+                        }
+                      },
+                      "configuration-condition": {
+                        "filtering-configuration-condition": {
+                          "packet-filter-condition": {
+                            "destination-dnsname": "mtb-user8login.viewdns.net",
+                            "dst-port": 6031
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-13",
+      "filename": "forCERTIFY2.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-13",
+          "threat-id": "b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
+          "last-update": "2019-04-17T09:47:00+00:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "models-affected": "ABC1234",
+          "Threat-Intelligence-Providers": ["AVAST\nFINDING: ELF:Filecoder-AF[Trj]"],
+          "cvss-vector": "¿?",
+          "systeminfo": "Dangerous behaviour, seems DGA domain that can contain malware",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": []
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae",
+              "type": "ipv4-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_653cb05e-1a92-4ce7-bafe-01f265436ff3",
+                  "configuration-rule": [
+                    {
+                      "name": "Rule_d748f2a9-ed32-4b4d-bd87-a1cf5e9854f5",
+                      "isCNF": false,
+                      "external-data": {
+                        "priority": 500
+                      },
+                      "configuration-action": {
+                        "bootstrapping-action": {
+                          "bootstrapping-action-type": "UPDATE",
+                          "bootstrapping-model-version": "0.2",
+                          "network-bootstrapping-model": "((PortclSrc-42,UDP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,UDP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,UDP-45)=([2.0,2.0],[1.0,1.0])) AND ((PortclSrc-42,DHCP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,DHCP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,DHCP-45)=([2.0,2.0],[1.0,1.0]))",
+                          "network-bootstrapping-model-signature": "3ca5d818857d9f13efe6d78864f88a37d726d4c71"
+                        }
+                      },
+                      "configuration-condition": {
+                        "bootstrapping-configuration-condition": {
+                          "device-condition": {
+                            "name": "Aria"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-14",
+      "filename": "afcf19e3-750b-45ab-adce-b535afe1200d.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-14",
+          "threat-id": "afcf19e3-750b-45ab-adce-b535afe1200d",
+          "last-update": "2024-02-16T11:35:25+01:00",
+          "cache-validity": 48,
+          "models-affected": "Log4j",
+          "is-supported": true,
+          "systeminfo": "Apache Log4j2 2.0-beta9 through 2.15.0 (excluding security releases 2.12.2, 2.12.3, and 2.3.1) JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default.",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_afcf19e3-750b-45ab-adce-b535afe1200d"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_afcf19e3-750b-45ab-adce-b535afe1200d"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": []
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_afcf19e3-750b-45ab-adce-b535afe1200d",
+              "threatid": "afcf19e3-750b-45ab-adce-b535afe1200d",
+              "type": "software-mspl-type",
+              "models-affected": ["Log4j"],
+              "configuration": {
+                "capability": "software-protection",
+                "rule-set-configuration": {
+                  "name": "mspl_set_03be639a-53a8-4385-8df3-7b9a48331033",
+                  "configuration-rule": {
+                    "name": "Rule_aaee7b7e-a150-401e-b067-acaae1f9cadd",
+                    "isCNF": false,
+                    "external-data": {
+                      "priority": 500
+                    },
+                    "configuration-action": {
+                      "software-protection-action": {
+                        "software-protection-type": "UPDATE",
+                        "software-fixed-version": "2.16",
+                        "software-fix-url": [
+                          "https://sr.certify.digital-worx.de/firmware/QmVJwv27ieRuya36ztgkRyP77ArbizmcuUajd52pf9wcYP",
+                          "https://sr.certify.digital-worx.de/firmware/"
+                        ]
+                      }
+                    },
+                    "configuration-condition": {
+                      "software-configuration-condition": {
+                        "software-identification-condition": {
+                          "software-id": "QmVJwv27ieRuya36ztgkRyP77ArbizmcuUajd52pf9wcYP",
+                          "software-name": "Log4j",
+                          "software-version": "2.15.0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-15",
+      "filename": "cb4d19e3-f51b-15cd-1278-a53533312401.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-15",
+          "threat-id": "cb4d19e3-f51b-15cd-1278-a53533312401",
+          "last-update": "2024-02-16T11:35:25+01:00",
+          "cache-validity": 48,
+          "models-affected": "OpenSSH",
+          "is-supported": true,
+          "systeminfo": "OpenSSH 6.2 through 8.x before 8.8, when certain non-default configurations are used, allows privilege escalation because supplemental groups are not initialized as expected. Helper programs for AuthorizedKeysCommand and AuthorizedPrincipalsCommand may run with privileges associated with group memberships of the sshd process, if the configuration specifies running the command as a different user. Users are advised to upgrade.",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_cb4d19e3-f51b-15cd-1278-a53533312401"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_cb4d19e3-f51b-15cd-1278-a53533312401"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": []
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_cb4d19e3-f51b-15cd-1278-a53533312401",
+              "threatid": "cb4d19e3-f51b-15cd-1278-a53533312401",
+              "type": "software-mspl-type",
+              "models-affected": ["OpenSSH"],
+              "configuration": {
+                "capability": "software-protection",
+                "rule-set-configuration": {
+                  "name": "mspl_set_03be639a-53a8-4385-8df3-7b9a48331033",
+                  "configuration-rule": {
+                    "name": "Rule_aaee7b7e-a150-401e-b067-acaae1f9cadd",
+                    "isCNF": false,
+                    "external-data": {
+                      "priority": 500
+                    },
+                    "configuration-action": {
+                      "software-protection-action": {
+                        "software-protection-type": "UPDATE",
+                        "software-fixed-version": "2.16",
+                        "software-fix-url": [
+                          "https://sr.certify.digital-worx.de/firmware/QmVJwv27ieRuya36ztgkRyP77ArbizmcuUajd52pf9wcYP",
+                          "https://sr.certify.digital-worx.de/firmware/"
+                        ]
+                      }
+                    },
+                    "configuration-condition": {
+                      "software-configuration-condition": {
+                        "software-identification-condition": {
+                          "software-id": "QmVJwv27ieRuya36ztgkRyP77ArbizmcuUajd52pf9wcYP",
+                          "software-name": "OpenSSH",
+                          "software-version": "2.15.0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "mspl_62eed5de-5710-49d5-b7a0-bb88433404cf",
+              "type": "ipv4-mspl-type",
+              "configuration": {
+                "capability": "Filtering_L4",
+                "rule-set-configuration": {
+                  "name": "mspl_set_d3802715-2abd-440b-8220-aa1be8dcd7d5",
+                  "configuration-rule": {
+                    "name": "Rule_380ce769-ddd8-4ef3-b260-953a4ae3136b",
+                    "isCNF": false,
+                    "external-data": {
+                      "priority": 500
+                    },
+                    "configuration-action": {
+                      "filteringAction": {
+                        "filtering-action-type": "DENY"
+                      }
+                    },
+                    "configuration-condition": {
+                      "filtering-configuration-condition": {
+                        "packet-filter-condition": {
+                          "source-port": 22
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mudfile-16",
+      "filename": "certifySoftwareUpdate.json",
+      "type": "threatmud",
+      "content": {
+        "ietf-threatmud:mud": {
+          "threat-mud-version": 1,
+          "threat-mud-url": "http://localhost:3000/mud-files/mudfile-16",
+          "threat-id": "afcf19e3-750b-45ab-adce-b535afe1200d",
+          "last-update": "2024-02-16T11:35:25+01:00",
+          "cache-validity": 48,
+          "is-supported": true,
+          "systeminfo": "Apache Log4j2 2.0-beta9 through 2.15.0 (excluding security releases 2.12.2, 2.12.3, and 2.3.1) JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default.",
+          "from-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_afcf19e3-750b-45ab-adce-b535afe1200d"
+                }
+              ]
+            }
+          },
+          "to-device-policy": {
+            "access-lists": {
+              "access-list": []
+            },
+            "mspl-list": {
+              "mspls": [
+                {
+                  "name": "mspl_afcf19e3-750b-45ab-adce-b535afe1200d"
+                }
+              ]
+            }
+          }
+        },
+        "ietf-access-control-list:acls": {
+          "acl": []
+        },
+        "umu-mspl-list:mspls": {
+          "mspl": [
+            {
+              "name": "mspl_afcf19e3-750b-45ab-adce-b535afe1200d",
+              "threatid": "afcf19e3-750b-45ab-adce-b535afe1200d",
+              "type": "software-mspl-type",
+              "models-affected": ["Log4j"],
+              "configuration": {
+                "capability": "software-protection",
+                "rule-set-configuration": {
+                  "name": "mspl_set_03be639a-53a8-4385-8df3-7b9a48331033",
+                  "configuration-rule": {
+                    "name": "Rule_aaee7b7e-a150-401e-b067-acaae1f9cadd",
+                    "isCNF": false,
+                    "external-data": {
+                      "priority": 500
+                    },
+                    "configuration-action": {
+                      "software-protection-action": {
+                        "software-protection-type": "UPDATE",
+                        "software-fixed-version": "2.16",
+                        "software-fix-url": [
+                          "https://sr.certify.digital-worx.de/firmware/QmVJwv27ieRuya36ztgkRyP77ArbizmcuUajd52pf9wcYP",
+                          "https://sr.certify.digital-worx.de/firmware/"
+                        ]
+                      }
+                    },
+                    "configuration-condition": {
+                      "software-configuration-condition": {
+                        "software-identification-condition": {
+                          "software-id": "QmVJwv27ieRuya36ztgkRyP77ArbizmcuUajd52pf9wcYP",
+                          "software-name": "Log4j",
+                          "software-version": "2.15.0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "msplFiles": [
+    {
+      "id": "msplfile-1",
+      "filename": "fronius1-secure.xml",
+      "type": "mspl",
+      "source": "test/results",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<mspl>\n  <name>\n    66179e1f-e0ba-4e32-b6eb-3601709059ef\n  </name>\n<configuration>\n<capability>\n  Filtering_L4\n</capability>\n<rule-set-configuration>\n  <name>\n    mspl_27b32eb9-904a-4c45-820b-ae5295bd674a\n</name>\n<configuration-rule>\n    <name>mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr</name>\n    <isCNF>false</isCNF>\n    <external-data>\n      <priority>500</priority>\n    </external-data>\n    <configuration-action>\n      <filteringAction>\n        <filtering-action-type>ACCEPT</filtering-action-type>\n      </filteringAction>\n    </configuration-action>\n    <configuration-condition>\n      <filtering-configuration-condition>\n        <packet-filter-condition>\n          <source-port>502</source-port>\n        </packet-filter-condition>\n      </filtering-configuration-condition>\n    </configuration-condition>\n  </configuration-rule>\n  <configuration-rule>\n    <name>mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1to</name>\n    <isCNF>false</isCNF>\n    <external-data>\n      <priority>500</priority>\n    </external-data>\n    <configuration-action>\n      <filteringAction>\n        <filtering-action-type>ACCEPT</filtering-action-type>\n      </filteringAction>\n    </configuration-action>\n    <configuration-condition>\n      <filtering-configuration-condition>\n        <packet-filter-condition>\n          <destination-port>502</destination-port>\n        </packet-filter-condition>\n      </filtering-configuration-condition>\n    </configuration-condition>\n  </configuration-rule>\n  <configuration-rule>\n    <name>mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1to</name>\n    <isCNF>false</isCNF>\n    <external-data>\n      <priority>500</priority>\n    </external-data>\n    <configuration-action>\n      <filteringAction>\n        <filtering-action-type>ACCEPT</filtering-action-type>\n      </filteringAction>\n    </configuration-action>\n    <configuration-condition>\n      <filtering-configuration-condition>\n        <packet-filter-condition>\n          <destination-port>802</destination-port>\n        </packet-filter-condition>\n      </filtering-configuration-condition>\n    </configuration-condition>\n  </configuration-rule>\n  <configuration-rule>\n    <name>mud-f361a0ed-562e-4e81-8893-3ab3e85218c3-v1fr</name>\n    <isCNF>false</isCNF>\n    <external-data>\n      <priority>500</priority>\n    </external-data>\n    <configuration-action>\n      <filteringAction>\n        <filtering-action-type>ACCEPT</filtering-action-type>\n      </filteringAction>\n    </configuration-action>\n    <configuration-condition>\n      <filtering-configuration-condition>\n        <packet-filter-condition>\n          <source-port>802</source-port>\n        </packet-filter-condition>\n      </filtering-configuration-condition>\n    </configuration-condition>\n  </configuration-rule>\n\n</rule-set-configuration>\n</configuration>\n</mspl>"
+    },
+    {
+      "id": "msplfile-2",
+      "filename": "scada.xml",
+      "type": "mspl",
+      "source": "test/results",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n  <mspl>\n    <name>mspl_fc551117-b12d-41e3-8169-2740c80e4951</name>\n    <threatid>64ffa996-fef5-47f2-9f42-c72462f8bf10</threatid>\n    <type>software-mspl-type</type>\n    <configuration>\n      <capability>software-protection</capability>\n      <rule-set-configuration>\n        <name>mspl_set_56d3ec6e-5891-4ca2-a700-643b76503581</name>\n        <configuration-rule>\n          <name>Rule_503be6e8-a4fd-4afb-aeaf-fed481044131</name>\n          <isCNF>false</isCNF>\n          <external-data>\n            <priority>500</priority>\n          </external-data>\n          <configuration-action>\n            <software-protection-action>\n              <software-protection-type>UPDATE</software-protection-type>\n              <software-fixed-version>4.0.2</software-fixed-version>\n              <software-fix-url>https://software.cisco.com/download/home/286325414/type/286325316/release/4.0.2?catid=268438162</software-fix-url>\n            </software-protection-action>\n          </configuration-action>\n          <configuration-condition>\n            <software-configuration-condition>\n              <software-identification-condition>\n                <software-name>Cyber Vision Software</software-name>\n                <software-version>&lt;=3.2</software-version>\n                <software-version>4.0</software-version>\n              </software-identification-condition>\n            </software-configuration-condition>\n          </configuration-condition>\n        </configuration-rule>\n        <configuration-rule>\n          <name>Rule_05614dc4-b684-44a8-9d05-a1e80c76f5b3</name>\n          <isCNF>false</isCNF>\n          <external-data>\n            <priority>500</priority>\n          </external-data>\n          <configuration-action>\n            <software-protection-action>\n              <software-protection-type>UPDATE</software-protection-type>\n              <software-fixed-version>MX16.16</software-fixed-version>\n              <software-fix-url/>\n            </software-protection-action>\n          </configuration-action>\n          <configuration-condition>\n            <software-configuration-condition>\n              <software-identification-condition>\n                <software-name>Meraki MX Software</software-name>\n                <software-version>MX14</software-version>\n                <software-version>MX15</software-version>\n                <software-version>MX16</software-version>\n              </software-identification-condition>\n            </software-configuration-condition>\n          </configuration-condition>\n        </configuration-rule>\n        <configuration-rule>\n          <name>Rule_40dea24a-ff6b-4c85-b125-1021f30889a4</name>\n          <isCNF>false</isCNF>\n          <external-data>\n            <priority>500</priority>\n          </external-data>\n          <configuration-action>\n            <software-protection-action>\n              <software-protection-type>UPDATE</software-protection-type>\n              <software-fixed-version>16.12</software-fixed-version>\n              <software-fixed-version>17.3.5</software-fixed-version>\n              <software-fixed-version>17.6.2</software-fixed-version>\n              <software-fix-url/>\n            </software-protection-action>\n          </configuration-action>\n          <configuration-condition>\n            <software-configuration-condition>\n              <software-identification-condition>\n                <software-name>UTD Software</software-name>\n                <software-version>16.12</software-version>\n                <software-version>17.3</software-version>\n                <software-version>17.6</software-version>\n              </software-identification-condition>\n            </software-configuration-condition>\n          </configuration-condition>\n        </configuration-rule>\n        <configuration-rule>\n          <name>Rule_61a19faa-820a-4d0a-a5ca-337d3c72a7bf</name>\n          <isCNF>false</isCNF>\n          <external-data>\n            <priority>500</priority>\n          </external-data>\n          <configuration-action>\n            <software-protection-action>\n              <software-protection-type>UPDATE</software-protection-type>\n              <software-fixed-version>2.9.19</software-fixed-version>\n              <software-fixed-version>3.1.11.0</software-fixed-version>\n              <software-fix-url>https://www.snort.org/downloads</software-fix-url>\n              <software-fix-url>https://www.snort.org/downloads/snort/snort-2.9.20-1.f35.x86_64.rpm</software-fix-url>\n              <software-fix-url>https://www.snort.org/downloads/snort/snort-2.9.20-1.src.rpm</software-fix-url>\n              <software-fix-url>https://www.snort.org/downloads/snort/snort-openappid-2.9.20-1.f35.x86_64.rpm</software-fix-url>\n              <software-fix-url>https://www.snort.org/downloads/snort/snort-2.9.20-1.centos.x86_64.rpm</software-fix-url>\n            </software-protection-action>\n          </configuration-action>\n          <configuration-condition>\n            <software-configuration-condition>\n              <software-identification-condition>\n                <software-name>Snort Software</software-name>\n                <software-version>2.x</software-version>\n                <software-version>3.x</software-version>\n              </software-identification-condition>\n            </software-configuration-condition>\n          </configuration-condition>\n        </configuration-rule>\n      </rule-set-configuration>\n    </configuration>\n  </mspl>"
+    },
+    {
+      "id": "msplfile-3",
+      "filename": "testmspl-output.xml",
+      "type": "mspl",
+      "source": "test/results",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mspl>\n    <name type=\"str\">mspl_example</name>\n    <configuration type=\"dict\">\n        <capability type=\"str\">Filtering_L4</capability>\n        <rule_set_configuration type=\"dict\">\n            <name type=\"str\">rule_set4810efe4-d029-4a42-93bf-b59a491d6fbb</name>\n            <default_action type=\"str\">deny</default_action>\n            <configuration_rule type=\"dict\">\n                <cl0-1-todev type=\"dict\">\n                    <external_data type=\"dict\">\n                        <priority type=\"int\">1</priority>\n                    </external_data>\n                    <configuration_action type=\"dict\">\n                        <filtering_action type=\"dict\">\n                            <filtering_action_type type=\"str\">allow</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition type=\"dict\">\n                        <filtering_configuration_condition type=\"dict\">\n                            <packet_filter_condition type=\"dict\">\n                                <source_dnsname type=\"str\">test.example.com</source_dnsname>\n                                <source_port type=\"str\">eq 443</source_port>\n                                <direction type=\"str\">INBOUND</direction>\n                                <protocol_type type=\"str\">6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name type=\"str\">cl0-1-todev</name>\n                </cl0-1-todev>\n                <cl0-2-todev type=\"dict\">\n                    <external_data type=\"dict\">\n                        <priority type=\"int\">1</priority>\n                    </external_data>\n                    <configuration_action type=\"dict\">\n                        <filtering_action type=\"dict\">\n                            <filtering_action_type type=\"str\">allow</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition type=\"dict\">\n                        <filtering_configuration_condition type=\"dict\">\n                            <packet_filter_condition type=\"dict\">\n                                <source_dnsname type=\"str\">test.example.com</source_dnsname>\n                                <source_port type=\"str\">eq 443</source_port>\n                                <direction type=\"str\">INBOUND</direction>\n                                <protocol_type type=\"str\">6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name type=\"str\">cl0-2-todev</name>\n                </cl0-2-todev>\n                <cl0-1-frdev type=\"dict\">\n                    <external_data type=\"dict\">\n                        <priority type=\"int\">1</priority>\n                    </external_data>\n                    <configuration_action type=\"dict\">\n                        <filtering_action type=\"dict\">\n                            <filtering_action_type type=\"str\">allow</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition type=\"dict\">\n                        <filtering_configuration_condition type=\"dict\">\n                            <packet_filter_condition type=\"dict\">\n                                <destination_dnsname type=\"str\">test.example.com</destination_dnsname>\n                                <destination_port type=\"str\">eq 443</destination_port>\n                                <direction type=\"str\">OUTBOUND</direction>\n                                <protocol_type type=\"str\">6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name type=\"str\">cl0-1-frdev</name>\n                </cl0-1-frdev>\n                <cl0-2-frdev type=\"dict\">\n                    <external_data type=\"dict\">\n                        <priority type=\"int\">1</priority>\n                    </external_data>\n                    <configuration_action type=\"dict\">\n                        <filtering_action type=\"dict\">\n                            <filtering_action_type type=\"str\">allow</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition type=\"dict\">\n                        <filtering_configuration_condition type=\"dict\">\n                            <packet_filter_condition type=\"dict\">\n                                <destination_dnsname type=\"str\">test.example2.com</destination_dnsname>\n                                <destination_port type=\"str\">eq 445</destination_port>\n                                <direction type=\"str\">OUTBOUND</direction>\n                                <protocol_type type=\"str\">6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name type=\"str\">cl0-2-frdev</name>\n                </cl0-2-frdev>\n            </configuration_rule>\n        </rule_set_configuration>\n    </configuration>\n</mspl>"
+    },
+    {
+      "id": "msplfile-4",
+      "filename": "traduccioniptables.xml",
+      "type": "mspl",
+      "source": "test/results",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mspl>\n    <name>mspl_example</name>\n    <configuration>\n        <capability>Filtering_L4</capability>\n        <rule_set_configuration>\n            <name>rule_set2b5ae482-44fa-49a7-ae7c-861528ab469c</name>\n            <default_action>reject</default_action>\n                <configuration_rule>\n                    <external_data>\n                        <priority>1</priority>\n                    </external_data>\n                    <configuration_action>\n                        <filtering_action>\n                            <filtering_action_type>drop</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition>\n                        <filtering_configuration_condition>\n                            <packet_filter_condition>\n                                <source_address>192.168.0.0/24</source_address>\n                                <destination_address>192.168.10.50/32</destination_address>\n                                <destination_port>22</destination_port>\n                                <direction>BOTH</direction>\n                                <protocol_type>6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name>rule_b6ca9533-b6be-497a-aa28-51c007714b21</name>\n                </configuration_rule>\n                <configuration_rule>\n                    <external_data>\n                        <priority>1</priority>\n                    </external_data>\n                    <configuration_action>\n                        <filtering_action>\n                            <filtering_action_type>reject</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition>\n                        <filtering_configuration_condition>\n                            <packet_filter_condition>\n                                <destination_address>192.168.0.0/24</destination_address>\n                                <destination_port>80</destination_port>\n                                <direction>BOTH</direction>\n                                <protocol_type>6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name>rule_f12fa588-d960-4a08-a2f5-807d1dab0fe3</name>\n                </configuration_rule>\n                <configuration_rule>\n                    <external_data>\n                        <priority>1</priority>\n                    </external_data>\n                    <configuration_action>\n                        <filtering_action>\n                            <filtering_action_type>drop</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition>\n                        <filtering_configuration_condition>\n                            <packet_filter_condition>\n                                <source_address>192.168.0.0/24</source_address>\n                                <destination_address>192.168.10.0/24</destination_address>\n                                <direction>BOTH</direction>\n                                <protocol_type>6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name>rule_edb96fe4-e160-4317-9e9d-2715fd475f31</name>\n                </configuration_rule>\n                <configuration_rule>\n                    <external_data>\n                        <priority>1</priority>\n                    </external_data>\n                    <configuration_action>\n                        <filtering_action>\n                            <filtering_action_type>drop</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition>\n                        <filtering_configuration_condition>\n                            <packet_filter_condition>\n                                <source_address>192.168.10.47/32</source_address>\n                                <destination_address>192.168.10.50/32</destination_address>\n                                <direction>BOTH</direction>\n                                <protocol_type>6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name>rule_8b2b6fc8-f4c1-4385-92d9-1cadcf336369</name>\n                </configuration_rule>\n                <configuration_rule>\n                    <external_data>\n                        <priority>1</priority>\n                    </external_data>\n                    <configuration_action>\n                        <filtering_action>\n                            <filtering_action_type>drop</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition>\n                        <filtering_configuration_condition>\n                            <packet_filter_condition>\n                                <source_address>192.168.1.46/32</source_address>\n                                <direction>BOTH</direction>\n                                <protocol_type>17</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name>rule_cd9cd459-4246-4f6a-a0cf-8e1bf06c6cf6</name>\n                </configuration_rule>\n                <configuration_rule>\n                    <external_data>\n                        <priority>1</priority>\n                    </external_data>\n                    <configuration_action>\n                        <filtering_action>\n                            <filtering_action_type>accept</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition>\n                        <filtering_configuration_condition>\n                            <packet_filter_condition>\n                                <source_address>192.168.1.0/24</source_address>\n                                <destination_address>192.168.2.0/24</destination_address>\n                                <direction>BOTH</direction>\n                                <protocol_type>6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name>rule_eb0ec7f3-9b10-4ddd-bbb7-1fbc74de0070</name>\n                </configuration_rule>\n                <configuration_rule>\n                    <external_data>\n                        <priority>1</priority>\n                    </external_data>\n                    <configuration_action>\n                        <filtering_action>\n                            <filtering_action_type>accept</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition>\n                        <filtering_configuration_condition>\n                            <packet_filter_condition>\n                                <source_address>192.168.10.0/24</source_address>\n                                <destination_address>192.168.10.50/32</destination_address>\n                                <destination_port>1234</destination_port>\n                                <direction>BOTH</direction>\n                                <protocol_type>6</protocol_type>\n                            </packet_filter_condition>\n                            <stateful_condition>\n                                <state>ESTABLISHED</state>\n                            </stateful_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name>rule_7262cea2-73d6-4d4a-ac4b-332d8d8c9baa</name>\n                </configuration_rule>\n        </rule_set_configuration>\n    </configuration>\n</mspl>"
+    },
+    {
+      "id": "msplfile-5",
+      "filename": "msplnewformat.xml",
+      "type": "mspl",
+      "source": "test/results",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mspl>\n    <name type=\"str\">mspl_example</name>\n    <configuration type=\"dict\">\n        <capability type=\"str\">Filtering_L4</capability>\n        <rule_set_configuration type=\"dict\">\n            <name type=\"str\">rule_set348b8b2f-fbff-4964-80fc-d7dcb621f9dc</name>\n            <default_action type=\"str\">deny</default_action>\n            <configuration_rule type=\"dict\">\n                <cl0-todev type=\"dict\">\n                    <external_data type=\"dict\">\n                        <priority type=\"int\">1</priority>\n                    </external_data>\n                    <configuration_action type=\"dict\">\n                        <filtering_action type=\"dict\">\n                            <filtering_action_type type=\"str\">allow</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition type=\"dict\">\n                        <filtering_configuration_condition type=\"dict\">\n                            <packet_filter_condition type=\"dict\">\n                                <source_dnsname type=\"str\">test.example.com</source_dnsname>\n                                <source_port type=\"str\">eq 443</source_port>\n                                <direction type=\"str\">INBOUND</direction>\n                                <protocol_type type=\"str\">6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name type=\"str\">cl0-todev</name>\n                </cl0-todev>\n                <cl0-frdev type=\"dict\">\n                    <external_data type=\"dict\">\n                        <priority type=\"int\">1</priority>\n                    </external_data>\n                    <configuration_action type=\"dict\">\n                        <filtering_action type=\"dict\">\n                            <filtering_action_type type=\"str\">allow</filtering_action_type>\n                        </filtering_action>\n                    </configuration_action>\n                    <configuration_condition type=\"dict\">\n                        <filtering_configuration_condition type=\"dict\">\n                            <packet_filter_condition type=\"dict\">\n                                <destination_dnsname type=\"str\">test.example.com</destination_dnsname>\n                                <destination_port type=\"str\">eq 443</destination_port>\n                                <direction type=\"str\">OUTBOUND</direction>\n                                <protocol_type type=\"str\">6</protocol_type>\n                            </packet_filter_condition>\n                        </filtering_configuration_condition>\n                    </configuration_condition>\n                    <name type=\"str\">cl0-frdev</name>\n                </cl0-frdev>\n            </configuration_rule>\n        </rule_set_configuration>\n    </configuration>\n</mspl>"
+    },
+    {
+      "id": "msplfile-6",
+      "filename": "fronius1.xml",
+      "type": "mspl",
+      "source": "test/results",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<mspl>\n  <name>\n    66179e1f-e0ba-4e32-b6eb-3601709059ef\n  </name>\n<configuration>\n<capability>\n  Filtering_L4\n</capability>\n<rule-set-configuration>\n  <name>\n    mspl_27b32eb9-904a-4c45-820b-ae5295bd674a\n</name>\n<configuration-rule>\n    <name>mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1fr</name>\n    <isCNF>false</isCNF>\n    <external-data>\n      <priority>500</priority>\n    </external-data>\n    <configuration-action>\n      <filteringAction>\n        <filtering-action-type>ACCEPT</filtering-action-type>\n      </filteringAction>\n    </configuration-action>\n    <configuration-condition>\n      <filtering-configuration-condition>\n        <packet-filter-condition>\n          <source-port>502</source-port>\n        </packet-filter-condition>\n      </filtering-configuration-condition>\n    </configuration-condition>\n  </configuration-rule>\n  <configuration-rule>\n    <name>mud-128af1cb-ce22-4c0a-b1d7-ccfe4a3767b7-v1to</name>\n    <isCNF>false</isCNF>\n    <external-data>\n      <priority>500</priority>\n    </external-data>\n    <configuration-action>\n      <filteringAction>\n        <filtering-action-type>ACCEPT</filtering-action-type>\n      </filteringAction>\n    </configuration-action>\n    <configuration-condition>\n      <filtering-configuration-condition>\n        <packet-filter-condition>\n          <destination-port>502</destination-port>\n        </packet-filter-condition>\n      </filtering-configuration-condition>\n    </configuration-condition>\n  </configuration-rule>\n</rule-set-configuration>\n</configuration>\n</mspl>"
+    },
+    {
+      "id": "msplfile-7",
+      "filename": "forcertify2.xml",
+      "type": "mspl",
+      "source": "test/results",
+      "content": "Is Threat MUD\n\nElemento->-> ['<?xml version=\"1.0\" encoding=\"utf-8\"?>\\n<root><name>mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae</name><type>ipv4-mspl-type</type><configuration><capability>Filtering_L4</capability><rule-set-configuration><name>mspl_set_653cb05e-1a92-4ce7-bafe-01f265436ff3</name><configuration-rule><name>Rule_d748f2a9-ed32-4b4d-bd87-a1cf5e9854f5</name><isCNF>false</isCNF><external-data><priority>500</priority></external-data><configuration-action><bootstrapping-action><bootstrapping-action-type>UPDATE</bootstrapping-action-type><bootstrapping-model-version>0.2</bootstrapping-model-version><network-bootstrapping-model>((PortclSrc-42,UDP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,UDP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,UDP-45)=([2.0,2.0],[1.0,1.0])) AND ((PortclSrc-42,DHCP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,DHCP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,DHCP-45)=([2.0,2.0],[1.0,1.0]))</network-bootstrapping-model><network-bootstrapping-model-signature>3ca5d818857d9f13efe6d78864f88a37d726d4c71</network-bootstrapping-model-signature></bootstrapping-action></configuration-action><configuration-condition><bootstrapping-configuration-condition><device-condition><name>Aria</name></device-condition></bootstrapping-configuration-condition></configuration-condition></configuration-rule></rule-set-configuration></configuration></root>']"
+    }
+  ]
+}

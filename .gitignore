@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .env
 !.env.example
+
+mock-server/node_modules/
+mock-server/db.json

@@ -66,17 +66,42 @@ Verifica los tipos TypeScript sin compilar.
 Crea un archivo `.env` en la raíz del proyecto:
 
 ```env
-# Tipo de adapter a usar: 'doss' o 'mock'
-VITE_API_ADAPTER=mock
+# Tipo de adapter a usar: 'doss' o 'json-server'
+VITE_API_ADAPTER=json-server
 
-# URL base de la API (solo para adapter 'doss')
-VITE_API_BASE_URL=http://localhost:3000/api
+# URL base de la API (solo para adapter 'doss' o 'json-server')
+VITE_API_BASE_URL=http://localhost:3000
 ```
 
 ### Adapters Disponibles
 
-- **mock**: Mock API client para desarrollo (por defecto)
+- **json-server**: JSON Server mock API (por defecto en desarrollo)
 - **doss**: Adapter para API DOSS
+
+### Mock Server
+
+Para desarrollo sin backend, se incluye un servidor mock independiente basado en JSON Server:
+
+1. **Instalar dependencias del mock-server**:
+   ```bash
+   cd mock-server
+   npm install
+   ```
+
+2. **Iniciar el servidor mock**:
+   ```bash
+   npm start
+   ```
+   
+   El servidor se ejecutará en `http://localhost:3001`
+
+3. **Configurar la aplicación**:
+   ```env
+   VITE_API_ADAPTER=json-server
+   VITE_API_BASE_URL=http://localhost:3001
+   ```
+
+El mock-server es un proyecto independiente que puede eliminarse fácilmente cuando ya no sea necesario. Ver `mock-server/README.md` para más detalles.
 
 ## Modularidad - Cambiar el API Client
 
@@ -184,13 +209,18 @@ UI Components → Hooks → API Client (Adapter) → Backend API
          Domain Entities
 ```
 
-Los componentes UI usan hooks que consumen el API client a través de la interfaz `IApiClient`. El adapter concreto (DossApiAdapter, MockApiClient, etc.) se inyecta mediante el factory en `config.js`.
+Los componentes UI usan hooks que consumen el API client a través de la interfaz `IApiClient`. El adapter concreto (DossApiAdapter, JsonServerApiClient, etc.) se inyecta mediante el factory en `config.ts`.
 
 ## Desarrollo sin Backend
 
-Por defecto, la aplicación usa el `MockApiClient` que proporciona datos de ejemplo. Esto permite desarrollar y probar la GUI sin necesidad de un backend funcionando.
+Por defecto, la aplicación usa el `JsonServerApiClient` que consume la API REST del mock-server (JSON Server). Esto permite desarrollar y probar la GUI con un servidor HTTP real sin necesidad del backend completo.
 
-Para cambiar al adapter DOSS:
+**Para usar el mock-server:**
+
+1. Inicia el mock-server (ver sección "Mock Server" arriba)
+2. La aplicación se conectará automáticamente si `VITE_API_ADAPTER=json-server` (valor por defecto)
+
+**Para cambiar al adapter DOSS:**
 
 ```env
 VITE_API_ADAPTER=doss

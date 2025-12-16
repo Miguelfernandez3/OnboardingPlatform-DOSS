@@ -33,7 +33,7 @@
     "inactive": "Inactivo"
   },
   "device": {
-    "management": "Gestión de Dispositivo",
+    "management": "Gestión de Dispositivo {{deviceName}}",
     "passport": {
       "title": "Pasaporte Digital",
       "loading": "Cargando pasaporte digital...",
@@ -50,10 +50,64 @@
       "noData": "No hay archivo MUD disponible"
     },
     "tabs": {
-      "passport": "Pasaporte Digital",
-      "mud": "Archivo MUD",
-      "policies": "Políticas Aplicadas",
-      "apply": "Aplicar Nueva Política"
+      "info": "Información",
+      "threats": "Amenazas",
+      "mitigations": "Mitigaciones",
+      "policies": "Políticas Aplicadas"
+    },
+    "info": {
+      "title": "Información del Dispositivo",
+      "basicInfo": "Información Básica",
+      "networkInfo": "Información de Red",
+      "securityInfo": "Información de Seguridad",
+      "timestamps": "Fechas",
+      "id": "ID",
+      "identifier": "UUID",
+      "ip": "Dirección IP",
+      "mac": "Dirección MAC",
+      "mudUrl": "URL MUD",
+      "inventoryId": "ID de Inventario",
+      "edk": "EDK",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "createdAt": "Creado",
+      "updatedAt": "Actualizado",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "editTitle": "Editar Dispositivo",
+      "invalidIP": "Dirección IP inválida",
+      "invalidMAC": "Dirección MAC inválida",
+      "saveError": "Error al guardar dispositivo",
+      "saveSuccess": "Dispositivo actualizado correctamente",
+      "deleteConfirm": "¿Está seguro de que desea eliminar este dispositivo?",
+      "deleteSuccess": "Dispositivo eliminado correctamente",
+      "noData": "No hay información del dispositivo disponible",
+      "passportSection": "Pasaporte Digital",
+      "mudSection": "Archivo MUD"
+    },
+    "threats": {
+      "title": "Amenazas",
+      "loading": "Cargando amenazas...",
+      "noThreats": "No hay amenazas asociadas a este dispositivo",
+      "identifier": "Identificador",
+      "threatMudUrl": "URL Threat MUD",
+      "viewMud": "Ver MUD",
+      "mudModalTitle": "Archivo Threat MUD",
+      "threatMudFile": "Contenido del Archivo Threat MUD"
+    },
+    "mitigations": {
+      "title": "Mitigaciones",
+      "loading": "Cargando mitigaciones...",
+      "noMitigations": "No hay mitigaciones asociadas a este dispositivo",
+      "enforce": "Aplicar",
+      "revoke": "Revocar",
+      "enforced": "Aplicada",
+      "notEnforced": "No Aplicada",
+      "lastEnforced": "Última Aplicación",
+      "showDetails": "Ver Detalles",
+      "hideDetails": "Ocultar Detalles",
+      "actions": "Acciones",
+      "mitigationActions": "Acciones de Mitigación"
     }
   },
   "policies": {
@@ -74,12 +128,22 @@
       "button": "Aplicar IDSP2",
       "error": "Por favor ingresa un IDSP2 ID"
     },
+    "createNew": "Crear Nueva Política",
     "createEdit": {
       "title": "Crear/Editar Política MSPL",
       "applyButton": "Aplicar Política",
       "loadingSchema": "Cargando esquema...",
       "success": "Política aplicada correctamente",
-      "error": "Error al aplicar política"
+      "error": "Error al aplicar política",
+      "policyName": "Nombre de la política",
+      "policyNamePlaceholder": "Ingrese un nombre para la política (opcional)"
+    },
+    "createPage": {
+      "title": "Crear Nueva Política para dispositivo {{deviceName}}",
+      "back": "Volver",
+      "cancel": "Cancelar",
+      "idsp2Section": "Aplicar por IDSP2 ID",
+      "msplSection": "Crear Política MSPL"
     }
   },
   "enforcement": {
@@ -97,7 +161,10 @@
     "addField": "Añadir",
     "selectSubtype": "Seleccionar subtipo",
     "chooseOne": "Elige uno...",
-    "removeField": "Eliminar campo"
+    "removeField": "Eliminar campo",
+    "expand": "Expandir",
+    "collapse": "Colapsar",
+    "noDefinition": "No se encontró la definición para {{type}}"
   },
   "xmlViewer": {
     "title": "Vista XML",

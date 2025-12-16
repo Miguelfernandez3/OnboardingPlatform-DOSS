@@ -1,43 +1,92 @@
-import { useState, useEffect } from 'react';
-import { apiClient } from '../../config';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../infrastructure/query/queryKeys';
+import { deviceService } from '../../infrastructure/services/deviceService';
 import { Device } from '../../core/domain/entities/Device';
 
 interface UseDeviceReturn {
   device: Device | null;
   loading: boolean;
   error: string | null;
+  updateDevice: (data: Partial<Device>) => Promise<Device>;
+  deleteDevice: () => Promise<void>;
 }
 
 /**
- * Hook para obtener un dispositivo específico
+ * Hook para obtener y gestionar un dispositivo específico
+ * Usa TanStack Query para cacheo automático y mutations
  */
 export function useDevice(deviceId: string | undefined): UseDeviceReturn {
-  const [device, setDevice] = useState<Device | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!deviceId) {
-      setLoading(false);
-      return;
+  // Query para obtener el dispositivo
+  const {
+    data: device = null,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: deviceId ? queryKeys.devices.detail(deviceId) : ['devices', 'invalid'],
+    queryFn: () => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return deviceService.getDevice(deviceId);
+    },
+    enabled: !!deviceId,
+  });
+
+  // Mutation para actualizar dispositivo
+  const updateMutation = useMutation({ 
+    mutationFn: (data: Partial<Device>) => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return deviceService.updateDevice(deviceId, data);
+    },
+    onSuccess: (updatedDevice) => {
+      // Invalidar y actualizar cache
+      queryClient.setQueryData(queryKeys.devices.detail(deviceId!), updatedDevice);
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.all });
+    },
+    onError: (err) => {
+      console.error('Error al actualizar dispositivo:', err);
+    },
+  });
+
+  // Mutation para eliminar dispositivo
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return deviceService.deleteDevice(deviceId);
+    },
+    onSuccess: () => {
+      // Invalidar lista de dispositivos y remover cache del dispositivo
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.all });
+      queryClient.removeQueries({ queryKey: queryKeys.devices.detail(deviceId!) });
+    },
+    onError: (err) => {
+      console.error('Error al eliminar dispositivo:', err);
+    },
+  });
+
+  const updateDevice = async (data: Partial<Device>): Promise<Device> => {
+    try {
+      return await updateMutation.mutateAsync(data);
+    } catch (err) {
+      throw err;
     }
+  };
 
-    const fetchDevice = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiClient.getDevice(deviceId);
-        setDevice(data);
-      } catch (err) {
-        setError((err as Error).message || 'Error al cargar dispositivo');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const deleteDevice = async (): Promise<void> => {
+    try {
+      await deleteMutation.mutateAsync();
+    } catch (err) {
+      throw err;
+    }
+  };
 
-    fetchDevice();
-  }, [deviceId]);
-
-  return { device, loading, error };
+  return {
+    device,
+    loading: isLoading,
+    error: isError ? (error as Error)?.message || 'Error al cargar dispositivo' : null,
+    updateDevice,
+    deleteDevice,
+  };
 }
 

@@ -33,7 +33,7 @@
     "inactive": "Inactive"
   },
   "device": {
-    "management": "Device Management",
+    "management": "Device Management {{deviceName}}",
     "passport": {
       "title": "Digital Passport",
       "loading": "Loading digital passport...",
@@ -50,10 +50,64 @@
       "noData": "No MUD file available"
     },
     "tabs": {
-      "passport": "Digital Passport",
-      "mud": "MUD File",
-      "policies": "Applied Policies",
-      "apply": "Apply New Policy"
+      "info": "Information",
+      "threats": "Threats",
+      "mitigations": "Mitigations",
+      "policies": "Applied Policies"
+    },
+    "info": {
+      "title": "Device Information",
+      "basicInfo": "Basic Information",
+      "networkInfo": "Network Information",
+      "securityInfo": "Security Information",
+      "timestamps": "Timestamps",
+      "id": "ID",
+      "identifier": "UUID",
+      "ip": "IP Address",
+      "mac": "MAC Address",
+      "mudUrl": "MUD URL",
+      "inventoryId": "Inventory ID",
+      "edk": "EDK",
+      "show": "Show",
+      "hide": "Hide",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "edit": "Edit",
+      "delete": "Delete",
+      "editTitle": "Edit Device",
+      "invalidIP": "Invalid IP address",
+      "invalidMAC": "Invalid MAC address",
+      "saveError": "Error saving device",
+      "saveSuccess": "Device updated successfully",
+      "deleteConfirm": "Are you sure you want to delete this device?",
+      "deleteSuccess": "Device deleted successfully",
+      "noData": "No device information available",
+      "passportSection": "Digital Passport",
+      "mudSection": "MUD File"
+    },
+    "threats": {
+      "title": "Threats",
+      "loading": "Loading threats...",
+      "noThreats": "No threats associated with this device",
+      "identifier": "Identifier",
+      "threatMudUrl": "Threat MUD URL",
+      "viewMud": "View MUD",
+      "mudModalTitle": "Threat MUD File",
+      "threatMudFile": "Threat MUD File Content"
+    },
+    "mitigations": {
+      "title": "Mitigations",
+      "loading": "Loading mitigations...",
+      "noMitigations": "No mitigations associated with this device",
+      "enforce": "Enforce",
+      "revoke": "Revoke",
+      "enforced": "Enforced",
+      "notEnforced": "Not Enforced",
+      "lastEnforced": "Last Enforced",
+      "showDetails": "Show Details",
+      "hideDetails": "Hide Details",
+      "actions": "Actions",
+      "mitigationActions": "Mitigation Actions"
     }
   },
   "policies": {
@@ -74,12 +128,22 @@
       "button": "Apply IDSP2",
       "error": "Please enter an IDSP2 ID"
     },
+    "createNew": "Create New Policy",
     "createEdit": {
       "title": "Create/Edit MSPL Policy",
       "applyButton": "Apply Policy",
       "loadingSchema": "Loading schema...",
       "success": "Policy applied successfully",
-      "error": "Error applying policy"
+      "error": "Error applying policy",
+      "policyName": "Policy Name",
+      "policyNamePlaceholder": "Enter a name for the policy (optional)"
+    },
+    "createPage": {
+      "title": "Create New Policy for device {{deviceName}}",
+      "back": "Back",
+      "cancel": "Cancel",
+      "idsp2Section": "Apply by IDSP2 ID",
+      "msplSection": "Create MSPL Policy"
     }
   },
   "enforcement": {
@@ -97,7 +161,10 @@
     "addField": "Add",
     "selectSubtype": "Select subtype",
     "chooseOne": "Choose one...",
-    "removeField": "Remove field"
+    "removeField": "Remove field",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "noDefinition": "No definition found for {{type}}"
   },
   "xmlViewer": {
     "title": "XML view",

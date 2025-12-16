@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
-import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../ports';
-import { Device, Policy, MUD, Passport } from '../../../domain';
+import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../core/ports';
+import { Device, Policy, MUD, Passport } from '../../../core/domain';
 
 /**
  * BaseApiClient - Clase base abstracta para adapters de API
@@ -82,6 +82,41 @@ export abstract class BaseApiClient extends IApiClient {
     });
   }
 
+  /**
+   * Realiza una petición PUT
+   * @protected
+   */
+  protected async put<T>(endpoint: string, data: unknown, params: Record<string, string> = {}): Promise<T> {
+    const resolvedEndpoint = this.config.resolveEndpoint(endpoint, params);
+    return await this.request<T>(resolvedEndpoint, {
+      method: 'PUT',
+      data: data
+    });
+  }
+
+  /**
+   * Realiza una petición PATCH
+   * @protected
+   */
+  protected async patch<T>(endpoint: string, data: unknown, params: Record<string, string> = {}): Promise<T> {
+    const resolvedEndpoint = this.config.resolveEndpoint(endpoint, params);
+    return await this.request<T>(resolvedEndpoint, {
+      method: 'PATCH',
+      data: data
+    });
+  }
+
+  /**
+   * Realiza una petición DELETE
+   * @protected
+   */
+  protected async delete<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+    const resolvedEndpoint = this.config.resolveEndpoint(endpoint, params);
+    return await this.request<T>(resolvedEndpoint, {
+      method: 'DELETE'
+    });
+  }
+
   // Métodos abstractos que deben ser implementados por las clases hijas
   abstract getDevices(): Promise<Device[]>;
   abstract getDevice(id: string): Promise<Device>;
@@ -89,7 +124,7 @@ export abstract class BaseApiClient extends IApiClient {
   abstract getDeviceMUD(id: string): Promise<MUD>;
   abstract getDevicePolicies(id: string): Promise<Policy[]>;
   abstract applyIDSP2(deviceId: string, idsp2Id: string): Promise<ApplyResult>;
-  abstract applyPolicy(deviceId: string, msplXml: string): Promise<ApplyResult>;
+  abstract applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult>;
   abstract getEnforcementStatus(deviceId: string): Promise<EnforcementStatus>;
 }
 

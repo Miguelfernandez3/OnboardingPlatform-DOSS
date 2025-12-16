@@ -12,7 +12,7 @@ interface MSPLViewerProps {
  */
 export default function MSPLViewer({ msplXml, title }: MSPLViewerProps): JSX.Element {
   const { t } = useTranslation();
-  const displayTitle = title || t('policies.title');
+  // const displayTitle = title || t('policies.title');
 
   if (!msplXml) {
     return <p>{t('policies.noPolicies')}</p>;
@@ -20,14 +20,14 @@ export default function MSPLViewer({ msplXml, title }: MSPLViewerProps): JSX.Ele
 
   return (
     <div>
-      <h3>{displayTitle}</h3>
+      {/* <h3>{displayTitle}</h3> */}
       <SyntaxHighlighter 
         language="xml" 
         style={oneDark} 
         wrapLines={true}
         customStyle={{
           borderRadius: '6px',
-          padding: '1rem',
+          padding: '0.5rem',  
           fontSize: '14px'
         }}
       >

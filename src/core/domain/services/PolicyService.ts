@@ -34,14 +34,17 @@ export class PolicyService {
 
   /**
    * Aplica una política MSPL a un dispositivo
+   * @param deviceId ID del dispositivo
+   * @param msplXml XML de la política MSPL
+   * @param name Nombre opcional de la política
    */
-  async applyPolicy(deviceId: string, msplXml: string): Promise<ApplyResult> {
+  async applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult> {
     const validation = this.validateMSPL(msplXml);
     if (!validation.valid) {
       throw new Error(validation.error);
     }
 
-    return await this.apiClient.applyPolicy(deviceId, msplXml);
+    return await this.apiClient.applyPolicy(deviceId, msplXml, name);
   }
 
   /**

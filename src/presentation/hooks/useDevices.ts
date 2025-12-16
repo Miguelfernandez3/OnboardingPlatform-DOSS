@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { apiClient } from '../../config';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '../../infrastructure/query/queryKeys';
+import { deviceService } from '../../infrastructure/services/deviceService';
 import { Device } from '../../core/domain/entities/Device';
 
 interface UseDevicesReturn {
@@ -10,29 +11,19 @@ interface UseDevicesReturn {
 
 /**
  * Hook para obtener la lista de dispositivos
+ * Usa TanStack Query para cacheo automático
  */
 export function useDevices(): UseDevicesReturn {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: devices = [], isLoading, isError, error } = useQuery({
+    queryKey: queryKeys.devices.all,
+    queryFn: deviceService.getDevices,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
 
-  useEffect(() => {
-    const fetchDevices = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiClient.getDevices();
-        setDevices(data);
-      } catch (err) {
-        setError((err as Error).message || 'Error al cargar dispositivos');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDevices();
-  }, []);
-
-  return { devices, loading, error };
+  return {
+    devices,
+    loading: isLoading,
+    error: isError ? (error as Error)?.message || 'Error al cargar dispositivos' : null,
+  };
 }
 

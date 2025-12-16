@@ -1,0 +1,14 @@
+{
+  "name": "onboarding-platform-mock-server",
+  "version": "1.0.0",
+  "description": "JSON Server mock API para desarrollo de onboarding-platform-gui",
+  "private": true,
+  "scripts": {
+    "init-db": "node init-db.js",
+    "start": "npm run init-db && json-server --watch db.json --port 3000 --routes routes.json",
+    "dev": "npm run init-db && json-server --watch db.json --port 3000 --routes routes.json"
+  },
+  "devDependencies": {
+    "json-server": "^0.17.4"
+  }
+}
