@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Policy } from '../../../core/domain/entities/Policy';
+import { useIsMobile } from '../../hooks';
 import MSPLViewer from '../mspl/MSPLViewer';
 
 interface PolicyListProps {
@@ -12,21 +13,24 @@ interface PolicyListProps {
  */
 export default function PolicyList({ policies, onCreateNew }: PolicyListProps): JSX.Element {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   return (
     <div>
       <div style={{
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '1.5rem'
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: isMobile ? '1rem' : '0',
+        marginBottom: isMobile ? '1rem' : '1.5rem'
       }}>
-        <h2 style={{ margin: 0 }}>{t('policies.title')}</h2>
+        <h2 style={{ margin: 0, fontSize: isMobile ? '1.25rem' : '1.5rem' }}>{t('policies.title')}</h2>
         {onCreateNew && (
           <button
             onClick={onCreateNew}
             style={{
-              padding: '0.75rem 1.5rem',
+              padding: isMobile ? '0.75rem 1rem' : '0.75rem 1.5rem',
               backgroundColor: '#007bff',
               color: 'white',
               border: 'none',
@@ -36,6 +40,7 @@ export default function PolicyList({ policies, onCreateNew }: PolicyListProps): 
               fontWeight: 'bold',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '0.5rem'
             }}
           >
@@ -47,17 +52,18 @@ export default function PolicyList({ policies, onCreateNew }: PolicyListProps): 
 
       {!policies || policies.length === 0 ? (
         <div style={{
-          padding: '3rem',
+          padding: isMobile ? '2rem 1rem' : '3rem',
           textAlign: 'center',
           backgroundColor: '#f8f9fa',
           borderRadius: '8px',
           border: '1px solid #dee2e6'
         }}>
-          <p style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>{t('policies.noPolicies')}</p>
+          <p style={{ marginBottom: '1rem', fontSize: isMobile ? '1rem' : '1.1rem' }}>{t('policies.noPolicies')}</p>
           {onCreateNew && (
             <button
               onClick={onCreateNew}
               style={{
+                width: isMobile ? '100%' : 'auto',
                 padding: '0.75rem 1.5rem',
                 backgroundColor: '#007bff',
                 color: 'white',
@@ -73,14 +79,14 @@ export default function PolicyList({ policies, onCreateNew }: PolicyListProps): 
           )}
         </div>
       ) : (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '1rem' : '1.5rem' }}>
         {policies.map((policy) => (
           <div 
             key={policy.id} 
             style={{
               border: '1px solid #ddd',
               borderRadius: '8px',
-              padding: '1rem',
+              padding: isMobile ? '0.75rem' : '1rem',
               backgroundColor: '#f9f9f9'
             }}
           >

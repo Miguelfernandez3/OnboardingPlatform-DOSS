@@ -206,3 +206,92 @@
   }
 }
 
+/* Responsive styles for mobile devices */
+@media (max-width: 768px) {
+  .policy-builder {
+    padding: 0.25rem;
+  }
+
+  .policy-level-0 {
+    padding: 0.5rem;
+  }
+
+  .policy-level-1,
+  .policy-level-2,
+  .policy-level-3 {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+  }
+
+  .builder-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .field-block {
+    padding: 0.4rem;
+    margin: 0.4rem 0;
+  }
+
+  .field-name {
+    min-width: 80px;
+    font-size: 0.85rem;
+  }
+
+  .field-header {
+    gap: 0.25rem;
+  }
+
+  .field-content {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .input-text {
+    min-width: 100px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .optional-fields {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+
+  .optional-level-1 {
+    margin-left: 0.5rem;
+  }
+
+  .optional-level-2 {
+    margin-left: 1rem;
+  }
+
+  .add-button {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    margin: 0.2rem 0.2rem 0.2rem 0;
+  }
+
+  .expand-button {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    gap: 0.25rem;
+  }
+
+  .delete-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    min-width: 24px;
+  }
+
+  .subtype-selector {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .subtype-selector select {
+    padding: 0.4rem;
+    font-size: 0.85rem;
+  }
+}
+
