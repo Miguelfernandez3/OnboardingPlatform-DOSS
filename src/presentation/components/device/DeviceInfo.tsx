@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Device } from '../../../core/domain/entities/Device';
 import { Passport } from '../../../core/domain/entities/Passport';
 import { MUD } from '../../../core/domain/entities/MUD';
+import { useIsMobile } from '../../hooks';
 import JsonViewer from '../common/JsonViewer';
 import MUDViewer from '../mud/MUDViewer';
 
@@ -20,6 +21,7 @@ interface DeviceInfoProps {
 export default function DeviceInfo({ device, passport, mud, onEdit, onDelete }: DeviceInfoProps): JSX.Element {
   const { t } = useTranslation();
   const [showEdk, setShowEdk] = useState<boolean>(false);
+  const isMobile = useIsMobile();
 
   const formatDate = (dateString?: string): string => {
     if (!dateString) return '-';
@@ -31,19 +33,22 @@ export default function DeviceInfo({ device, passport, mud, onEdit, onDelete }: 
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
+    <div style={{ padding: isMobile ? '0.5rem' : '1rem' }}>
       <div style={{ 
         display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '2rem'
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: isMobile ? '1rem' : '0',
+        marginBottom: isMobile ? '1rem' : '2rem'
       }}>
-        <h2>{t('device.info.title')}</h2>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <h2 style={{ margin: 0, fontSize: isMobile ? '1.25rem' : '1.5rem' }}>{t('device.info.title')}</h2>
+        <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '1rem' }}>
           <button
             onClick={onEdit}
             style={{
-              padding: '0.5rem 1rem',
+              flex: isMobile ? 1 : 'none',
+              padding: isMobile ? '0.75rem 1rem' : '0.5rem 1rem',
               backgroundColor: '#007bff',
               color: 'white',
               border: 'none',
@@ -57,7 +62,8 @@ export default function DeviceInfo({ device, passport, mud, onEdit, onDelete }: 
           <button
             onClick={onDelete}
             style={{
-              padding: '0.5rem 1rem',
+              flex: isMobile ? 1 : 'none',
+              padding: isMobile ? '0.75rem 1rem' : '0.5rem 1rem',
               backgroundColor: '#dc3545',
               color: 'white',
               border: 'none',
@@ -73,16 +79,16 @@ export default function DeviceInfo({ device, passport, mud, onEdit, onDelete }: 
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '1.5rem'
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: isMobile ? '1rem' : '1.5rem'
       }}>
         <div style={{
-          padding: '1rem',
+          padding: isMobile ? '0.75rem' : '1rem',
           backgroundColor: '#f8f9fa',
           borderRadius: '4px',
           border: '1px solid #dee2e6'
         }}>
-          <h3 style={{ marginTop: 0, marginBottom: '1rem', fontSize: '1rem', fontWeight: 'bold' }}>
+          <h3 style={{ marginTop: 0, marginBottom: isMobile ? '0.75rem' : '1rem', fontSize: isMobile ? '0.9rem' : '1rem', fontWeight: 'bold' }}>
             {t('device.info.basicInfo')}
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

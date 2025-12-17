@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { useDevices } from '../hooks/useDevices';
+import { useDevices, useIsMobile } from '../hooks';
 import { queryKeys } from '../../infrastructure/query/queryKeys';
 import { deviceService } from '../../infrastructure/services/deviceService';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -14,6 +14,7 @@ export default function DeviceList(): JSX.Element {
   const { devices, loading, error } = useDevices();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   // Prefetch device data on hover
   const handleDevicePrefetch = (deviceId: string) => {
@@ -45,69 +46,123 @@ export default function DeviceList(): JSX.Element {
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>{t('devices.title')}</h1>
+    <div style={{ padding: isMobile ? '1rem' : '2rem' }}>
+      <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem' }}>{t('devices.title')}</h1>
       {devices.length === 0 ? (
         <p>{t('devices.noDevices')}</p>
-      ) : (
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          marginTop: '1rem'
-        }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-              <th style={{ padding: '0.75rem', textAlign: 'left' }}>{t('common.id')}</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left' }}>{t('common.name')}</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left' }}>{t('common.type')}</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left' }}>{t('common.manufacturer')}</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left' }}>{t('common.model')}</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left' }}>{t('common.status')}</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left' }}>{t('common.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {devices.map((device) => (
-              <tr 
-                key={device.id}
-                style={{ borderBottom: '1px solid #dee2e6' }}
+      ) : isMobile ? (
+        // Vista de tarjetas para móvil
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+          {devices.map((device) => (
+            <div
+              key={device.id}
+              style={{
+                padding: '1rem',
+                backgroundColor: '#fff',
+                borderRadius: '8px',
+                border: '1px solid #dee2e6',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{device.name}</h3>
+                <span style={{
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  backgroundColor: device.status === 'active' ? '#d4edda' : '#fff3cd',
+                  color: device.status === 'active' ? '#155724' : '#856404',
+                  fontSize: '0.75rem'
+                }}>
+                  {device.status === 'active' ? t('devices.active') : t('devices.inactive')}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
+                <div><strong>{t('common.type')}:</strong> {device.type}</div>
+                <div><strong>{t('common.manufacturer')}:</strong> {device.manufacturer}</div>
+                <div><strong>{t('common.model')}:</strong> {device.model}</div>
+              </div>
+              <button
+                onMouseEnter={() => handleDevicePrefetch(device.id)}
+                onClick={() => navigate(`/devices/${device.id}`)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '1rem'
+                }}
               >
-                <td style={{ padding: '0.75rem' }}>{device.id}</td>
-                <td style={{ padding: '0.75rem' }}>{device.name}</td>
-                <td style={{ padding: '0.75rem' }}>{device.type}</td>
-                <td style={{ padding: '0.75rem' }}>{device.manufacturer}</td>
-                <td style={{ padding: '0.75rem' }}>{device.model}</td>
-                <td style={{ padding: '0.75rem' }}>
-                  <span style={{
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '4px',
-                    backgroundColor: device.status === 'active' ? '#d4edda' : '#fff3cd',
-                    color: device.status === 'active' ? '#155724' : '#856404',
-                    fontSize: '0.875rem'
-                  }}>
-                    {device.status === 'active' ? t('devices.active') : t('devices.inactive')}
-                  </span>
-                </td>
-                <td style={{ padding: '0.75rem' }}>
-                  <button
-                    onMouseEnter={() => handleDevicePrefetch(device.id)}
-                    onClick={() => navigate(`/devices/${device.id}`)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {t('devices.viewDetails')}
-                  </button>
-                </td>
+                {t('devices.viewDetails')}
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Tabla con scroll horizontal para desktop/tablet
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginTop: '1rem',
+            minWidth: '700px'
+          }}>
+            <thead>
+              <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.id')}</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.name')}</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.type')}</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.manufacturer')}</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.model')}</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.status')}</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.actions')}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {devices.map((device) => (
+                <tr 
+                  key={device.id}
+                  style={{ borderBottom: '1px solid #dee2e6' }}
+                >
+                  <td style={{ padding: '0.75rem' }}>{device.id}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.name}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.type}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.manufacturer}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.model}</td>
+                  <td style={{ padding: '0.75rem' }}>
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      backgroundColor: device.status === 'active' ? '#d4edda' : '#fff3cd',
+                      color: device.status === 'active' ? '#155724' : '#856404',
+                      fontSize: '0.875rem'
+                    }}>
+                      {device.status === 'active' ? t('devices.active') : t('devices.inactive')}
+                    </span>
+                  </td>
+                  <td style={{ padding: '0.75rem' }}>
+                    <button
+                      onMouseEnter={() => handleDevicePrefetch(device.id)}
+                      onClick={() => navigate(`/devices/${device.id}`)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {t('devices.viewDetails')}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
