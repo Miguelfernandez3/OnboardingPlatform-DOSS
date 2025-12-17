@@ -25,7 +25,7 @@ export function QueryClientProvider({ children }: QueryClientProviderProps) {
   return (
     <TanStackQueryClientProvider client={queryClient}>
       {children}
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      {import.meta.env.VITE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </TanStackQueryClientProvider>
   );
 }

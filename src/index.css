@@ -11,6 +11,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f5f5f5;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
 }
 
 code {
@@ -20,5 +22,65 @@ code {
 
 #app {
   min-height: 100vh;
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+}
+
+/* Global responsive styles */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+  }
+
+  h3 {
+    font-size: 1rem !important;
+  }
+
+  /* Improve touch targets */
+  button, 
+  select, 
+  input[type="text"], 
+  input[type="email"], 
+  input[type="password"],
+  textarea {
+    min-height: 44px;
+  }
+
+  /* Better scrolling experience */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Improve text readability on mobile */
+  p, li, td, th {
+    line-height: 1.6;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+/* Ensure images and media don't overflow */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Utility class for scrollable tables */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 

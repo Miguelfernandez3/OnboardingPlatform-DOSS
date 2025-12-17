@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useIsMobile } from '../../hooks';
 import PolicyBuilder from './PolicyBuilder';
 import XmlViewer from './XmlViewer';
 import { buildXmlFromObject, parseXmlToObject, type Schema } from './helpers';
@@ -20,6 +21,7 @@ interface MSPLEditorProps {
  */
 export default function MSPLEditor({ schema, initialData, onChange, onApply }: MSPLEditorProps): JSX.Element {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   
   // Parsear initialData si es XML string
   const parseInitialData = (): Record<string, unknown> => {
@@ -88,12 +90,12 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <div style={{ padding: isMobile ? '0.5rem' : '2rem' }}>
       {/* Campo de nombre de la política */}
       {onApply && (
         <div style={{ 
-          marginBottom: '2rem', 
-          padding: '1rem', 
+          marginBottom: isMobile ? '1rem' : '2rem', 
+          padding: isMobile ? '0.75rem' : '1rem', 
           backgroundColor: '#f8f9fa', 
           borderRadius: '8px',
           border: '1px solid #dee2e6'
@@ -102,7 +104,7 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
             display: 'block', 
             marginBottom: '0.5rem', 
             fontWeight: 'bold',
-            fontSize: '1rem'
+            fontSize: isMobile ? '0.9rem' : '1rem'
           }}>
             {t('policies.createEdit.policyName') || 'Nombre de la política'}:
           </label>
@@ -113,8 +115,8 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
             placeholder={t('policies.createEdit.policyNamePlaceholder') || 'Ingrese un nombre para la política (opcional)'}
             style={{
               width: '100%',
-              padding: '0.75rem',
-              fontSize: '1rem',
+              padding: isMobile ? '0.5rem' : '0.75rem',
+              fontSize: isMobile ? '0.9rem' : '1rem',
               border: '1px solid #ced4da',
               borderRadius: '4px',
               boxSizing: 'border-box'
@@ -123,8 +125,19 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
         </div>
       )}
       
-      <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
-        <div style={{ flex: 4, borderRight: '1px solid #ccc', paddingRight: '2rem' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '1rem' : '2rem', 
+        marginTop: isMobile ? '1rem' : '2rem' 
+      }}>
+        <div style={{ 
+          flex: isMobile ? 'none' : 4, 
+          borderRight: isMobile ? 'none' : '1px solid #ccc', 
+          borderBottom: isMobile ? '1px solid #ccc' : 'none',
+          paddingRight: isMobile ? 0 : '2rem',
+          paddingBottom: isMobile ? '1rem' : 0
+        }}>
           <PolicyBuilder
             type={ROOT_TYPE}
             schema={loadedSchema}
@@ -134,7 +147,7 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
         </div>
 
         <div style={{
-          flex: 6,
+          flex: isMobile ? 'none' : 6,
           maxWidth: '100%',
           overflowX: 'auto',
         }}>
@@ -143,11 +156,12 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
       </div>
 
       {onApply && (
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+        <div style={{ marginTop: isMobile ? '1rem' : '2rem', textAlign: 'center' }}>
           <button 
             onClick={handleApply}
             style={{
-              padding: '0.75rem 2rem',
+              width: isMobile ? '100%' : 'auto',
+              padding: isMobile ? '1rem 2rem' : '0.75rem 2rem',
               fontSize: '1rem',
               backgroundColor: '#007bff',
               color: 'white',

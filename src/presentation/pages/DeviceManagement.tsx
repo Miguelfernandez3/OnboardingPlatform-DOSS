@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { apiClient } from '../../config';
 import { Passport } from '../../core/domain/entities/Passport';
 import { MUD } from '../../core/domain/entities/MUD';
-import { usePolicies, useDevice, useThreats, useMitigations } from '../hooks';
+import { usePolicies, useDevice, useThreats, useMitigations, useIsMobile } from '../hooks';
 import { PolicyList, EnforcementStatus, LoadingSpinner, DeviceInfo, DeviceEditForm, ThreatList, MitigationList } from '../components';
 
 interface Tab {
@@ -20,6 +20,7 @@ export default function DeviceManagement(): JSX.Element {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Inicializar el tab activo desde el hash de la URL o por defecto 'info'
   const getInitialTab = (): string => {
@@ -164,8 +165,10 @@ export default function DeviceManagement(): JSX.Element {
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>{t('device.management', { deviceName: device?.name || id })}</h1>
+    <div style={{ padding: isMobile ? '1rem' : '2rem'}}>
+      <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem', marginBottom: '1.5rem'  }}>
+        {t('device.management', { deviceName: device?.name || id })}
+      </h1>
 
       {error && (
         <div style={{
@@ -180,35 +183,66 @@ export default function DeviceManagement(): JSX.Element {
         </div>
       )}
 
-      {/* Tabs */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '2px solid #dee2e6',
-        marginBottom: '2rem',
-        justifyContent: 'space-between', // distribuye los botones a lo largo del ancho
-        width: '100%'
-      }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
+      {/* Tabs - Dropdown en móvil, tabs en desktop */}
+      {isMobile ? (
+        <div style={{ marginBottom: '1.5rem'}}>
+          <select
+            value={activeTab}
+            onChange={(e) => handleTabChange(e.target.value)}
             style={{
-              flex: 1, // cada botón toma el mismo tamaño y se distribuyen
-              padding: '1rem 2rem',
-              border: 'none',
-              backgroundColor: 'transparent',
-              borderBottom: activeTab === tab.id ? '3px solid #007bff' : '3px solid transparent',
-              color: activeTab === tab.id ? '#007bff' : '#6c757d',
-              fontWeight: activeTab === tab.id ? 'bold' : 'normal',
-              cursor: 'pointer',
+              width: '100%',
+              padding: '0.75rem 1rem',
               fontSize: '1rem',
-              textAlign: 'center'
+              border: '2px solid #007bff',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              color: '#333',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23007bff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 1rem center',
+              paddingRight: '2.5rem'
             }}
           >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+            {tabs.map((tab) => (
+              <option key={tab.id} value={tab.id}>
+                {tab.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <div style={{
+          display: 'flex',
+          borderBottom: '2px solid #dee2e6',
+          marginBottom: '2rem',
+          justifyContent: 'space-between',
+          width: '100%'
+        }}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              style={{
+                flex: 1,
+                padding: '1rem 2rem',
+                border: 'none',
+                backgroundColor: 'transparent',
+                borderBottom: activeTab === tab.id ? '3px solid #007bff' : '3px solid transparent',
+                color: activeTab === tab.id ? '#007bff' : '#6c757d',
+                fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                textAlign: 'center'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Tab Content */}
       <div>
