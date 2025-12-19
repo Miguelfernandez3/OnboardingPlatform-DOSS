@@ -19,8 +19,8 @@ class Device(Base):
     mudurl = Column(String)
     mudfile = Column(String)
     mitigation_actions = Column(String)
-    inventory_id = Column(String)
-    edk = Column(String)
+    dsp_id = Column(String)
+    dsp = Column(String)
 
 class Threat(Base):
     __tablename__ = 'threat'
@@ -43,10 +43,10 @@ class Database():
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
-    def createDevice(self, ip, mac, model, identifier, mudurl, mudfile, mitigation_actions, inventory_id, edk):
+    def createDevice(self, ip, mac, model, identifier, mudurl, mudfile, mitigation_actions, dsp_id, dsp):
         # Create and add new entry
         new_device = Device(ip=ip, mac=mac, model=model, identifier=identifier, mudurl=mudurl,
-                            mudfile=mudfile, mitigation_actions=mitigation_actions, inventory_id=inventory_id, edk=edk)
+                            mudfile=mudfile, mitigation_actions=mitigation_actions, dsp_id=dsp_id, dsp=dsp)
         try:
             if self.session.query(Device).filter_by(identifier=identifier).first() is None:
                 self.session.add(new_device)
@@ -72,7 +72,7 @@ class Database():
 
     def createdevice(self, device):
         return self.createDevice(device.ip, device.mac, device.model, device.identifier, device.mudurl, device.mudfile,
-                                 device.mitigation_actions, device.inventory_id, device.edk)
+                                 device.mitigation_actions, device.dsp_id, device.dsp)
 
     def createThreat(self, threat):
         return self.createThreat(threat.identifier, threat.threat_mud_url, threat.threat_mud_file,
@@ -126,8 +126,8 @@ class Database():
                 device_to_update.mudurl = device.mudurl
                 device_to_update.mudfile = device.mudfile
                 device_to_update.mitigation_actions = device.mitigation_actions
-                device_to_update.inventory_id = device.inventory_id
-                device_to_update.edk = device.edk
+                device_to_update.dsp_id = device.dsp_id
+                device_to_update.dsp = device.dsp
                 self.session.commit()
                 return True
             return False
@@ -173,10 +173,12 @@ class Database():
 
     def parseDeviceJson(self, devicejson):
         device_data = devicejson
-        return Device(ip=device_data['ip_address'], mac=None, model=device_data['device'],
-                      identifier=device_data['uuid'], mudurl=device_data['mud-url'],
-                      mudfile=None, mitigation_actions=None, inventory_id=None, edk = device_data['edk'])
+        return Device(ip=None, mac=None, model=None,
+                      identifier=device_data['device_id'], mudurl=None,
+                      mudfile=None, mitigation_actions=None, dsp_id=device_data.get('DSP_id'), dsp=None)
 
     def printDevice(self, device):
         print(
-            "IP: " + device.ip + ", MAC: " + device.mac + ", model: " + device.model + ", identifier: " + device.identifier + ", mudurl: " + device.mudurl + ", mudfile: " + str(device.mudfile) + ", mitigation_actions: " + str(device.mitigation_actions) + ", inventory_id: " + str(device.inventory_id))
+            "IP: " + str(device.ip) + ", MAC: " + str(device.mac) + ", model: " + str(device.model) + ", identifier: " + str(device.identifier) + ", mudurl: " + str(device.mudurl) + ", mudfile: " + str(device.mudfile) + ", mitigation_actions: " + str(device.mitigation_actions) + ", dsp_id: " + str(device.dsp_id) + ", dsp: " + str(device.dsp))
+        
+        return "IP: " + str(device.ip) + ", MAC: " + str(device.mac) + ", model: " + str(device.model) + ", identifier: " + str(device.identifier) + ", mudurl: " + str(device.mudurl) + ", mudfile: " + str(device.mudfile) + ", mitigation_actions: " + str(device.mitigation_actions) + ", dsp_id: " + str(device.dsp_id) + ", dsp: " + str(device.dsp)

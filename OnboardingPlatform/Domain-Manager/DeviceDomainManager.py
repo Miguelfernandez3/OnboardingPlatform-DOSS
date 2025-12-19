@@ -36,28 +36,86 @@ class DeviceDomainManager:
         with open('config.yaml') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
             self.broker = config['DeviceDomainManager']['Broker']
-            self.bootstrapping = config['DeviceDomainManager']['EnrolmentIP']
+            self.FEAM_server = config['DeviceDomainManager']['FEAM_server']
+            self.FEAM_sessionId = config['DeviceDomainManager']['FEAM_sessionId']
 
-            self.topicKnownDevice = config['DeviceDomainManager']['topicKnownDevice']
-            self.topicThreatMUD = config['DeviceDomainManager']['topicTMUDFile']
-
-            self.topicSendMudFile = config['DeviceDomainManager']['topicsendMUDFile']
-            self.topicsiemACK = config['DeviceDomainManager']['topicSIEMACK']
-
-            self.topicDADM_Notification = config['DeviceDomainManager']['topicDADMNotification']
-            self.topicThreatRequest = config['DeviceDomainManager']['topicThreatRequest']
-
-            self.topics = [self.topicKnownDevice, self.topicThreatRequest]
+            self.topics = []
 
         self.db = Database.Database()
+
+        self.prepareFEAM()
 
         pconf = {
             'bootstrap.servers': self.broker,
         }
-        self.producer = Producer(pconf)
+        #self.producer = Producer(pconf)
 
-        threading.Thread(target=self.start).start()
+        #threading.Thread(target=self.start).start()
         #self.start()
+
+    def prepareFEAM(self):
+        url = f"{self.FEAM_server}/init"
+
+        payload = f'{{"sessionId": "{self.FEAM_sessionId}"}}'
+        headers = {
+            'user-agent': "vscode-restclient",
+            'content-type': "application/json"
+            }
+
+        logging.info("Initializing FEAM server")
+        response = requests.request("POST", url, data=payload, headers=headers)
+        if response.status_code == 200:
+            logging.info("FEAM server is prepared")
+        else:
+            logging.error("FEAM server is not prepared")
+            logging.error(response.text)
+            
+        print(response.text)
+
+        logging.info("Stopping Forget Pin Timer")
+        url = f"{self.FEAM_server}/stopForgetPinTimer"
+        payload = f'{{"sessionId": "{self.FEAM_sessionId}"}}'
+        headers = {
+            'user-agent': "vscode-restclient",
+            'content-type': "application/json"
+            }
+
+        response = requests.request("POST", url, data=payload, headers=headers)
+
+        if response.status_code == 200:
+            logging.info("FEAM Forget Pin Timer is stopped")
+        else:
+            logging.error("FEAM Forget Pin Timer is not stopped")
+            logging.error(response.text)
+        print(response.text)
+
+    def FEAMcheckPIN(self, pin=1234):
+        url = f"{self.FEAM_server}/checkPin"
+
+        payload = f"{{\"sessionId\": \"{self.FEAM_sessionId}\",\"pinCode\": \"{pin}\"}}"
+        headers = {
+            'user-agent': "vscode-restclient",
+            'content-type': "application/json"
+            }
+        response = requests.request("POST", url, data=payload, headers=headers)
+        print(response.text)
+
+    def FEAMgetDSPfromID(self, dsp_id):
+        self.FEAMcheckPIN()
+        url = f"{self.FEAM_server}/callResourceServer"
+
+        payload = f"{{\"sessionId\": \"{self.FEAM_sessionId}\",\"functionId\":\"0bfae6a6-9281-4d38-ad18-b851ef9b86a0\",\"operationId\":\"0bfae6a6-4637-487c-a71a-9cba257304af\",\"extraValues\": [\"{{\\\"id\\\":\\\"{dsp_id}\\\",\\\"version\\\":\\\"1.0.0\\\"}}\"]}}"
+        headers = {
+            'user-agent': "vscode-restclient",
+            'content-type': "application/json"
+            }
+
+        response = requests.request("POST", url, data=payload, headers=headers)
+
+        return response.text
+
+
+
 
     def configBroker(self):
         
@@ -82,9 +140,46 @@ class DeviceDomainManager:
     def getTranslation(self, mudfile):
         return mudtranslator.translate(json.loads(mudfile))
 
+    def getMUDUrlFromDSP(self, dsp_json):
+        """
+        Extract MUD file URL from DSP JSON by looking for links with rel="MUD file"
+        
+        Args:
+            dsp_json: The DSP JSON object (either string or dict)
+        
+        Returns:
+            str: The href URL of the MUD file, or None if not found
+        """
+        try:
+            # If dsp_json is a string, parse it
+            if isinstance(dsp_json, str):
+                dsp_data = json.loads(dsp_json)
+            else:
+                dsp_data = dsp_json
+            
+            # Navigate to components in the DSP structure
+            components = dsp_data.get('dspFile', {}).get('doss-dsp', {}).get('local-definitions', {}).get('components', [])
+            
+            # Iterate through components to find MUD file links
+            for component in components:
+                links = component.get('links', [])
+                for link in links:
+                    # Check if this link is a MUD file
+                    if link.get('rel') == 'MUD file':
+                        return link.get('href')
+            
+            # If no MUD file found
+            logging.warning("No MUD file link found in DSP")
+            return None
+            
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
+            logging.error(f"Error parsing DSP JSON for MUD URL: {e}")
+            return None
+        
+    def getMUD(self, dsp, device_identifier):
 
-    def sendMUDURL(self, mudurl, device_identifier):
-
+        mudurl = self.getMUDUrlFromDSP(dsp).replace(".json","")
+        print("MUD URL: " + mudurl)
         dic = {
             'mudurl': mudurl,
             'device_identifier': device_identifier
@@ -97,9 +192,15 @@ class DeviceDomainManager:
 
         js = response.json()
         print(js)
-        self.process_message_topic_MUDFile(js)
 
-        pass
+        mudfile = js['mudfile']
+
+        ret = {
+            'mudurl': mudurl,
+            'mudfile': mudfile
+        }
+
+        return ret
 
 
     def parseMitigationsTMUD(self, mitigation_actions):
@@ -200,11 +301,46 @@ class DeviceDomainManager:
             logging.error(f"Error retrieving TMUD file: {e}")
             return None
 
+    def getDSP(self, DSP_id):
+        dspResponse = self.FEAMgetDSPfromID(DSP_id)
+        logging.warning(f"New DSP File retrieved from DSPP. Updating entry in database.")
+        #print(dspResponse)
+        jsonResponse = json.loads(dspResponse.replace('\"', '"'))
+        #print(jsonResponse)
+        if jsonResponse['status'] == 'ok':
+            dspJSON = jsonResponse['responseJson']
+            print("DSP JSON: " + dspJSON)
+            return dspJSON
+        dspJSON = '{"signature":"RYFiVhs5YFNJQ7eR90ki1ryeGWRcI99iD4CSPaUfuPlYXjycjfrpyp/TP0z6Y63ndajAtj6BnuOqzSjHPL4hQvkRaaew/fqI12k3Xl19LK3ZABXmIFjOu7lfi3kHyMIVCgsDCSVJOBmJjDEW/d+Rr9gyoISuCkpPRFiw/6gelIg=","certificate":"MIIBxTCCAS6gAwIBAgIIZ04S/ociQiowDQYJKoZIhvcNAQELBQAwGzEZMBcGA1UEAxMQVGVzdCBDZXJ0aWZpY2F0ZTAeFw0yNTA0MjIxMTM1MDNaFw0yNjA0MjMxMTM1MDNaMBsxGTAXBgNVBAMTEFRlc3QgQ2VydGlmaWNhdGUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKuCNWExJ/0JBuguUiGYeanS6ieB4N2NhQDOG+w5tXxamuHSLvfAbjHQTJfaZSOBjdOOQbYYD7CUYcb3iOHEPYBVS7vN+lVfE4bAiNg7e440ms8Fv7xc4yMj3BLKMHrTJV3ohvK/+udww3DR5DLJ6tjdIx3myZqKjmcq8FmLTo8PAgMBAAGjEjAQMA4GA1UdDwEB/wQEAwIFoDANBgkqhkiG9w0BAQsFAAOBgQCGL32J9m28yRFZRG57W1Z3lDGpsOy6fOVCOCjO1EcmZboMyggg9oHEFmLwarMXOe2xVys1kT9oBgmNha96eTrFH1n6PuwN3WF6un/y6xNn+dP2XvkNKLHR7Mi/wVk25mW6UFbq8KtKqZ9yQHLKCu6QrqvzkF5RelVZn3A34GgirA==","dspFile":{"doss-dsp":{"uuid":"477ac7cd-c71e-444a-a124-f80c2f47393b","metadata":{"title":"Attacker genDSP","last-modified":"2025-07-09T16:40:00.000000","version":"1.0.0","dsp-model-version":"1.0.0"},"local-definitions":{"components":[{"uuid":"864b7845-54fd-44b4-8c4f-04a5ce648113","type":"this-system","title":"Attacker","description":"Attacker environment for vulnerability scanning and exploitation","links":[{"href":"attacker_sbom.json","rel":"SBOM file","media-type":"application/vnd.cyclonedx+json"},{"href":"http://localhost:8091/attacker_mud.json","rel":"MUD file","media-type":"application/mud+json"}],"status":{"state":"operational"}}]}}}}'
+        print("DSP JSON: " + dspJSON)
+        return dspJSON
+
+    def register_dsp(self, device):
+        existing_device = self.db.getDevice(device.identifier)
+        
+        if existing_device is not None:
+            logging.info("Device already exists in database.")
+            return False
+        else:
+            logging.warning(f"New device with identifier {device.identifier} joining. Creating entry in database.")
+            dsp = self.getDSP(device.dsp_id)
+            device.dsp = dsp
+            
+            ret = self.getMUD(device.dsp, device.identifier)
+            device.mudurl = ret['mudurl']
+            device.mudfile = ret['mudfile']
+            
+            self.db.createdevice(device)
+            logging.info("Device registered successfully.")
+            self.db.printDevice(device)
+            return True
 
     def printAllDevices(self):
         devices = self.db.getAllDevices()
+        dvcs = []
         for device in devices:
-            self.db.printDevice(device)
+            dvcs.append(self.db.printDevice(device))
+        return dvcs
     
     
     def start(self):
@@ -321,17 +457,33 @@ def list_endpoints():
 def post_DSP():
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
         
-        return jsonify({'status': 'success', 'message': 'Data received and processed'}), 200
+        logging.info(f"Received DSP ID: {data.get('DSP_id')} for Device ID: {data.get('device_id')}")
+        device = dadm.db.parseDeviceJson(data)
+        if dadm.register_dsp(device):
+            return jsonify({'status': 'success', 'message': 'Data received and processed'}), 200
+        else:
+            return jsonify({'status': 'error', 'message': 'Device already exists'}), 400
     elif request.method == 'GET':
         return jsonify({'status': 'success', 'message': 'GET request received'}), 200
     else:
         return jsonify({'status': 'error', 'message': 'Invalid request method'}), 405
     
-    
+
+@app.route('/devices', methods=['GET'])
+def printDevices():
+    devices = dadm.printAllDevices()
+
+    return jsonify({'status': 'success', 'message': 'Devices printed to console', 'data': devices}), 200
+
+@app.route('/newthreat', methods=['POST'])
+def newThreat():
+    data = request.get_json()
+    logging.info(f"Received new threat: {data}")
+    return jsonify({'status': 'success', 'message': 'New threat received'}), 200
+
 if __name__ == '__main__':
-    
+    logging.info("Starting Device and Domain manager")
     dadm = DeviceDomainManager()
 
 

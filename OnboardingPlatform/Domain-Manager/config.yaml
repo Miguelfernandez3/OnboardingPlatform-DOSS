@@ -1,12 +1,8 @@
-appName: CERTIFY
+appName: DOSS
 
 DeviceDomainManager:
-  topicsendMUDFile: "CC_DADM_MSPL"
-  topicTMUDFile: "CC_DADM_THREAT_MSPL"
-  topicThreatRequest: "CC_DADM_REQUEST"
-  topicKnownDevice: "CC_NBM_ACK"
-  topicSIEMACK: "DADM_SIEMACK"
-  topicDADMNotification: "CC_DADM_NOTIFICATION"
+  FEAM_server: "http://192.168.0.181:8181"
   Broker: "10.0.0.8:9092"
-  EnrolmentIP: "localhost:9092"
+  FEAM_sessionId: "f8cd0ed5-dd43-4032-919e-1c28c37fa472"
+  
   
