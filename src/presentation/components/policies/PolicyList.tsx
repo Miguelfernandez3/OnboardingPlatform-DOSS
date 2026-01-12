@@ -91,20 +91,25 @@ export default function PolicyList({ policies, onCreateNew }: PolicyListProps): 
             }}
           >
             <div style={{ marginBottom: '1rem' }}>
-              <h3>{policy.name || `${t('policies.id')} ${policy.id}`}</h3>
-              <p><strong>{t('policies.id')}:</strong> {policy.id}</p>
-              <p><strong>{t('policies.status')}:</strong> 
+              <h3 style={{ marginBottom: '0.75rem' }}>{policy.name || `${t('policies.id')} ${policy.id}`}</h3>
+              <p style={{ marginBottom: '0.5rem', marginTop: 0 }}>
+                <strong>{t('policies.id')}:</strong> {policy.id}
+              </p>
+              <p style={{ marginBottom: '0.5rem', marginTop: 0 }}>
+                <strong>{t('policies.status')}:</strong> 
                 <span style={{
                   marginLeft: '0.5rem',
                   padding: '0.2rem 0.5rem',
                   borderRadius: '4px',
                   backgroundColor: policy.status === 'active' ? '#d4edda' : '#fff3cd',
-                  color: policy.status === 'active' ? '#155724' : '#856404'
+                  color: policy.status === 'active' ? '#155724' : '#856404',
+                  display: 'inline-block'
                 }}>
                   {policy.status}
                 </span>
               </p>
-              <p><strong>{t('policies.enforcement')}:</strong> 
+              <p style={{ marginBottom: '0.5rem', marginTop: 0 }}>
+                <strong>{t('policies.enforcement')}:</strong> 
                 <span style={{
                   marginLeft: '0.5rem',
                   padding: '0.2rem 0.5rem',
@@ -112,13 +117,16 @@ export default function PolicyList({ policies, onCreateNew }: PolicyListProps): 
                   backgroundColor: policy.enforcementStatus === 'completed' ? '#d4edda' : 
                                    policy.enforcementStatus === 'error' ? '#f8d7da' : '#fff3cd',
                   color: policy.enforcementStatus === 'completed' ? '#155724' : 
-                         policy.enforcementStatus === 'error' ? '#721c24' : '#856404'
+                         policy.enforcementStatus === 'error' ? '#721c24' : '#856404',
+                  display: 'inline-block'
                 }}>
                   {policy.enforcementStatus}
                 </span>
               </p>
               {policy.appliedAt && (
-                <p><strong>{t('policies.appliedAt')}:</strong> {new Date(policy.appliedAt).toLocaleString()}</p>
+                <p style={{ marginBottom: 0, marginTop: 0 }}>
+                  <strong>{t('policies.appliedAt')}:</strong> {new Date(policy.appliedAt).toLocaleString()}
+                </p>
               )}
             </div>
             {policy.msplXml && (
