@@ -23,7 +23,7 @@ sys.path.append(parent_dir)
 
 from Policy_Translator import mudtranslator
 from lxml import etree
-from datetime import datetime
+from datetime import datetime, timezone
 app = Flask(__name__)
 dadm = None
 
