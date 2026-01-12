@@ -30,9 +30,6 @@ from Policy_Translator import mudtranslator
 class ThreatMUDManager:
 
     def __init__(self):
-
-        logging.basicConfig(filename="TMUD.log", level=logging.DEBUG)
-
         # Read config.yaml
 
         with open('config.yaml') as f:
@@ -343,5 +340,27 @@ def get_threat_by_id(threat_id):
         }), 500
 
 if __name__ == '__main__':
-    manager = ThreatMUDManager()
-    app.run(host='0.0.0.0', use_reloader=False, debug=True, port=8889)
+    # Configure logging with more detailed level for debugging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),  # Log to console
+            logging.FileHandler('ThreatMUDManager.log')  # Also log to file
+        ]
+    )
+    
+    logging.info("=" * 80)
+    logging.info("Starting ThreatMUDManager")
+    logging.info("=" * 80)
+    
+    try:
+        logging.debug("Creating ThreatMUDManager instance")
+        manager = ThreatMUDManager()
+        logging.info("ThreatMUDManager instance created successfully")
+        
+        logging.info("Starting Flask application on port 8889")
+        app.run(host='0.0.0.0', use_reloader=False, debug=True, port=8889)
+    except Exception as e:
+        logging.critical(f"Fatal error starting ThreatMUDManager: {e}", exc_info=True)
+        raise

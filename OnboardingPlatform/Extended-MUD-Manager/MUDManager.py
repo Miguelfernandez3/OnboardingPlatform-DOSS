@@ -33,10 +33,6 @@ manager = None
 class MUDManager:
 
     def __init__(self):
-
-        logging.basicConfig(filename="MUD.log", level=logging.DEBUG)
-
-
         # Read config.yaml
 
         with open('config.yaml') as f:
@@ -243,7 +239,29 @@ def newConnexion():
     return response
 
 if __name__ == '__main__':
-    manager = MUDManager()
-    app.run(host='0.0.0.0', use_reloader=False, debug=True, port=8888)
+    # Configure logging with more detailed level for debugging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),  # Log to console
+            logging.FileHandler('MUDManager.log')  # Also log to file
+        ]
+    )
+    
+    logging.info("=" * 80)
+    logging.info("Starting MUDManager")
+    logging.info("=" * 80)
+    
+    try:
+        logging.debug("Creating MUDManager instance")
+        manager = MUDManager()
+        logging.info("MUDManager instance created successfully")
+        
+        logging.info("Starting Flask application on port 8888")
+        app.run(host='0.0.0.0', use_reloader=False, debug=True, port=8888)
+    except Exception as e:
+        logging.critical(f"Fatal error starting MUDManager: {e}", exc_info=True)
+        raise
 
 
