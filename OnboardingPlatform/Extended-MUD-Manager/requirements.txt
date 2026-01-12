@@ -1,5 +1,10 @@
-confluent_kafka==2.3.0
+confluent-kafka==2.3.0
 PyYAML==6.0.1
-PyYAML==6.0.1
-Requests==2.31.0
+requests==2.31.0
 SQLAlchemy==2.0.28
+Flask==2.3.2
+pyangbind==0.8.5
+xmltodict==0.13.0
+dicttoxml==1.7.16
+bitarray==2.9.2
+six==1.16.0

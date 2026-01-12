@@ -1,5 +1,6 @@
 confluent_kafka==2.3.0
 Flask==3.0.3
+flask-cors==4.0.0
 lxml==5.2.2
 python-dotenv==1.0.1
 PyYAML==6.0.1
@@ -7,3 +8,9 @@ PyYAML==6.0.1
 Requests==2.32.1
 scapy==2.5.0
 SQLAlchemy==2.0.28
+cryptography==46.0.3
+pyangbind==0.8.6
+bitarray==3.8.0
+six==1.17.0
+dicttoxml==1.7.16
+xmltodict==1.0.2
