@@ -1,8 +1,14 @@
 appName: DOSS
 
+APIGateway:
+  port: 4321
+  enable_cors: true
+
 DeviceDomainManager:
   FEAM_server: "http://192.168.0.181:8181"
   Broker: "10.0.0.8:9092"
   FEAM_sessionId: "f8cd0ed5-dd43-4032-919e-1c28c37fa472"
+  ThreatMUDManager_url: "http://localhost:8889"
+  MUDManager_url: "http://localhost:8888"
   
   

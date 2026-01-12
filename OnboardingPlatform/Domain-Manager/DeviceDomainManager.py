@@ -38,6 +38,8 @@ class DeviceDomainManager:
             self.broker = config['DeviceDomainManager']['Broker']
             self.FEAM_server = config['DeviceDomainManager']['FEAM_server']
             self.FEAM_sessionId = config['DeviceDomainManager']['FEAM_sessionId']
+            self.ThreatMUDManager_url = config['DeviceDomainManager'].get('ThreatMUDManager_url', 'http://localhost:8889')
+            self.MUDManager_url = config['DeviceDomainManager'].get('MUDManager_url', 'http://localhost:8888')
 
             self.topics = []
 
@@ -177,31 +179,190 @@ class DeviceDomainManager:
             return None
         
     def getMUD(self, dsp, device_identifier):
+        """
+        Obtiene el archivo MUD del MUD Manager vía API REST
+        
+        Args:
+            dsp: Digital Service Passport (JSON)
+            device_identifier: Identificador del dispositivo
+        
+        Returns:
+            dict: Diccionario con 'mudurl' y 'mudfile', o None si hay error
+        """
+        logging.debug(f"getMUD called for device_identifier: {device_identifier}")
+        try:
+            mudurl = self.getMUDUrlFromDSP(dsp)
+            if not mudurl:
+                logging.error("No MUD URL found in DSP")
+                return None
+            
+            mudurl = mudurl.replace(".json", "")
+            logging.debug(f"Extracted MUD URL: {mudurl}")
+            
+            dic = {
+                'mudurl': mudurl,
+                'device_identifier': device_identifier
+            }
 
-        mudurl = self.getMUDUrlFromDSP(dsp).replace(".json","")
-        print("MUD URL: " + mudurl)
-        dic = {
-            'mudurl': mudurl,
-            'device_identifier': device_identifier
-        }
+            headers = {
+                'Content-Type': 'application/json'
+            }
+            
+            url = f"{self.MUDManager_url}/mud"
+            logging.debug(f"Making HTTP POST request to: {url}")
+            logging.debug(f"MUDManager_url: {self.MUDManager_url}")
+            logging.debug(f"Request payload: {dic}")
+            
+            response = requests.post(url, json=dic, headers=headers, timeout=10)
+            logging.debug(f"Response status code: {response.status_code}")
+            
+            if response.status_code == 200:
+                try:
+                    js = response.json()
+                    logging.debug(f"Response JSON keys: {list(js.keys()) if isinstance(js, dict) else 'N/A'}")
+                    
+                    mudfile = js.get('mudfile')
+                    if not mudfile:
+                        logging.error("Response JSON does not contain 'mudfile' key")
+                        return None
+                    
+                    ret = {
+                        'mudurl': mudurl,
+                        'mudfile': mudfile
+                    }
+                    
+                    logging.info(f"Successfully retrieved MUD file for device {device_identifier}")
+                    return ret
+                except ValueError as json_err:
+                    logging.error(f"JSON decode error: {json_err}, response text: {response.text[:200]}")
+                    return None
+            else:
+                logging.error(f"MUDManager returned status {response.status_code}: {response.text[:200]}")
+                return None
+                
+        except requests.exceptions.ConnectionError as e:
+            logging.error(f"Could not connect to MUDManager at {self.MUDManager_url}: {e}")
+            return None
+        except requests.exceptions.Timeout as e:
+            logging.error(f"Timeout connecting to MUDManager at {self.MUDManager_url}: {e}")
+            return None
+        except Exception as e:
+            logging.error(f"Unexpected error getting MUD from MUDManager: {e}", exc_info=True)
+            return None
 
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        response = requests.post("http://localhost:8888/mud", json=dic, headers=headers)
 
-        js = response.json()
-        print(js)
-
-        mudfile = js['mudfile']
-
-        ret = {
-            'mudurl': mudurl,
-            'mudfile': mudfile
-        }
-
-        return ret
-
+    def get_threats_from_threatmud_manager(self, device_identifier=None):
+        """
+        Obtiene threats del ThreatMUDManager vía API REST
+        
+        Args:
+            device_identifier: Si se proporciona, filtra por device_identifier
+        
+        Returns:
+            list: Lista de threats o lista vacía si hay error
+        """
+        logging.debug(f"get_threats_from_threatmud_manager called with device_identifier={device_identifier}, type={type(device_identifier)}")
+        try:
+            # Validar device_identifier
+            if device_identifier is None:
+                logging.debug("device_identifier is None, getting all threats")
+                url = f"{self.ThreatMUDManager_url}/api/threats"
+            else:
+                # Asegurarse de que device_identifier es string válido
+                device_identifier_str = str(device_identifier) if device_identifier else None
+                if not device_identifier_str or device_identifier_str == 'None':
+                    logging.warning(f"Invalid device_identifier: {device_identifier}, getting all threats instead")
+                    url = f"{self.ThreatMUDManager_url}/api/threats"
+                else:
+                    url = f"{self.ThreatMUDManager_url}/api/threats/device/{device_identifier_str}"
+            
+            logging.debug(f"Making HTTP GET request to: {url}")
+            logging.debug(f"ThreatMUDManager_url: {self.ThreatMUDManager_url}")
+            
+            response = requests.get(url, timeout=5)
+            logging.debug(f"Response status code: {response.status_code}")
+            logging.debug(f"Response headers: {dict(response.headers)}")
+            
+            if response.status_code == 200:
+                logging.debug("Response status is 200, parsing JSON")
+                try:
+                    data = response.json()
+                    logging.debug(f"Parsed JSON data type: {type(data)}, keys: {list(data.keys()) if isinstance(data, dict) else 'N/A'}")
+                    threats = data.get('threats', [])
+                    logging.debug(f"Extracted threats: type={type(threats)}, length={len(threats) if isinstance(threats, list) else 'N/A'}")
+                    
+                    # Validar que threats es una lista
+                    if not isinstance(threats, list):
+                        logging.error(f"threats is not a list, it's {type(threats)}: {threats}")
+                        return []
+                    
+                    logging.info(f"Successfully retrieved {len(threats)} threats from ThreatMUDManager")
+                    return threats
+                except ValueError as json_err:
+                    logging.error(f"JSON decode error: {json_err}, response text: {response.text[:200]}")
+                    return []
+            else:
+                logging.warning(f"ThreatMUDManager returned status {response.status_code}: {response.text[:200]}")
+                return []
+        except requests.exceptions.ConnectionError as e:
+            logging.warning(f"Could not connect to ThreatMUDManager at {self.ThreatMUDManager_url}: {e}")
+            return []
+        except requests.exceptions.Timeout as e:
+            logging.warning(f"Timeout connecting to ThreatMUDManager at {self.ThreatMUDManager_url}: {e}")
+            return []
+        except Exception as e:
+            logging.error(f"Unexpected error getting threats from ThreatMUDManager: {e}", exc_info=True)
+            return []
+    
+    def get_threat_by_id_from_threatmud_manager(self, threat_id):
+        """
+        Obtiene un threat específico por ID del ThreatMUDManager vía API REST
+        
+        Args:
+            threat_id: ID del threat
+        
+        Returns:
+            dict: Datos del threat o None si no se encuentra
+        """
+        logging.debug(f"get_threat_by_id_from_threatmud_manager called with threat_id={threat_id}, type={type(threat_id)}")
+        try:
+            # Validar threat_id
+            if threat_id is None:
+                logging.warning("threat_id is None")
+                return None
+            
+            threat_id_str = str(threat_id)
+            url = f"{self.ThreatMUDManager_url}/api/threats/{threat_id_str}"
+            
+            logging.debug(f"Making HTTP GET request to: {url}")
+            response = requests.get(url, timeout=5)
+            logging.debug(f"Response status code: {response.status_code}")
+            
+            if response.status_code == 200:
+                logging.debug("Response status is 200, parsing JSON")
+                try:
+                    threat_data = response.json()
+                    logging.debug(f"Parsed threat data type: {type(threat_data)}, keys: {list(threat_data.keys()) if isinstance(threat_data, dict) else 'N/A'}")
+                    logging.info(f"Successfully retrieved threat {threat_id} from ThreatMUDManager")
+                    return threat_data
+                except ValueError as json_err:
+                    logging.error(f"JSON decode error: {json_err}, response text: {response.text[:200]}")
+                    return None
+            elif response.status_code == 404:
+                logging.debug(f"Threat {threat_id} not found (404)")
+                return None
+            else:
+                logging.warning(f"ThreatMUDManager returned status {response.status_code}: {response.text[:200]}")
+                return None
+        except requests.exceptions.ConnectionError as e:
+            logging.warning(f"Could not connect to ThreatMUDManager at {self.ThreatMUDManager_url}: {e}")
+            return None
+        except requests.exceptions.Timeout as e:
+            logging.warning(f"Timeout connecting to ThreatMUDManager at {self.ThreatMUDManager_url}: {e}")
+            return None
+        except Exception as e:
+            logging.error(f"Unexpected error getting threat {threat_id} from ThreatMUDManager: {e}", exc_info=True)
+            return None
 
     def parseMitigationsTMUD(self, mitigation_actions):
         
@@ -327,6 +488,10 @@ class DeviceDomainManager:
             device.dsp = dsp
             
             ret = self.getMUD(device.dsp, device.identifier)
+            if ret is None:
+                logging.error(f"Failed to get MUD file for device {device.identifier}. Device registration aborted.")
+                return False
+            
             device.mudurl = ret['mudurl']
             device.mudfile = ret['mudfile']
             
