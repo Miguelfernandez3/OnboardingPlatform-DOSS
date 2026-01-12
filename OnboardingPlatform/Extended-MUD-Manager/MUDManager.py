@@ -222,11 +222,9 @@ class MUDManager:
 
 @app.route('/mud', methods=['POST'])
 def newConnexion():
-
+    logging.info(f"Received POST request: /mud")
     js = request.get_json()
-    print(js)
-    logging.info("Received new message from REST API")
-    logging.info("Message:\n"+str(js))
+    logging.info(f"Request payload: {js}")
     logging.info("Parsing message")
 
 
