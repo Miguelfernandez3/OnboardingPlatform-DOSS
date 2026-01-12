@@ -1,10 +1,26 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime, timezone
 import json
 
 # Create a base class for our classes definitions
 Base = declarative_base()
+
+
+# Excepción personalizada para errores de base de datos
+class DatabaseError(Exception):
+    """Excepción personalizada para errores de base de datos"""
+    def __init__(self, message, original_error=None):
+        self.message = message
+        self.original_error = original_error
+        super().__init__(self.message)
+    
+    def __str__(self):
+        if self.original_error:
+            return f"{self.message}: {self.original_error}"
+        return self.message
 
 
 # Define the Device model
@@ -82,36 +98,46 @@ class Database():
         try:
             device = self.session.query(Device).filter_by(identifier=identifier).first()
             return device
-        except:
-            return None
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error retrieving device with identifier {identifier}", e)
+        except Exception as e:
+            raise DatabaseError(f"Unexpected error retrieving device with identifier {identifier}", e)
 
     def getDevicesByModel(self, model):
         try:
             devices = self.session.query(Device).filter_by(model=model).all()
             return devices
-        except:
-            return None
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error retrieving devices with model {model}", e)
+        except Exception as e:
+            raise DatabaseError(f"Unexpected error retrieving devices with model {model}", e)
 
     def getThreat(self, threat_mud_url):
         try:
             threat = self.session.query(Device).filter_by(threat_mud_url=threat_mud_url).first()
             return threat
-        except:
-            return None
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error retrieving threat with URL {threat_mud_url}", e)
+        except Exception as e:
+            raise DatabaseError(f"Unexpected error retrieving threat with URL {threat_mud_url}", e)
 
     def getAllDevices(self):
         try:
             devices = self.session.query(Device).all()
-            return devices
-        except:
-            return None
+            return devices if devices else []
+        except SQLAlchemyError as e:
+            raise DatabaseError("Error retrieving all devices", e)
+        except Exception as e:
+            raise DatabaseError("Unexpected error retrieving all devices", e)
 
     def getAllThreats(self):
         try:
             threats = self.session.query(Threat).all()
             return threats
-        except:
-            return None
+        except SQLAlchemyError as e:
+            raise DatabaseError("Error retrieving all threats", e)
+        except Exception as e:
+            raise DatabaseError("Unexpected error retrieving all threats", e)
 
 
     def updateDevice(self, device):
@@ -133,6 +159,12 @@ class Database():
             return False
         except:
             return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error updating mitigation actions for device {device_identifier}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error updating mitigation actions for device {device_identifier}", e)
 
     def updateThreat(self, threat):
 
@@ -146,8 +178,12 @@ class Database():
                 self.session.commit()
                 return True
             return False
-        except:
-            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error updating threat with id {threat.id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error updating threat with id {threat.id}", e)
 
     def deleteDevice(self, device):
         try:
@@ -157,8 +193,12 @@ class Database():
                 self.session.commit()
                 return True
             return False
-        except:
-            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error deleting device with id {device.id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error deleting device with id {device.id}", e)
 
     def deleteThreat(self, threat):
         try:
@@ -168,8 +208,12 @@ class Database():
                 self.session.commit()
                 return True
             return False
-        except:
-            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error deleting threat with id {threat.id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error deleting threat with id {threat.id}", e)
 
     def parseDeviceJson(self, devicejson):
         device_data = devicejson
