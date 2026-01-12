@@ -73,18 +73,20 @@ class MUDManager:
 
     def sendMUDFile(self, mud):
 
-        dic = {
-            "mudurl": mud.mudurl,
-            "mudfile": mud.mudfile,
-            "device_identifier": mud.device_identifier
-        }
-        mud_json = json.dumps(dic)
+        try:
+            dic = {
+                "mudurl": mud.mudurl,
+                "mudfile": mud.mudfile,
+                "device_identifier": mud.device_identifier
+            }
+            mud_json = json.dumps(dic)
 
-        self.producer.poll(1)
-        self.producer.produce(self.sendtopic, value=mud_json)
-        self.producer.flush()
-
-        pass
+            self.producer.poll(1)
+            self.producer.produce(self.sendtopic, value=mud_json)
+            self.producer.flush()
+            logging.info(f"MUD file sent to Kafka topic {self.sendtopic}")
+        except Exception as e:
+            logging.error(f"Error sending MUD file to Kafka: {e}", exc_info=True)
 
     def validateURL(self,mudurl):
 
