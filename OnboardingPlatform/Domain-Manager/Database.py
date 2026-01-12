@@ -37,7 +37,6 @@ class Device(Base):
     mitigation_actions = Column(String)
     dsp_id = Column(String)
     dsp = Column(String)
-    # Nuevos campos según especificación
     name = Column(String)
     type = Column(String)
     manufacturer = Column(String)
@@ -102,9 +101,6 @@ class Database():
             raise DatabaseError(f"Unexpected error creating device with identifier {identifier}", e)
 
     def createThreat(self, identifier, threat_mud_url, threat_mud_file, mitigation_actions):
-
-        new_threat = Threat(identifier=identifier, threat_mud_url=threat_mud_url,
-                            threat_mud_file=threat_mud_file, mitigation_actions=mitigation_actions)
         try:
             new_threat = Threat(identifier=identifier, threat_mud_url=threat_mud_url,
                                 threat_mud_file=threat_mud_file, mitigation_actions=mitigation_actions)
@@ -128,7 +124,7 @@ class Database():
                                  getattr(device, 'manufacturer', None), getattr(device, 'status', 'active'),
                                  getattr(device, 'edk', None))
 
-    def createThreat(self, threat):
+    def createThreatFromObject(self, threat):
         return self.createThreat(threat.identifier, threat.threat_mud_url, threat.threat_mud_file,
                                  threat.mitigation_actions)
 
@@ -152,7 +148,7 @@ class Database():
 
     def getThreat(self, threat_mud_url):
         try:
-            threat = self.session.query(Device).filter_by(threat_mud_url=threat_mud_url).first()
+            threat = self.session.query(Threat).filter_by(threat_mud_url=threat_mud_url).first()
             return threat
         except SQLAlchemyError as e:
             raise DatabaseError(f"Error retrieving threat with URL {threat_mud_url}", e)
@@ -179,7 +175,6 @@ class Database():
 
 
     def updateDevice(self, device):
-
         try:
             device_to_update = self.session.query(Device).filter_by(id=device.id).first()
             if device_to_update:
