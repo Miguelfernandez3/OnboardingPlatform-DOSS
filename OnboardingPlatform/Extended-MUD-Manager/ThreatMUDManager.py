@@ -10,7 +10,7 @@ import yaml
 from confluent_kafka import Consumer, Producer
 from Database import TMUD, Database
 import sys
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -228,11 +228,9 @@ class ThreatMUDManager:
 
 @app.route('/tmud', methods=['POST'])
 def newtmud():
-
+    logging.info(f"Received POST request: /tmud")
     js = request.get_json()
-    print(js)
-    logging.info("Received new message from REST API")
-    logging.info("Message:\n"+str(js))
+    logging.info(f"Request payload: {js}")
     logging.info("Parsing message")
 
 
@@ -243,6 +241,106 @@ def newtmud():
     print(response)
 
     return response
+
+@app.route('/api/threats', methods=['GET'])
+def get_all_threats():
+    """Obtiene todos los threats (TMUDs)"""
+    logging.info(f"Received GET request: /api/threats")
+    try:
+        all_tmuds = manager.db.getAllTMUDs()
+        if all_tmuds is None:
+            return jsonify({'threats': []}), 200
+        
+        threats = []
+        for tmud in all_tmuds:
+            threats.append({
+                'id': str(tmud.id),
+                'identifier': tmud.device_identifier,
+                'threat_mud_url': tmud.tmudurl,
+                'threat_mud_file': tmud.tmudfile,
+                'mitigation_actions': tmud.mspl
+            })
+        
+        return jsonify({'threats': threats}), 200
+    except Exception as e:
+        logging.error(f"Error getting all threats: {e}", exc_info=True)
+        return jsonify({
+            'error': str(e),
+            'code': 'INTERNAL_ERROR',
+            'details': {}
+        }), 500
+
+@app.route('/api/threats/device/<device_identifier>', methods=['GET'])
+def get_threats_by_device(device_identifier):
+    """Obtiene todos los threats asociados a un dispositivo"""
+    logging.info(f"Received GET request: /api/threats/device/{device_identifier}")
+    try:
+        all_tmuds = manager.db.getAllTMUDs()
+        if all_tmuds is None:
+            return jsonify({'threats': []}), 200
+        
+        threats = []
+        for tmud in all_tmuds:
+            if tmud.device_identifier == device_identifier:
+                threats.append({
+                    'id': str(tmud.id),
+                    'identifier': tmud.device_identifier,
+                    'threat_mud_url': tmud.tmudurl,
+                    'threat_mud_file': tmud.tmudfile,
+                    'mitigation_actions': tmud.mspl
+                })
+        
+        return jsonify({'threats': threats}), 200
+    except Exception as e:
+        logging.error(f"Error getting threats for device {device_identifier}: {e}", exc_info=True)
+        return jsonify({
+            'error': str(e),
+            'code': 'INTERNAL_ERROR',
+            'details': {}
+        }), 500
+
+@app.route('/api/threats/<threat_id>', methods=['GET'])
+def get_threat_by_id(threat_id):
+    """Obtiene un threat específico por ID"""
+    logging.info(f"Received GET request: /api/threats/{threat_id}")
+    try:
+        threat_id_int = int(threat_id)
+        all_tmuds = manager.db.getAllTMUDs()
+        if all_tmuds is None:
+            return jsonify({
+                'error': f'Threat with id {threat_id} not found',
+                'code': 'THREAT_NOT_FOUND',
+                'details': {}
+            }), 404
+        
+        for tmud in all_tmuds:
+            if tmud.id == threat_id_int:
+                return jsonify({
+                    'id': str(tmud.id),
+                    'identifier': tmud.device_identifier,
+                    'threat_mud_url': tmud.tmudurl,
+                    'threat_mud_file': tmud.tmudfile,
+                    'mitigation_actions': tmud.mspl
+                }), 200
+        
+        return jsonify({
+            'error': f'Threat with id {threat_id} not found',
+            'code': 'THREAT_NOT_FOUND',
+            'details': {}
+        }), 404
+    except ValueError:
+        return jsonify({
+            'error': f'Invalid threat id: {threat_id}',
+            'code': 'INVALID_THREAT_ID',
+            'details': {}
+        }), 400
+    except Exception as e:
+        logging.error(f"Error getting threat {threat_id}: {e}", exc_info=True)
+        return jsonify({
+            'error': str(e),
+            'code': 'INTERNAL_ERROR',
+            'details': {}
+        }), 500
 
 if __name__ == '__main__':
     manager = ThreatMUDManager()
