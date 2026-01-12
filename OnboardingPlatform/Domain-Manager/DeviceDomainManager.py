@@ -7,7 +7,9 @@ from confluent_kafka import Consumer, Producer
 import json
 # Import Flask for API REST server, create app variable and import routes from routes.py file
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
+from Database import DatabaseError
 import threading
 import os
 import sys
