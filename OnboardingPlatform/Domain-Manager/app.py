@@ -4,11 +4,16 @@ Main Flask application entry point.
 Initializes Flask app and DeviceDomainManager instance.
 """
 import logging
+import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from core.device_domain_manager import DeviceDomainManager
 from api.routes import register_blueprints
 from utils.app_context import set_dadm_instance
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Create Flask app
 app = Flask(__name__)
@@ -41,6 +46,14 @@ if __name__ == '__main__':
         
         # Set global instance for error handlers
         set_dadm_instance(dadm)
+        
+        # Create admin user if it doesn't exist
+        try:
+            from scripts.create_admin import create_admin
+            logging.info("Checking for admin user...")
+            create_admin()
+        except Exception as e:
+            logging.warning(f"Could not create admin user: {e}. Continuing anyway...")
         
         # Register all blueprints
         register_blueprints(app)

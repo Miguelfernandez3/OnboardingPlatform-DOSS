@@ -61,4 +61,54 @@ class Config:
     def topics(self) -> list:
         """List of Kafka topics."""
         return self._config.get('DeviceDomainManager', {}).get('topics', [])
+    
+    @property
+    def jwt_secret_key(self) -> str:
+        """JWT secret key for token signing."""
+        # Primero intentar desde variable de entorno
+        env_key = os.getenv('JWT_SECRET_KEY')
+        if env_key:
+            return env_key
+        
+        # Luego desde config.yaml
+        auth_config = self._config.get('Authentication', {})
+        secret_key = auth_config.get('jwt_secret_key')
+        
+        # Si es una referencia a variable de entorno (${JWT_SECRET_KEY})
+        if secret_key and secret_key.startswith('${') and secret_key.endswith('}'):
+            env_var = secret_key[2:-1]
+            env_value = os.getenv(env_var)
+            if env_value:
+                return env_value
+        
+        # Si no hay secret key, usar un default (NO RECOMENDADO PARA PRODUCCIÓN)
+        if not secret_key:
+            logging.warning("JWT_SECRET_KEY not set. Using default (INSECURE). Set JWT_SECRET_KEY environment variable for production.")
+            return "CHANGE_THIS_SECRET_KEY_IN_PRODUCTION"
+        
+        return secret_key
+    
+    @property
+    def jwt_algorithm(self) -> str:
+        """JWT algorithm for token signing."""
+        auth_config = self._config.get('Authentication', {})
+        return auth_config.get('jwt_algorithm', 'HS256')
+    
+    @property
+    def jwt_expiration_hours(self) -> int:
+        """JWT access token expiration time in hours."""
+        auth_config = self._config.get('Authentication', {})
+        return auth_config.get('jwt_expiration_hours', 24)
+    
+    @property
+    def jwt_refresh_expiration_hours(self) -> int:
+        """JWT refresh token expiration time in hours."""
+        auth_config = self._config.get('Authentication', {})
+        return auth_config.get('jwt_refresh_expiration_hours', 168)  # 7 días
+    
+    @property
+    def password_min_length(self) -> int:
+        """Minimum password length."""
+        auth_config = self._config.get('Authentication', {})
+        return auth_config.get('password_min_length', 8)
 

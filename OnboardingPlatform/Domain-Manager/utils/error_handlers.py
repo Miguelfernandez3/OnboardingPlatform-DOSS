@@ -5,6 +5,7 @@ Decorators and functions for centralized error handling in API endpoints
 from functools import wraps
 from flask import jsonify
 from Database import DatabaseError
+from core.auth.exceptions import AuthenticationError, AuthorizationError, TokenExpiredError, InvalidCredentialsError
 import logging
 from utils.app_context import get_dadm_instance
 
@@ -17,6 +18,42 @@ def handle_api_errors(f):
     def decorated_function(*args, **kwargs):
         try:
             return f(*args, **kwargs)
+        except AuthenticationError as e:
+            logging.error(f"Authentication error in {f.__name__}: {e.message}", exc_info=True)
+            return jsonify({
+                'error': e.message,
+                'code': 'AUTHENTICATION_ERROR',
+                'details': {
+                    'original_error': str(e.original_error) if e.original_error else None
+                }
+            }), 401
+        except AuthorizationError as e:
+            logging.error(f"Authorization error in {f.__name__}: {e.message}", exc_info=True)
+            return jsonify({
+                'error': e.message,
+                'code': 'AUTHORIZATION_ERROR',
+                'details': {
+                    'original_error': str(e.original_error) if e.original_error else None
+                }
+            }), 403
+        except TokenExpiredError as e:
+            logging.error(f"Token expired error in {f.__name__}: {e.message}", exc_info=True)
+            return jsonify({
+                'error': e.message,
+                'code': 'TOKEN_EXPIRED',
+                'details': {
+                    'original_error': str(e.original_error) if e.original_error else None
+                }
+            }), 401
+        except InvalidCredentialsError as e:
+            logging.error(f"Invalid credentials error in {f.__name__}: {e.message}", exc_info=True)
+            return jsonify({
+                'error': e.message,
+                'code': 'INVALID_CREDENTIALS',
+                'details': {
+                    'original_error': str(e.original_error) if e.original_error else None
+                }
+            }), 401
         except DatabaseError as e:
             logging.error(f"Database error in {f.__name__}: {e.message}", exc_info=True)
             return jsonify({

@@ -10,5 +10,11 @@ DeviceDomainManager:
   FEAM_sessionId: "f8cd0ed5-dd43-4032-919e-1c28c37fa472"
   ThreatMUDManager_url: "http://localhost:8889"
   MUDManager_url: "http://localhost:8888"
-  
+
+Authentication:
+  jwt_secret_key: ${JWT_SECRET_KEY}  # Variable de entorno recomendada
+  jwt_algorithm: HS256
+  jwt_expiration_hours: 24
+  jwt_refresh_expiration_hours: 168
+  password_min_length: 8
   

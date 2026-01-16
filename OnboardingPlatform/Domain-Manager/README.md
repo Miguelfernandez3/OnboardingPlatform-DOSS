@@ -7,9 +7,29 @@ pip install -r requirements.txt
 ```
 
  ## Configuration
- You can create a *.env* file that defines environment variables that configure the behaviour of the module. They are parsed before starting the services in the *globals.py* file. The current variables are:
+
+### Variables de Entorno Requeridas para Autenticación
+Crea manualmente el archivo `.env` con las siguientes variables:
+
+```env
+# JWT Secret Key - REQUERIDO (mínimo 32 caracteres)
+JWT_SECRET_KEY=tu_secret_key_super_seguro_aqui
+
+# Credenciales del Administrador Inicial - REQUERIDO
+ADMIN_EMAIL=email_del_usuario_administrador_aqui
+ADMIN_PASSWORD=tu_password_seguro_aqui
+```
+
+**Variables Requeridas:**
+- `JWT_SECRET_KEY`: Clave secreta para firmar tokens JWT (generar con: `python -c "import secrets; print(secrets.token_urlsafe(32))"`)
+- `ADMIN_EMAIL`: Email del usuario administrador inicial
+- `ADMIN_PASSWORD`: Password del administrador (mínimo 8 caracteres)
+
+El usuario administrador se creará automáticamente al iniciar la aplicación si no existe.
+
+### Otras Variables de Entorno (Opcionales)
 - LOG_LEVEL (e.g. DEBUG): Define level of logging
-- LOG_OUTPUT (e.g. STDOUT): Define output stream for logging. STODOUT or STDERR, otherwise will be treated as a filename. 
+- LOG_OUTPUT (e.g. STDOUT): Define output stream for logging. STDOUT or STDERR, otherwise will be treated as a filename. 
 - DADM_PORT (e.g. 4321): Port where the server will listen
 - SOFTWARE_REPO_URL (e.g. http://localhost:8081): Url where software repository is listening
 - INV_REG_URL (e.g. http://localhost:8080/chain/): Url where inventory and registry is listening
@@ -19,11 +39,38 @@ pip install -r requirements.txt
 
  ## Running the Server
 
+ **IMPORTANTE**: Asegúrate de tener configurado el archivo `.env` antes de ejecutar el servidor.
+
  To launch the Flask server, which will handle all the routes for registering and querying devices and software, use the following command:
 
  ```bash
- python DeviceDomainManager.py
+ python app.py
  ```
+
+ Al iniciar, el servidor:
+ 1. Cargará las variables de entorno desde `.env`
+ 2. Creará automáticamente el usuario administrador si no existe
+ 3. Iniciará el servidor Flask en el puerto 4321
+
+### Autenticación
+
+Todos los endpoints (excepto `/api/auth/login`) requieren autenticación JWT.
+
+**IMPORTANTE**: Los usuarios no pueden registrarse por sí mismos. Solo los administradores pueden crear usuarios a través del endpoint `POST /api/users` (requiere autenticación de admin).
+
+Para autenticarte:
+1. Inicia sesión con credenciales proporcionadas por un administrador: `POST /api/auth/login` (retorna `access_token` y `refresh_token`)
+2. Usa el token en las peticiones: `Authorization: Bearer <access_token>`
+
+**Gestión de usuarios (solo administradores):**
+- `GET /api/users` - Listar usuarios con paginación
+- `POST /api/users` - Crear nuevo usuario
+- `GET /api/users/<user_id>` - Obtener usuario
+- `PUT /api/users/<user_id>/role` - Cambiar rol de usuario
+- `DELETE /api/users/<user_id>` - Eliminar usuario (soft delete)
+- `POST /api/users/<user_id>/activate` - Reactivar usuario
+
+Para más información sobre la API de autenticación, consulta los endpoints en `api/auth.py` y `api/users.py`.
 
 ## API Calls
 The API calls cover functionality described in the flows (such as software upgrade demo) as REST APIs.

@@ -68,6 +68,18 @@ class Policy(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
+class User(Base):
+    __tablename__ = 'user'
+    
+    id = Column(Integer, primary_key=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    password_hash = Column(String, nullable=False)
+    role = Column(String, default='user', nullable=False)  # 'user' o 'admin'
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_login = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
 class Database():
     def __init__(self):
 
@@ -415,6 +427,273 @@ class Database():
         except Exception as e:
             self.session.rollback()
             raise DatabaseError(f"Unexpected error deleting policy with id {policy_id}", e)
+
+    def createUser(self, email, password, role='user'):
+        """
+        Crea un nuevo usuario con password hasheado
+        
+        Args:
+            email: Email del usuario (único)
+            password: Password en texto plano (se hasheará)
+            role: Rol del usuario ('user' o 'admin')
+        
+        Returns:
+            User: El objeto User creado o None si el email ya existe
+        """
+        try:
+            # Verificar si el usuario ya existe
+            existing_user = self.session.query(User).filter_by(email=email).first()
+            if existing_user:
+                return None
+            
+            # Importar password_service aquí para evitar dependencia circular
+            from core.auth.password_service import hash_password
+            
+            # Hash del password
+            password_hash = hash_password(password)
+            
+            # Crear nuevo usuario
+            new_user = User(
+                email=email,
+                password_hash=password_hash,
+                role=role,
+                is_active=True
+            )
+            self.session.add(new_user)
+            self.session.commit()
+            return new_user
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error creating user with email {email}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error creating user with email {email}", e)
+
+    def getUser(self, email):
+        """
+        Obtiene un usuario por email
+        
+        Args:
+            email: Email del usuario
+        
+        Returns:
+            User: El objeto User o None si no existe
+        """
+        try:
+            user = self.session.query(User).filter_by(email=email).first()
+            return user
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error retrieving user with email {email}", e)
+        except Exception as e:
+            raise DatabaseError(f"Unexpected error retrieving user with email {email}", e)
+
+    def getUserById(self, user_id):
+        """
+        Obtiene un usuario por ID
+        
+        Args:
+            user_id: ID del usuario
+        
+        Returns:
+            User: El objeto User o None si no existe
+        """
+        try:
+            user = self.session.query(User).filter_by(id=user_id).first()
+            return user
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error retrieving user with id {user_id}", e)
+        except Exception as e:
+            raise DatabaseError(f"Unexpected error retrieving user with id {user_id}", e)
+
+    def getUsersPaginated(self, page=1, per_page=20, filters=None):
+        """
+        Obtiene usuarios con paginación optimizada
+        
+        Args:
+            page: Número de página (empezando en 1)
+            per_page: Items por página (máximo 100)
+            filters: dict con {'role': 'admin', 'is_active': True, 'search': 'email'}
+        
+        Returns:
+            tuple: (users_list, total_count)
+        """
+        try:
+            # Validar per_page máximo
+            if per_page > 100:
+                per_page = 100
+            
+            # Construir query base
+            query = self.session.query(User)
+            
+            # Aplicar filtros
+            if filters:
+                if filters.get('role'):
+                    query = query.filter(User.role == filters['role'])
+                if filters.get('is_active') is not None:
+                    query = query.filter(User.is_active == filters['is_active'])
+                if filters.get('search'):
+                    search_term = f"%{filters['search']}%"
+                    query = query.filter(User.email.ilike(search_term))
+            
+            # Conteo total (una query optimizada)
+            total = query.count()
+            
+            # Paginación con offset y limit (una query optimizada)
+            offset = (page - 1) * per_page
+            users = query.order_by(User.created_at.desc()).offset(offset).limit(per_page).all()
+            
+            return users if users else [], total
+        except SQLAlchemyError as e:
+            raise DatabaseError("Error retrieving paginated users", e)
+        except Exception as e:
+            raise DatabaseError("Unexpected error retrieving paginated users", e)
+
+    def getUsersCount(self, filters=None):
+        """
+        Obtiene el conteo total de usuarios con filtros
+        
+        Args:
+            filters: dict con {'role': 'admin', 'is_active': True, 'search': 'email'}
+        
+        Returns:
+            int: Número total de usuarios que cumplen los filtros
+        """
+        try:
+            query = self.session.query(User)
+            
+            # Aplicar filtros (mismos que getUsersPaginated)
+            if filters:
+                if filters.get('role'):
+                    query = query.filter(User.role == filters['role'])
+                if filters.get('is_active') is not None:
+                    query = query.filter(User.is_active == filters['is_active'])
+                if filters.get('search'):
+                    search_term = f"%{filters['search']}%"
+                    query = query.filter(User.email.ilike(search_term))
+            
+            return query.count()
+        except SQLAlchemyError as e:
+            raise DatabaseError("Error counting users", e)
+        except Exception as e:
+            raise DatabaseError("Unexpected error counting users", e)
+
+    def updateUserRole(self, user_id, new_role):
+        """
+        Actualiza el rol de un usuario
+        
+        Args:
+            user_id: ID del usuario
+            new_role: Nuevo rol ('user' o 'admin')
+        
+        Returns:
+            bool: True si se actualizó correctamente, False si no existe
+        """
+        try:
+            user_to_update = self.session.query(User).filter_by(id=user_id).first()
+            if user_to_update:
+                user_to_update.role = new_role
+                user_to_update.updated_at = datetime.now(timezone.utc)
+                self.session.commit()
+                return True
+            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error updating user role for user {user_id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error updating user role for user {user_id}", e)
+
+    def updateUserLastLogin(self, user_id):
+        """
+        Actualiza el último login de un usuario
+        
+        Args:
+            user_id: ID del usuario
+        
+        Returns:
+            bool: True si se actualizó correctamente, False si no existe
+        """
+        try:
+            user_to_update = self.session.query(User).filter_by(id=user_id).first()
+            if user_to_update:
+                user_to_update.last_login = datetime.now(timezone.utc)
+                user_to_update.updated_at = datetime.now(timezone.utc)
+                self.session.commit()
+                return True
+            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error updating last login for user {user_id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error updating last login for user {user_id}", e)
+
+    def deleteUser(self, user_id):
+        """
+        Elimina un usuario (soft delete - is_active=False)
+        
+        Args:
+            user_id: ID del usuario
+        
+        Returns:
+            bool: True si se eliminó correctamente, False si no existe
+        """
+        try:
+            user_to_delete = self.session.query(User).filter_by(id=user_id).first()
+            if user_to_delete:
+                user_to_delete.is_active = False
+                user_to_delete.updated_at = datetime.now(timezone.utc)
+                self.session.commit()
+                return True
+            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error deleting user with id {user_id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error deleting user with id {user_id}", e)
+
+    def activateUser(self, user_id):
+        """
+        Reactiva un usuario (is_active=True)
+        
+        Args:
+            user_id: ID del usuario
+        
+        Returns:
+            bool: True si se reactivó correctamente, False si no existe
+        """
+        try:
+            user_to_activate = self.session.query(User).filter_by(id=user_id).first()
+            if user_to_activate:
+                user_to_activate.is_active = True
+                user_to_activate.updated_at = datetime.now(timezone.utc)
+                self.session.commit()
+                return True
+            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error activating user with id {user_id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error activating user with id {user_id}", e)
+
+    def verifyPassword(self, user, password):
+        """
+        Verifica un password contra el hash almacenado
+        
+        Args:
+            user: Objeto User
+            password: Password en texto plano
+        
+        Returns:
+            bool: True si el password es correcto, False en caso contrario
+        """
+        try:
+            from core.auth.password_service import verify_password
+            return verify_password(password, user.password_hash)
+        except Exception as e:
+            raise DatabaseError(f"Error verifying password for user {user.id}", e)
 
     def printDevice(self, device):
         print(
