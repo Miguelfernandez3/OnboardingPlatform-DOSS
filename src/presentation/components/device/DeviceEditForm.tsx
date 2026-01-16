@@ -14,6 +14,9 @@ interface DeviceEditFormProps {
 export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditFormProps): JSX.Element {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
+    name: device.name || '',
+    type: device.type || '',
+    manufacturer: device.manufacturer || '',
     ip: device.ip || '',
     mac: device.mac || '',
     model: device.model || '',
@@ -125,6 +128,95 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                {t('device.info.name')}:
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder={t('device.info.namePlaceholder')}
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid #ced4da',
+                  borderRadius: '4px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                {t('device.info.type')}:
+              </label>
+              <input
+                type="text"
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                placeholder={t('device.info.typePlaceholder')}
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid #ced4da',
+                  borderRadius: '4px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                {t('device.info.manufacturer')}:
+              </label>
+              <input
+                type="text"
+                value={formData.manufacturer}
+                onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
+                placeholder={t('device.info.manufacturerPlaceholder')}
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid #ced4da',
+                  borderRadius: '4px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                {t('common.model')}:
+              </label>
+              <input
+                type="text"
+                value={formData.model}
+                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                placeholder={t('device.info.modelPlaceholder')}
+                required
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid #ced4da',
+                  borderRadius: '4px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+
+            <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold'}}>
                 {t('device.info.ip')}:
               </label>
@@ -155,28 +247,6 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
                 value={formData.mac}
                 onChange={(e) => setFormData({ ...formData, mac: e.target.value })}
                 placeholder="00:1B:44:11:3A:B7"
-                autoComplete="off"
-                data-lpignore="true"
-                data-form-type="other"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '4px',
-                  fontSize: '1rem'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                {t('common.model')}:
-              </label>
-              <input
-                type="text"
-                value={formData.model}
-                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                required
                 autoComplete="off"
                 data-lpignore="true"
                 data-form-type="other"

@@ -17,7 +17,7 @@ export function useDevices(): UseDevicesReturn {
   const { data: devices = [], isLoading, isError, error } = useQuery({
     queryKey: queryKeys.devices.all,
     queryFn: deviceService.getDevices,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 5, // 5 segundos
   });
 
   return {
