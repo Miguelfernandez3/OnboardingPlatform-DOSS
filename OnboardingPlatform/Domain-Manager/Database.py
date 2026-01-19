@@ -678,6 +678,31 @@ class Database():
             self.session.rollback()
             raise DatabaseError(f"Unexpected error activating user with id {user_id}", e)
 
+    def deactivateUser(self, user_id):
+        """
+        Desactiva un usuario (is_active=False)
+        
+        Args:
+            user_id: ID del usuario
+        
+        Returns:
+            bool: True si se desactivó correctamente, False si no existe
+        """
+        try:
+            user_to_deactivate = self.session.query(User).filter_by(id=user_id).first()
+            if user_to_deactivate:
+                user_to_deactivate.is_active = False
+                user_to_deactivate.updated_at = datetime.now(timezone.utc)
+                self.session.commit()
+                return True
+            return False
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error deactivating user with id {user_id}", e)
+        except Exception as e:
+            self.session.rollback()
+            raise DatabaseError(f"Unexpected error deactivating user with id {user_id}", e)
+
     def verifyPassword(self, user, password):
         """
         Verifica un password contra el hash almacenado

@@ -365,3 +365,55 @@ def activate_user(current_user, user_id):
             'code': 'DATABASE_ERROR',
             'details': {}
         }), 500
+
+@users_bp.route('/api/users/<int:user_id>/deactivate', methods=['POST'])
+@handle_api_errors
+@require_admin
+def deactivate_user(current_user, user_id):
+    """Deactivates a user (admin only)"""
+    dadm = get_dadm_instance()
+    if dadm is None:
+        return jsonify({
+            'error': 'DeviceDomainManager not initialized',
+            'code': 'INITIALIZATION_ERROR',
+            'details': {}
+        }), 500
+    
+    try:
+        # Verificar que el usuario existe
+        user = dadm.db.getUserById(user_id)
+        if user is None:
+            return jsonify({
+                'error': f'User with id {user_id} not found',
+                'code': 'USER_NOT_FOUND',
+                'details': {}
+            }), 404
+        
+        # No permitir auto-desactivación
+        if user_id == current_user['id']:
+            return jsonify({
+                'error': 'Cannot deactivate your own account',
+                'code': 'CANNOT_DEACTIVATE_SELF',
+                'details': {}
+            }), 400
+        
+        success = dadm.db.deactivateUser(user_id)
+        if success:
+            updated_user = dadm.db.getUserById(user_id)
+            return jsonify({
+                'user': user_to_dict(updated_user)
+            }), 200
+        else:
+            return jsonify({
+                'error': 'Failed to deactivate user',
+                'code': 'DEACTIVATE_FAILED',
+                'details': {}
+            }), 500
+    except DatabaseError as e:
+        logging.error(f"Database error in deactivate_user: {e.message}", exc_info=True)
+        return jsonify({
+            'error': e.message,
+            'code': 'DATABASE_ERROR',
+            'details': {}
+        }), 500
+
