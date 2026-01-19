@@ -11,6 +11,10 @@ from confluent_kafka import Consumer, Producer
 from Database import TMUD, Database
 import sys
 from flask import Flask, request, jsonify
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,6 +23,11 @@ parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 
 # Add the Implementation directory to sys.path
 sys.path.append(parent_dir)
+
+# Import shared authentication
+shared_auth_path = os.path.join(parent_dir, 'shared_auth')
+sys.path.insert(0, shared_auth_path)
+from decorators import require_auth
 
 app = Flask(__name__)
 
@@ -224,7 +233,8 @@ class ThreatMUDManager:
             logging.info("TMUD Server is closing")
 
 @app.route('/tmud', methods=['POST'])
-def newtmud():
+@require_auth
+def newtmud(current_user):
     logging.info(f"Received POST request: /tmud")
     js = request.get_json()
     logging.info(f"Request payload: {js}")
@@ -240,7 +250,8 @@ def newtmud():
     return response
 
 @app.route('/api/threats', methods=['GET'])
-def get_all_threats():
+@require_auth
+def get_all_threats(current_user):
     """Obtiene todos los threats (TMUDs)"""
     logging.info(f"Received GET request: /api/threats")
     try:
@@ -268,7 +279,8 @@ def get_all_threats():
         }), 500
 
 @app.route('/api/threats/device/<device_identifier>', methods=['GET'])
-def get_threats_by_device(device_identifier):
+@require_auth
+def get_threats_by_device(device_identifier, current_user):
     """Obtiene todos los threats asociados a un dispositivo"""
     logging.info(f"Received GET request: /api/threats/device/{device_identifier}")
     try:
@@ -297,7 +309,8 @@ def get_threats_by_device(device_identifier):
         }), 500
 
 @app.route('/api/threats/<threat_id>', methods=['GET'])
-def get_threat_by_id(threat_id):
+@require_auth
+def get_threat_by_id(threat_id, current_user):
     """Obtiene un threat específico por ID"""
     logging.info(f"Received GET request: /api/threats/{threat_id}")
     try:

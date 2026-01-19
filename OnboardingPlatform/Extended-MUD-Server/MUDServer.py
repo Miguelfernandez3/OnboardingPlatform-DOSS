@@ -1,13 +1,25 @@
 
 from flask import Flask, request, abort, send_file
+from dotenv import load_dotenv
 import json
 import sys
 import os
 
+# Load environment variables from .env file
+load_dotenv()
+
+# Import shared authentication
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+shared_auth_path = os.path.join(parent_dir, 'shared_auth')
+sys.path.insert(0, shared_auth_path)
+from decorators import require_auth
+
 app = Flask(__name__)
 
 @app.route('/list',methods = ['GET'])
-def getList():
+@require_auth
+def getList(current_user):
     lst = os.listdir('./files')
     ret = []
     print(lst)
@@ -19,7 +31,8 @@ def getList():
     return json.dumps(ret)
 
 @app.route('/<hash>', methods = ['GET'])
-def getThreatMudFile(hash):
+@require_auth
+def getThreatMudFile(hash, current_user):
     print("hash ", hash)
     splited = hash.split(".")
     if len(splited) == 1:
@@ -41,7 +54,8 @@ def getThreatMudFile(hash):
         abort(404)
 
 @app.route("/signature", methods = ['GET'])
-def getSignature():
+@require_auth
+def getSignature(current_user):
     return "signature"
 
 if __name__ == "__main__":

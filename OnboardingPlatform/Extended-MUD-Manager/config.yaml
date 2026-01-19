@@ -29,3 +29,6 @@ PolicyTranslator:
   Hostname: 127.0.0.1
   Port: 5001
   Endpoint: "translate"
+
+Authentication:
+  jwt_secret_key: ${JWT_SECRET_KEY}

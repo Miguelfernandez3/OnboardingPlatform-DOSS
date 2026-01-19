@@ -6,6 +6,7 @@ import time
 import logging
 
 from flask import Flask, request
+from dotenv import load_dotenv
 
 import MUDFileSigner as Verifier
 import requests
@@ -16,6 +17,10 @@ from Database import Database, MUD
 from confluent_kafka import Consumer, Producer
 import json
 import sys
+
+# Load environment variables from .env file
+load_dotenv()
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Go up one level to the Implementation directory
@@ -26,6 +31,16 @@ sys.path.append(parent_dir)
 
 from Policy_Translator import mudtranslator
 import traceback
+
+# Import shared authentication
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+shared_auth_path = os.path.join(parent_dir, 'shared_auth')
+sys.path.insert(0, shared_auth_path)
+from decorators import require_auth
+
 app = Flask(__name__)
 
 manager = None
@@ -47,12 +62,22 @@ class MUDManager:
         if self.SetInterval:
             self.periodicCheck()
 
-        pconf = {
-            'bootstrap.servers': self.broker,
-        }
-        self.producer = Producer(pconf)
+        # Kafka producer initialization (currently disabled - uncomment if Kafka is available)
+        # The Producer will attempt to connect immediately, causing timeout errors if Kafka is not available
+        self.producer = None
+        # Uncomment the following lines if Kafka is available and needed:
+        # try:
+        #     pconf = {
+        #         'bootstrap.servers': self.broker,
+        #     }
+        #     self.producer = Producer(pconf)
+        #     logging.info(f"Kafka producer initialized for broker {self.broker}")
+        # except Exception as e:
+        #     logging.warning(f"Could not initialize Kafka producer for broker {self.broker}: {e}")
+        #     logging.warning("Kafka functionality will be disabled. MUD Manager will continue without Kafka.")
 
-        threading.Thread(target=self.start).start()
+        # Start Kafka consumer thread (currently disabled)
+        # threading.Thread(target=self.start).start()
         #self.start()
 
     def periodicCheck(self):
@@ -72,6 +97,10 @@ class MUDManager:
         threading.Timer(float(self.interval), function=self.periodicCheck).start()
 
     def sendMUDFile(self, mud):
+        """Envía un archivo MUD a través de Kafka (si está disponible)"""
+        if self.producer is None:
+            logging.warning("Kafka producer not available. Skipping MUD file send to Kafka.")
+            return
 
         try:
             dic = {
@@ -223,7 +252,8 @@ class MUDManager:
 '''
 
 @app.route('/mud', methods=['POST'])
-def newConnexion():
+@require_auth
+def newConnexion(current_user):
     logging.info(f"Received POST request: /mud")
     js = request.get_json()
     logging.info(f"Request payload: {js}")

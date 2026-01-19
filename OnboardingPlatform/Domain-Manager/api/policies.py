@@ -5,6 +5,7 @@ Endpoints related to MSPL policies.
 from flask import Blueprint, jsonify, request
 from utils.error_handlers import handle_api_errors, require_device
 from utils.app_context import get_dadm_instance
+from core.auth.decorators import require_auth
 from datetime import datetime, timezone
 import logging
 
@@ -12,8 +13,9 @@ policies_bp = Blueprint('policies', __name__)
 
 @policies_bp.route('/api/devices/<device_id>/policies', methods=['GET'])
 @handle_api_errors
+@require_auth
 @require_device
-def get_device_policies(device_id, device):
+def get_device_policies(device_id, device, current_user):
     """Gets MSPL policies applied to a device"""
     dadm = get_dadm_instance()
     policies = dadm.policy_service.get_device_policies(device_id, device)
@@ -23,8 +25,9 @@ def get_device_policies(device_id, device):
 
 @policies_bp.route('/api/devices/<device_id>/apply-policy', methods=['POST'])
 @handle_api_errors
+@require_auth
 @require_device
-def apply_policy(device_id, device):
+def apply_policy(device_id, device, current_user):
     """Applies an MSPL policy directly to a device"""
     dadm = get_dadm_instance()
     
@@ -86,7 +89,8 @@ def apply_policy(device_id, device):
 
 @policies_bp.route('/api/devices/<device_id>/policies/<policy_id>/enforcement-status', methods=['POST'])
 @handle_api_errors
-def update_policy_enforcement_status(device_id, policy_id):
+@require_auth
+def update_policy_enforcement_status(device_id, policy_id, current_user):
     """
     Callback endpoint to receive enforcement status updates
     from DSP Enforcer/ERA after applying a policy
@@ -198,8 +202,9 @@ def update_policy_enforcement_status(device_id, policy_id):
 
 @policies_bp.route('/api/devices/<device_id>/enforcement-status', methods=['GET'])
 @handle_api_errors
+@require_auth
 @require_device
-def get_enforcement_status(device_id, device):
+def get_enforcement_status(device_id, device, current_user):
     """Gets the enforcement status of a device based on real policies"""
     dadm = get_dadm_instance()
     status = dadm.policy_service.get_enforcement_status(device_id, device)

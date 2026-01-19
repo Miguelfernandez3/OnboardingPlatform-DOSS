@@ -5,14 +5,16 @@ Endpoints related to threats.
 from flask import Blueprint, jsonify, request
 from utils.error_handlers import handle_api_errors, require_device
 from utils.app_context import get_dadm_instance
+from core.auth.decorators import require_auth
 import logging
 
 threats_bp = Blueprint('threats', __name__)
 
 @threats_bp.route('/api/devices/<device_id>/threats', methods=['GET'])
 @handle_api_errors
+@require_auth
 @require_device
-def get_device_threats(device_id, device):
+def get_device_threats(device_id, device, current_user):
     """Gets threats associated with a device"""
     logging.info(f"get_device_threats called for device_id: {device_id}")
     logging.debug(f"Device found: identifier={device.identifier}, type={type(device.identifier)}")
@@ -63,7 +65,8 @@ def get_device_threats(device_id, device):
 
 @threats_bp.route('/newthreat', methods=['POST'])
 @handle_api_errors
-def newThreat():
+@require_auth
+def newThreat(current_user):
     """Legacy endpoint for new threat"""
     data = request.get_json()
     logging.info(f"Received new threat: {data}")

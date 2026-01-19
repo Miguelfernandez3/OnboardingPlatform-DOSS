@@ -5,6 +5,7 @@ Endpoints related to mitigations.
 from flask import Blueprint, jsonify
 from utils.error_handlers import handle_api_errors, require_device
 from utils.app_context import get_dadm_instance
+from core.auth.decorators import require_auth
 from datetime import datetime
 import logging
 
@@ -12,8 +13,9 @@ mitigations_bp = Blueprint('mitigations', __name__)
 
 @mitigations_bp.route('/api/devices/<device_id>/mitigations', methods=['GET'])
 @handle_api_errors
+@require_auth
 @require_device
-def get_device_mitigations(device_id, device):
+def get_device_mitigations(device_id, device, current_user):
     """Gets mitigations associated with a device"""
     dadm = get_dadm_instance()
     mitigations = dadm.mitigation_service.get_device_mitigations(device_id, device)
@@ -23,8 +25,9 @@ def get_device_mitigations(device_id, device):
 
 @mitigations_bp.route('/api/devices/<device_id>/mitigations/<mitigation_id>/enforce', methods=['POST'])
 @handle_api_errors
+@require_auth
 @require_device
-def enforce_mitigation(device_id, device, mitigation_id):
+def enforce_mitigation(device_id, device, mitigation_id, current_user):
     """Applies (enforce) a mitigation on a device"""
     dadm = get_dadm_instance()
     
@@ -90,8 +93,9 @@ def enforce_mitigation(device_id, device, mitigation_id):
 
 @mitigations_bp.route('/api/devices/<device_id>/mitigations/<mitigation_id>/revoke', methods=['POST'])
 @handle_api_errors
+@require_auth
 @require_device
-def revoke_mitigation(device_id, device, mitigation_id):
+def revoke_mitigation(device_id, device, mitigation_id, current_user):
     """Revokes (revoke) a mitigation on a device"""
     dadm = get_dadm_instance()
     

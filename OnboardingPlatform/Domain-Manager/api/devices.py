@@ -6,6 +6,7 @@ from flask import Blueprint, jsonify, request
 from utils.error_handlers import handle_api_errors, require_device
 from utils.app_context import get_dadm_instance
 from utils.formatters import device_to_dict
+from core.auth.decorators import require_auth
 from Database import DatabaseError
 import logging
 import json
@@ -15,7 +16,8 @@ devices_bp = Blueprint('devices', __name__)
 
 @devices_bp.route('/api/devices', methods=['GET'])
 @handle_api_errors
-def get_devices():
+@require_auth
+def get_devices(current_user):
     """Gets the list of all devices"""
     dadm = get_dadm_instance()
     devices = dadm.db.getAllDevices()
@@ -33,8 +35,9 @@ def get_devices():
 
 @devices_bp.route('/api/devices/<device_id>', methods=['GET'])
 @handle_api_errors
+@require_auth
 @require_device
-def get_device(device_id, device):
+def get_device(device_id, device, current_user):
     """Gets a specific device by ID"""
     device_dict = device_to_dict(device)
     return jsonify({
@@ -43,8 +46,9 @@ def get_device(device_id, device):
 
 @devices_bp.route('/api/devices/<device_id>', methods=['PUT'])
 @handle_api_errors
+@require_auth
 @require_device
-def update_device(device_id, device):
+def update_device(device_id, device, current_user):
     """Updates device information"""
     dadm = get_dadm_instance()
     data = request.get_json()
@@ -82,8 +86,9 @@ def update_device(device_id, device):
 
 @devices_bp.route('/api/devices/<device_id>', methods=['DELETE'])
 @handle_api_errors
+@require_auth
 @require_device
-def delete_device(device_id, device):
+def delete_device(device_id, device, current_user):
     """Deletes a device"""
     dadm = get_dadm_instance()
     success = dadm.db.deleteDevice(device)
@@ -98,8 +103,9 @@ def delete_device(device_id, device):
 
 @devices_bp.route('/api/devices/<device_id>/passport', methods=['GET'])
 @handle_api_errors
+@require_auth
 @require_device
-def get_device_passport(device_id, device):
+def get_device_passport(device_id, device, current_user):
     """Gets the digital passport (DSP) of a device"""
     # DSP is stored in device.dsp as JSON string
     dsp_data = {}
@@ -116,8 +122,9 @@ def get_device_passport(device_id, device):
 
 @devices_bp.route('/api/devices/<device_id>/mud', methods=['GET'])
 @handle_api_errors
+@require_auth
 @require_device
-def get_device_mud(device_id, device):
+def get_device_mud(device_id, device, current_user):
     """Gets the MUD file of a device"""
     mud_data = {}
     if device.mudfile:
@@ -159,7 +166,8 @@ def get_device_mud(device_id, device):
 
 @devices_bp.route('/api/devices/<device_id>/apply-idsp2', methods=['POST'])
 @handle_api_errors
-def apply_idsp2(device_id):
+@require_auth
+def apply_idsp2(device_id, current_user):
     """Applies an IDSP2 ID to a device"""
     dadm = get_dadm_instance()
     data = request.get_json()
@@ -199,7 +207,8 @@ def apply_idsp2(device_id):
 # Legacy endpoints (maintain compatibility)
 @devices_bp.route('/dsp', methods=['GET', 'POST'])
 @handle_api_errors
-def post_DSP():
+@require_auth
+def post_DSP(current_user):
     """Legacy endpoint for registering DSP"""
     dadm = get_dadm_instance()
     if request.method == 'POST':
@@ -217,7 +226,8 @@ def post_DSP():
 
 @devices_bp.route('/devices', methods=['GET'])
 @handle_api_errors
-def printDevices():
+@require_auth
+def printDevices(current_user):
     """Legacy endpoint for listing devices"""
     dadm = get_dadm_instance()
     devices = dadm.printAllDevices()

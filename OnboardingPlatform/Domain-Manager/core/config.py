@@ -61,7 +61,7 @@ class Config:
     def topics(self) -> list:
         """List of Kafka topics."""
         return self._config.get('DeviceDomainManager', {}).get('topics', [])
-    
+
     @property
     def jwt_secret_key(self) -> str:
         """JWT secret key for token signing."""
