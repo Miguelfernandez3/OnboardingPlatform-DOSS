@@ -24,7 +24,12 @@
     "devices": "Devices",
     "users": "Users",
     "logout": "Logout",
-    "welcome": "Welcome, {{email}}"
+    "welcome": "Welcome, {{email}}",
+    "language": "Language"
+  },
+  "users": {
+    "title": "Users",
+    "comingSoon": "Coming soon"
   },
   "auth": {
     "login": "Login",
@@ -197,4 +202,3 @@
     "noData": "No data to display"
   }
 }
-

@@ -20,11 +20,16 @@
     "manufacturer": "Fabricante"
   },
   "navbar": {
-    "title": "Plataforma de Onboarding",
+    "title": "Onboarding Platform",
     "devices": "Dispositivos",
     "users": "Usuarios",
     "logout": "Cerrar sesión",
-    "welcome": "Bienvenido, {{email}}"
+    "welcome": "Bienvenido, {{email}}",
+    "language": "Idioma"
+  },
+  "users": {
+    "title": "Usuarios",
+    "comingSoon": "Próximamente"
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -197,4 +202,3 @@
     "noData": "No hay datos para mostrar"
   }
 }
-
