@@ -21,6 +21,14 @@ export const jsonServerConfig: AdapterConfig = {
     enforceMitigation: '/mitigations/:mitigationId',
     revokeMitigation: '/mitigations/:mitigationId',
     updateDevice: '/devices/:id',
-    deleteDevice: '/devices/:id'
+    deleteDevice: '/devices/:id',
+    login: '/auth/login',
+    refresh: '/auth/refresh',
+    me: '/auth/me',
+    changePassword: '/auth/change-password',
+    users: '/users',
+    user: '/users/:id',
+    userRole: '/users/:id',
+    userActivate: '/users/:id'
   }
 };

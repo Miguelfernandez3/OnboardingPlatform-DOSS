@@ -2,16 +2,16 @@ import { BaseApiClient } from '../base/BaseApiClient';
 import { ConfigProvider } from '../../../core/adapters/config/ConfigProvider';
 import { jsonServerConfig } from './json-server.config';
 import { Device, DeviceData, Policy, PolicyData, MUD, MUDData, Passport, PassportData, Threat, ThreatData, Mitigation, MitigationData } from '../../../core/domain';
-import { ApplyResult, EnforcementStatus } from '../../../core/ports';
+import { ApplyResult, EnforcementStatus, AuthResponse, UserData, UsersResponse, UserFilters } from '../../../core/ports';
 
 /**
  * JsonServerApiClient - Implementación para JSON Server
  * Consume la API REST del servidor mock JSON Server
  */
 export class JsonServerApiClient extends BaseApiClient {
-  constructor() {
+  constructor(onTokenRefresh?: () => Promise<void>, onAuthError?: () => void) {
     const configProvider = new ConfigProvider(jsonServerConfig);
-    super(configProvider);
+    super(configProvider, onTokenRefresh, onAuthError);
   }
 
   async getDevices(): Promise<Device[]> {
@@ -271,5 +271,141 @@ export class JsonServerApiClient extends BaseApiClient {
 
   async deleteDevice(deviceId: string): Promise<void> {
     await this.delete<void>('deleteDevice', { id: deviceId });
+  }
+
+  async login(email: string, password: string): Promise<AuthResponse> {
+    // Mock: buscar usuario en la colección users
+    const users = await this.get<UserData[]>('users');
+    const user = users.find(u => u.email === email);
+    
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    // Mock: validar password (en producción esto sería un hash)
+    // Para el mock, asumimos que el password es válido si el usuario existe
+    // En un mock real, podrías tener un campo password_hash y compararlo
+    
+    // Generar tokens mock (en producción estos serían JWT reales)
+    const accessToken = `mock_access_token_${user.id}_${Date.now()}`;
+    const refreshToken = `mock_refresh_token_${user.id}_${Date.now()}`;
+
+    return {
+      accessToken,
+      refreshToken,
+      user
+    };
+  }
+
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    // Mock: validar refresh token y generar nuevos tokens
+    // En un mock real, podrías almacenar los tokens y validarlos
+    const tokenParts = refreshToken.split('_');
+    if (tokenParts.length < 4 || tokenParts[0] !== 'mock' || tokenParts[1] !== 'refresh') {
+      throw new Error('Invalid refresh token');
+    }
+
+    const userId = tokenParts[2];
+    const user = await this.getUser(userId);
+
+    // Generar nuevos tokens
+    const newAccessToken = `mock_access_token_${user.id}_${Date.now()}`;
+    const newRefreshToken = `mock_refresh_token_${user.id}_${Date.now()}`;
+
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      user
+    };
+  }
+
+  async getCurrentUser(): Promise<UserData> {
+    // Mock: obtener usuario del token (simplificado)
+    // En producción, el backend decodificaría el token
+    const users = await this.get<UserData[]>('users');
+    // Por ahora, devolver el primer usuario (en producción vendría del token)
+    if (users.length === 0) {
+      throw new Error('User not found');
+    }
+    return users[0];
+  }
+
+  async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    // Mock: actualizar password del usuario actual
+    // En producción, esto validaría el oldPassword y actualizaría el hash
+    const user = await this.getCurrentUser();
+    // En un mock real, actualizarías el password en la base de datos
+    // Por ahora, solo validamos que el usuario existe
+    if (!user) {
+      throw new Error('User not found');
+    }
+  }
+
+  async getUsers(page?: number, limit?: number, filters?: UserFilters): Promise<UsersResponse> {
+    // JSON Server soporta paginación con _page y _limit
+    const params: Record<string, string> = {};
+    if (page !== undefined) {
+      params._page = page.toString();
+    }
+    if (limit !== undefined) {
+      params._limit = limit.toString();
+    }
+    if (filters?.email) {
+      params.email_like = filters.email;
+    }
+    if (filters?.role) {
+      params.role = filters.role;
+    }
+    if (filters?.isActive !== undefined) {
+      params.isActive = filters.isActive.toString();
+    }
+
+    const users = await this.get<UserData[]>('users', params);
+    const total = users.length; // En un mock real, necesitarías un endpoint que devuelva el total
+
+    return {
+      users: users || [],
+      total,
+      page: page || 1,
+      limit: limit || 10
+    };
+  }
+
+  async getUser(id: string): Promise<UserData> {
+    const user = await this.get<UserData>('user', { id });
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return user;
+  }
+
+  async createUser(email: string, password: string, role: string): Promise<UserData> {
+    const newUser: UserData = {
+      id: `user_${Date.now()}`,
+      email,
+      role,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const user = await this.post<UserData>('users', newUser);
+    return user;
+  }
+
+  async updateUserRole(id: string, role: string): Promise<UserData> {
+    const currentUser = await this.getUser(id);
+    const updatedUser = await this.put<UserData>('user', { ...currentUser, role }, { id });
+    return updatedUser;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await this.delete<void>('user', { id });
+  }
+
+  async activateUser(id: string): Promise<UserData> {
+    const currentUser = await this.getUser(id);
+    const updatedUser = await this.put<UserData>('user', { ...currentUser, isActive: true }, { id });
+    return updatedUser;
   }
 }

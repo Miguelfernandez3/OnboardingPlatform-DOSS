@@ -21,7 +21,15 @@ export const dossConfig: AdapterConfig = {
     enforceMitigation: '/devices/:id/mitigations/:mitigationId/enforce',
     revokeMitigation: '/devices/:id/mitigations/:mitigationId/revoke',
     updateDevice: '/devices/:id',
-    deleteDevice: '/devices/:id'
+    deleteDevice: '/devices/:id',
+    login: '/auth/login',
+    refresh: '/auth/refresh',
+    me: '/auth/me',
+    changePassword: '/auth/change-password',
+    users: '/users',
+    user: '/users/:id',
+    userRole: '/users/:id/role',
+    userActivate: '/users/:id/activate'
   }
 };
 

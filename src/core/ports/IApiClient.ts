@@ -11,6 +11,35 @@ export interface EnforcementStatus {
   timestamp: string;
 }
 
+export interface UserData {
+  id: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: UserData;
+}
+
+export interface UsersResponse {
+  users: UserData[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface UserFilters {
+  email?: string;
+  role?: string;
+  isActive?: boolean;
+}
+
 /**
  * IApiClient - Interface/Contrato para API Client
  * Define los métodos que debe implementar cualquier adapter de API
@@ -88,5 +117,55 @@ export abstract class IApiClient {
    * Elimina un dispositivo
    */
   abstract deleteDevice(deviceId: string): Promise<void>;
+
+  /**
+   * Autenticación: Inicia sesión con email y password
+   */
+  abstract login(email: string, password: string): Promise<AuthResponse>;
+
+  /**
+   * Autenticación: Refresca el token de acceso usando el refresh token
+   */
+  abstract refreshToken(refreshToken: string): Promise<AuthResponse>;
+
+  /**
+   * Autenticación: Obtiene el usuario actual autenticado
+   */
+  abstract getCurrentUser(): Promise<UserData>;
+
+  /**
+   * Autenticación: Cambia la contraseña del usuario actual
+   */
+  abstract changePassword(oldPassword: string, newPassword: string): Promise<void>;
+
+  /**
+   * Usuarios: Obtiene la lista de usuarios con paginación y filtros
+   */
+  abstract getUsers(page?: number, limit?: number, filters?: UserFilters): Promise<UsersResponse>;
+
+  /**
+   * Usuarios: Obtiene un usuario por ID
+   */
+  abstract getUser(id: string): Promise<UserData>;
+
+  /**
+   * Usuarios: Crea un nuevo usuario (solo admin)
+   */
+  abstract createUser(email: string, password: string, role: string): Promise<UserData>;
+
+  /**
+   * Usuarios: Actualiza el rol de un usuario (solo admin)
+   */
+  abstract updateUserRole(id: string, role: string): Promise<UserData>;
+
+  /**
+   * Usuarios: Elimina un usuario (solo admin)
+   */
+  abstract deleteUser(id: string): Promise<void>;
+
+  /**
+   * Usuarios: Activa un usuario (solo admin)
+   */
+  abstract activateUser(id: string): Promise<UserData>;
 }
 

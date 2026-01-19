@@ -10,5 +10,11 @@
   "/mud-files?type=:type": "/mudFiles?type=:type",
   "/mspl-files": "/msplFiles",
   "/mspl-files/:id": "/msplFiles/:id",
-  "/mspl-files?source=:source": "/msplFiles?source=:source"
+  "/mspl-files?source=:source": "/msplFiles?source=:source",
+  "/auth/login": "/auth/login",
+  "/auth/refresh": "/auth/refresh",
+  "/auth/me": "/auth/me",
+  "/auth/change-password": "/auth/change-password",
+  "/users": "/users",
+  "/users/:id": "/users/:id"
 }

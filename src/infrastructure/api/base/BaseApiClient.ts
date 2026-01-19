@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../core/ports';
 import { Device, Policy, MUD, Passport } from '../../../core/domain';
+import { setupAuthInterceptor } from '../interceptors/authInterceptor';
 
 /**
  * BaseApiClient - Clase base abstracta para adapters de API
@@ -8,29 +9,39 @@ import { Device, Policy, MUD, Passport } from '../../../core/domain';
  */
 export abstract class BaseApiClient extends IApiClient {
   protected config: IConfigProvider;
+  protected axiosInstance: AxiosInstance;
 
-  constructor(configProvider: IConfigProvider) {
+  constructor(configProvider: IConfigProvider, onTokenRefresh?: () => Promise<void>, onAuthError?: () => void) {
     super();
     this.config = configProvider;
+    
+    // Crear instancia de axios con la base URL
+    this.axiosInstance = axios.create({
+      baseURL: this.config.getApiBaseUrl(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Configurar interceptor de autenticación
+    setupAuthInterceptor(this.axiosInstance, onTokenRefresh, onAuthError);
   }
 
   /**
-   * Realiza una petición HTTP usando axios
+   * Realiza una petición HTTP usando la instancia de axios
    * @protected
    */
   protected async request<T>(endpoint: string, options: AxiosRequestConfig = {}): Promise<T> {
-    const url = `${this.config.getApiBaseUrl()}${endpoint}`;
-    
     const defaultOptions: AxiosRequestConfig = {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
         ...options.headers
-      },
-      ...options
+      }
     };
 
     try {
-      const response = await axios<T>(url, defaultOptions);
+      const response = await this.axiosInstance<T>(endpoint, defaultOptions);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -44,6 +55,18 @@ export abstract class BaseApiClient extends IApiClient {
       }
       throw error;
     }
+  }
+
+  /**
+   * Realiza una petición POST sin token (para login/refresh)
+   * @protected
+   */
+  protected async authPost<T>(endpoint: string, data: unknown, params: Record<string, string> = {}): Promise<T> {
+    const resolvedEndpoint = this.config.resolveEndpoint(endpoint, params);
+    return await this.request<T>(resolvedEndpoint, {
+      method: 'POST',
+      data: data
+    });
   }
 
   /**

@@ -21,7 +21,21 @@
   },
   "navbar": {
     "title": "Plataforma de Onboarding",
-    "devices": "Dispositivos"
+    "devices": "Dispositivos",
+    "users": "Usuarios",
+    "logout": "Cerrar sesión",
+    "welcome": "Bienvenido, {{email}}"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "submit": "Iniciar sesión",
+    "submitting": "Iniciando sesión...",
+    "error": "Error al iniciar sesión",
+    "invalidCredentials": "Credenciales inválidas",
+    "sessionExpired": "Sesión expirada",
+    "verifying": "Verificando autenticación..."
   },
   "devices": {
     "title": "Dispositivos",

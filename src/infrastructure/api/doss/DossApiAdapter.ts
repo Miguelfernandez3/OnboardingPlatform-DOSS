@@ -2,7 +2,7 @@ import { BaseApiClient } from '../base/BaseApiClient';
 import { ConfigProvider } from '../../../core/adapters/config/ConfigProvider';
 import { dossConfig } from './doss.config';
 import { Device, DeviceData, Policy, PolicyData, MUD, Passport, PassportData, Threat, ThreatData, Mitigation, MitigationData } from '../../../core/domain';
-import { ApplyResult, EnforcementStatus } from '../../../core/ports';
+import { ApplyResult, EnforcementStatus, AuthResponse, UserData, UsersResponse, UserFilters } from '../../../core/ports';
 
 /**
  * Interfaces para las respuestas de la API DOSS
@@ -69,14 +69,35 @@ interface MitigationApiResponse {
   data?: MitigationData;
 }
 
+interface LoginApiResponse {
+  access_token?: string;
+  accessToken?: string;
+  refresh_token?: string;
+  refreshToken?: string;
+  user: UserData;
+}
+
+interface UserApiResponse {
+  user?: UserData;
+  data?: UserData;
+}
+
+interface UsersApiResponse {
+  users?: UserData[];
+  data?: UserData[];
+  total?: number;
+  page?: number;
+  limit?: number;
+}
+
 /**
  * DossApiAdapter - Implementación específica para DOSS
  * Extiende BaseApiClient e implementa los métodos específicos de DOSS
  */
 export class DossApiAdapter extends BaseApiClient {
-  constructor() {
+  constructor(onTokenRefresh?: () => Promise<void>, onAuthError?: () => void) {
     const configProvider = new ConfigProvider(dossConfig);
-    super(configProvider);
+    super(configProvider, onTokenRefresh, onAuthError);
   }
 
   async getDevices(): Promise<Device[]> {
@@ -222,6 +243,119 @@ export class DossApiAdapter extends BaseApiClient {
 
   async deleteDevice(deviceId: string): Promise<void> {
     await this.delete<void>('deleteDevice', { id: deviceId });
+  }
+
+  async login(email: string, password: string): Promise<AuthResponse> {
+    const data = await this.authPost<LoginApiResponse>('login', { email, password });
+    // Soportar ambos formatos: snake_case (backend) y camelCase
+    return {
+      accessToken: data.access_token || data.accessToken || '',
+      refreshToken: data.refresh_token || data.refreshToken || '',
+      user: data.user
+    };
+  }
+
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    // Backend espera refresh_token (snake_case)
+    const data = await this.authPost<LoginApiResponse>('refresh', { refresh_token: refreshToken });
+    // El backend solo devuelve access_token, mantener el refresh_token existente
+    const accessToken = data.access_token || data.accessToken;
+    if (!accessToken) {
+      throw new Error('Invalid refresh response: no access token received');
+    }
+    // Obtener el usuario actual para devolverlo en la respuesta
+    let user: UserData;
+    try {
+      user = data.user || await this.getCurrentUser();
+    } catch (error) {
+      // Si no se puede obtener el usuario, lanzar error
+      throw new Error('Failed to get user after refresh');
+    }
+    return {
+      accessToken: accessToken,
+      refreshToken: refreshToken, // Mantener el refresh token existente
+      user: user
+    };
+  }
+
+  async getCurrentUser(): Promise<UserData> {
+    const data = await this.get<UserApiResponse>('me');
+    const user = data.user || data.data;
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  }
+
+  async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    await this.put<void>('changePassword', { oldPassword, newPassword });
+  }
+
+  async getUsers(page?: number, limit?: number, filters?: UserFilters): Promise<UsersResponse> {
+    const params: Record<string, string> = {};
+    if (page !== undefined) {
+      params.page = page.toString();
+    }
+    if (limit !== undefined) {
+      params.limit = limit.toString();
+    }
+    if (filters?.email) {
+      params.email = filters.email;
+    }
+    if (filters?.role) {
+      params.role = filters.role;
+    }
+    if (filters?.isActive !== undefined) {
+      params.isActive = filters.isActive.toString();
+    }
+
+    const data = await this.get<UsersApiResponse>('users', params);
+    return {
+      users: data.users || data.data || [],
+      total: data.total || (data.users || data.data || []).length,
+      page: data.page || page || 1,
+      limit: data.limit || limit || 10
+    };
+  }
+
+  async getUser(id: string): Promise<UserData> {
+    const data = await this.get<UserApiResponse>('user', { id });
+    const user = data.user || data.data;
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return user;
+  }
+
+  async createUser(email: string, password: string, role: string): Promise<UserData> {
+    const data = await this.post<UserApiResponse>('users', { email, password, role });
+    const user = data.user || data.data;
+    if (!user) {
+      throw new Error('Failed to create user');
+    }
+    return user;
+  }
+
+  async updateUserRole(id: string, role: string): Promise<UserData> {
+    const data = await this.put<UserApiResponse>('userRole', { role }, { id });
+    const user = data.user || data.data;
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await this.delete<void>('user', { id });
+  }
+
+  async activateUser(id: string): Promise<UserData> {
+    const data = await this.post<UserApiResponse>('userActivate', {}, { id });
+    const user = data.user || data.data;
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return user;
   }
 }
 

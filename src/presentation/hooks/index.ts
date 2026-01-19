@@ -4,3 +4,4 @@ export * from './useIsMobile';
 export * from './useMitigations';
 export * from './usePolicies';
 export * from './useThreats';
+export * from './useUsers';

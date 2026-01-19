@@ -21,7 +21,21 @@
   },
   "navbar": {
     "title": "Onboarding Platform",
-    "devices": "Devices"
+    "devices": "Devices",
+    "users": "Users",
+    "logout": "Logout",
+    "welcome": "Welcome, {{email}}"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "error": "Error signing in",
+    "invalidCredentials": "Invalid credentials",
+    "sessionExpired": "Session expired",
+    "verifying": "Verifying authentication..."
   },
   "devices": {
     "title": "Devices",
