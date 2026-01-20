@@ -287,20 +287,22 @@ export default function UsersPage(): JSX.Element {
                   >
                     {user.isActive ? t('users.deactivate') : t('users.activate')}
                   </button>
-                  <button
-                    onClick={() => setDeleteModal({ isOpen: true, user })}
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '4px',
-                      border: 'none',
-                      backgroundColor: '#dc3545',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {t('users.delete')}
-                  </button>
+                  {!user.isActive && (
+                    <button
+                      onClick={() => setDeleteModal({ isOpen: true, user })}
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '4px',
+                        border: 'none',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      {t('users.delete')}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -372,20 +374,22 @@ export default function UsersPage(): JSX.Element {
                         >
                           {user.isActive ? t('users.deactivate') : t('users.activate')}
                         </button>
-                        <button
-                          onClick={() => setDeleteModal({ isOpen: true, user })}
-                          style={{
-                            padding: '0.375rem 0.75rem',
-                            borderRadius: '4px',
-                            border: 'none',
-                            backgroundColor: '#dc3545',
-                            color: 'white',
-                            cursor: 'pointer',
-                            fontSize: '0.875rem'
-                          }}
-                        >
-                          {t('users.delete')}
-                        </button>
+                        {!user.isActive && (
+                          <button
+                            onClick={() => setDeleteModal({ isOpen: true, user })}
+                            style={{
+                              padding: '0.375rem 0.75rem',
+                              borderRadius: '4px',
+                              border: 'none',
+                              backgroundColor: '#dc3545',
+                              color: 'white',
+                              cursor: 'pointer',
+                              fontSize: '0.875rem'
+                            }}
+                          >
+                            {t('users.delete')}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

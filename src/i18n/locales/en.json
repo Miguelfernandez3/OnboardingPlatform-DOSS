@@ -86,6 +86,7 @@
       "CANNOT_DEACTIVATE_SELF": "You cannot deactivate your own account",
       "CANNOT_DELETE_SELF": "You cannot delete your own account",
       "USER_NOT_FOUND": "User not found",
+      "USER_MUST_BE_DEACTIVATED": "User must be deactivated before deletion",
       "EMAIL_EXISTS": "Email already registered",
       "INVALID_ROLE": "Invalid role",
       "DEACTIVATE_FAILED": "Failed to deactivate user",
