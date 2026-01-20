@@ -279,7 +279,7 @@ def update_user_role(current_user, user_id):
 @handle_api_errors
 @require_admin
 def delete_user(current_user, user_id):
-    """Deletes a user (soft delete, admin only)"""
+    """Deletes a user permanently (hard delete, admin only). User must be deactivated first."""
     dadm = get_dadm_instance()
     if dadm is None:
         return jsonify({
@@ -303,6 +303,14 @@ def delete_user(current_user, user_id):
             return jsonify({
                 'error': 'Cannot delete your own account',
                 'code': 'CANNOT_DELETE_SELF',
+                'details': {}
+            }), 400
+        
+        # Solo permitir eliminar usuarios desactivados
+        if user.is_active:
+            return jsonify({
+                'error': 'User must be deactivated before deletion',
+                'code': 'USER_MUST_BE_DEACTIVATED',
                 'details': {}
             }), 400
         

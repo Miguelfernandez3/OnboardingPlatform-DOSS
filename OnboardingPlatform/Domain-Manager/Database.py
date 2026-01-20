@@ -630,7 +630,7 @@ class Database():
 
     def deleteUser(self, user_id):
         """
-        Elimina un usuario (soft delete - is_active=False)
+        Elimina un usuario permanentemente (hard delete)
         
         Args:
             user_id: ID del usuario
@@ -641,8 +641,7 @@ class Database():
         try:
             user_to_delete = self.session.query(User).filter_by(id=user_id).first()
             if user_to_delete:
-                user_to_delete.is_active = False
-                user_to_delete.updated_at = datetime.now(timezone.utc)
+                self.session.delete(user_to_delete)
                 self.session.commit()
                 return True
             return False
