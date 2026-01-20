@@ -83,12 +83,49 @@ interface UserApiResponse {
 }
 
 interface UsersApiResponse {
-  users?: UserData[];
-  data?: UserData[];
+  users?: UserDataRaw[];
+  data?: UserDataRaw[];
   total?: number;
   page?: number;
   limit?: number;
+  pagination?: {
+    total: number;
+    page: number;
+    per_page: number;
+    pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
 }
+
+// Raw user data from API (snake_case)
+interface UserDataRaw {
+  id: string | number;
+  email: string;
+  role: string;
+  is_active?: boolean;
+  isActive?: boolean;
+  last_login?: string;
+  lastLogin?: string;
+  created_at?: string;
+  createdAt?: string;
+  updated_at?: string;
+  updatedAt?: string;
+}
+
+// Transform user data from snake_case to camelCase
+function transformUserData(raw: UserDataRaw): UserData {
+  return {
+    id: String(raw.id),
+    email: raw.email,
+    role: raw.role,
+    isActive: raw.is_active ?? raw.isActive ?? false,
+    lastLogin: raw.last_login ?? raw.lastLogin,
+    createdAt: raw.created_at ?? raw.createdAt,
+    updatedAt: raw.updated_at ?? raw.updatedAt,
+  };
+}
+
 
 /**
  * DossApiAdapter - Implementación específica para DOSS
@@ -103,22 +140,22 @@ export class DossApiAdapter extends BaseApiClient {
   async getDevices(): Promise<Device[]> {
     const data = await this.get<DevicesApiResponse>('devices');
     const devices = data.devices || data.data || [];
-    
+
     if (!Array.isArray(devices)) {
       return [];
     }
-    
+
     return devices.map(device => Device.fromJSON(device));
   }
 
   async getDevice(id: string): Promise<Device> {
     const data = await this.get<DeviceApiResponse>('device', { id });
     const device = data.device || data.data;
-    
+
     if (!device) {
       throw new Error(`Device with id ${id} not found`);
     }
-    
+
     return Device.fromJSON(device);
   }
 
@@ -135,11 +172,11 @@ export class DossApiAdapter extends BaseApiClient {
   async getDevicePolicies(id: string): Promise<Policy[]> {
     const data = await this.get<PoliciesApiResponse>('policies', { id });
     const policies = data.policies || data.data || [];
-    
+
     if (!Array.isArray(policies)) {
       return [];
     }
-    
+
     return policies.map(policy => Policy.fromJSON(policy));
   }
 
@@ -157,7 +194,7 @@ export class DossApiAdapter extends BaseApiClient {
     if (name) {
       params.name = name;
     }
-    
+
     const data = await this.postXml<ApplyResultApiResponse>('applyPolicy', msplXml, params);
     return {
       status: data.status || 'pending',
@@ -177,22 +214,22 @@ export class DossApiAdapter extends BaseApiClient {
   async getDeviceThreats(deviceId: string): Promise<Threat[]> {
     const data = await this.get<ThreatsApiResponse>('threats', { id: deviceId });
     const threats = data.threats || data.data || [];
-    
+
     if (!Array.isArray(threats)) {
       return [];
     }
-    
+
     return threats.map(threat => Threat.fromJSON({ ...threat, deviceId }));
   }
 
   async getDeviceMitigations(deviceId: string): Promise<Mitigation[]> {
     const data = await this.get<MitigationsApiResponse>('mitigations', { id: deviceId });
     const mitigations = data.mitigations || data.data || [];
-    
+
     if (!Array.isArray(mitigations)) {
       return [];
     }
-    
+
     return mitigations.map(mitigation => Mitigation.fromJSON({ ...mitigation, deviceId }));
   }
 
@@ -203,11 +240,11 @@ export class DossApiAdapter extends BaseApiClient {
       { id: deviceId, mitigationId }
     );
     const mitigation = data.mitigation || data.data;
-    
+
     if (!mitigation) {
       throw new Error(`Mitigation with id ${mitigationId} not found`);
     }
-    
+
     return Mitigation.fromJSON({ ...mitigation, deviceId });
   }
 
@@ -218,11 +255,11 @@ export class DossApiAdapter extends BaseApiClient {
       { id: deviceId, mitigationId }
     );
     const mitigation = data.mitigation || data.data;
-    
+
     if (!mitigation) {
       throw new Error(`Mitigation with id ${mitigationId} not found`);
     }
-    
+
     return Mitigation.fromJSON({ ...mitigation, deviceId });
   }
 
@@ -233,11 +270,11 @@ export class DossApiAdapter extends BaseApiClient {
       { id: deviceId }
     );
     const device = updateData.device || updateData.data;
-    
+
     if (!device) {
       throw new Error(`Device with id ${deviceId} not found`);
     }
-    
+
     return Device.fromJSON(device);
   }
 
@@ -310,11 +347,16 @@ export class DossApiAdapter extends BaseApiClient {
     }
 
     const data = await this.get<UsersApiResponse>('users', params);
+    const rawUsers = data.users || data.data || [];
+    const users = rawUsers.map(transformUserData);
+
+    // Support both direct fields and pagination object from API
+    const pagination = data.pagination;
     return {
-      users: data.users || data.data || [],
-      total: data.total || (data.users || data.data || []).length,
-      page: data.page || page || 1,
-      limit: data.limit || limit || 10
+      users,
+      total: pagination?.total ?? data.total ?? users.length,
+      page: pagination?.page ?? data.page ?? page ?? 1,
+      limit: pagination?.per_page ?? data.limit ?? limit ?? 10
     };
   }
 
@@ -351,6 +393,15 @@ export class DossApiAdapter extends BaseApiClient {
 
   async activateUser(id: string): Promise<UserData> {
     const data = await this.post<UserApiResponse>('userActivate', {}, { id });
+    const user = data.user || data.data;
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return user;
+  }
+
+  async deactivateUser(id: string): Promise<UserData> {
+    const data = await this.post<UserApiResponse>('userDeactivate', {}, { id });
     const user = data.user || data.data;
     if (!user) {
       throw new Error(`User with id ${id} not found`);

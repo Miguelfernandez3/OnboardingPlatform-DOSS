@@ -167,5 +167,10 @@ export abstract class IApiClient {
    * Usuarios: Activa un usuario (solo admin)
    */
   abstract activateUser(id: string): Promise<UserData>;
+
+  /**
+   * Usuarios: Desactiva un usuario (solo admin)
+   */
+  abstract deactivateUser(id: string): Promise<UserData>;
 }
 

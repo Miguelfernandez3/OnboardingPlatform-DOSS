@@ -29,7 +29,8 @@ export const dossConfig: AdapterConfig = {
     users: '/users',
     user: '/users/:id',
     userRole: '/users/:id/role',
-    userActivate: '/users/:id/activate'
+    userActivate: '/users/:id/activate',
+    userDeactivate: '/users/:id/deactivate'
   }
 };
 

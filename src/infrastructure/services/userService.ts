@@ -47,4 +47,11 @@ export const userService = {
   activateUser: async (id: string): Promise<UserData> => {
     return await apiClient.activateUser(id);
   },
+
+  /**
+   * Desactiva un usuario (solo admin)
+   */
+  deactivateUser: async (id: string): Promise<UserData> => {
+    return await apiClient.deactivateUser(id);
+  },
 };

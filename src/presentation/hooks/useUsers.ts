@@ -127,3 +127,19 @@ export function useActivateUser() {
     },
   });
 }
+
+/**
+ * Hook para desactivar un usuario
+ */
+export function useDeactivateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => userService.deactivateUser(id),
+    onSuccess: (_, id) => {
+      // Invalidar la lista de usuarios y el usuario específico
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(id) });
+    },
+  });
+}

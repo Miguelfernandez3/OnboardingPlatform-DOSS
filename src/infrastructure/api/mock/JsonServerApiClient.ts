@@ -17,29 +17,29 @@ export class JsonServerApiClient extends BaseApiClient {
   async getDevices(): Promise<Device[]> {
     // JSON Server devuelve directamente el array
     const devices = await this.get<DeviceData[]>('devices');
-    
+
     if (!Array.isArray(devices)) {
       return [];
     }
-    
+
     return devices.map(device => Device.fromJSON(device));
   }
 
   async getDevice(id: string): Promise<Device> {
     // JSON Server devuelve directamente el objeto
     const device = await this.get<DeviceData>('device', { id });
-    
+
     if (!device) {
       throw new Error(`Device with id ${id} not found`);
     }
-    
+
     return Device.fromJSON(device);
   }
 
   async getDevicePassport(id: string): Promise<Passport> {
     // JSON Server devuelve un array filtrado, tomar el primer elemento
     const passports = await this.get<PassportData[]>('passport', { deviceId: id });
-    
+
     if (!Array.isArray(passports) || passports.length === 0) {
       // Si no existe, crear uno por defecto
       return Passport.fromJSON({
@@ -60,14 +60,14 @@ export class JsonServerApiClient extends BaseApiClient {
         }
       });
     }
-    
+
     return Passport.fromJSON(passports[0]);
   }
 
   async getDeviceMUD(id: string): Promise<MUD> {
     // JSON Server devuelve un array filtrado, tomar el primer elemento
     const muds = await this.get<MUDData[]>('mud', { deviceId: id });
-    
+
     if (!Array.isArray(muds) || muds.length === 0) {
       // Si no existe, crear uno por defecto
       return MUD.fromJSON({
@@ -97,18 +97,18 @@ export class JsonServerApiClient extends BaseApiClient {
         }
       });
     }
-    
+
     return MUD.fromJSON(muds[0]);
   }
 
   async getDevicePolicies(id: string): Promise<Policy[]> {
     // JSON Server devuelve directamente el array filtrado
     const policies = await this.get<PolicyData[]>('policies', { deviceId: id });
-    
+
     if (!Array.isArray(policies)) {
       return [];
     }
-    
+
     return policies.map(policy => Policy.fromJSON(policy));
   }
 
@@ -123,13 +123,13 @@ export class JsonServerApiClient extends BaseApiClient {
       appliedAt: new Date().toISOString(),
       enforcementStatus: 'pending'
     };
-    
+
     // Crear la política directamente en la colección policies
     await this.request<PolicyData>('/policies', {
       method: 'POST',
       data: newPolicy
     });
-    
+
     return {
       status: 'pending',
       message: `IDSP2 ${idsp2Id} application initiated for device ${deviceId}`
@@ -147,13 +147,13 @@ export class JsonServerApiClient extends BaseApiClient {
       appliedAt: new Date().toISOString(),
       enforcementStatus: 'pending'
     };
-    
+
     // Crear la política directamente en la colección policies
     await this.request<PolicyData>('/policies', {
       method: 'POST',
       data: newPolicy
     });
-    
+
     return {
       status: 'pending',
       message: `Policy application initiated for device ${deviceId}`
@@ -163,7 +163,7 @@ export class JsonServerApiClient extends BaseApiClient {
   async getEnforcementStatus(deviceId: string): Promise<EnforcementStatus> {
     // JSON Server devuelve un array filtrado, tomar el primer elemento
     const statuses = await this.get<EnforcementStatus[]>('enforcementStatus', { deviceId });
-    
+
     if (!Array.isArray(statuses) || statuses.length === 0) {
       // Si no existe, crear uno por defecto
       return {
@@ -172,29 +172,29 @@ export class JsonServerApiClient extends BaseApiClient {
         timestamp: new Date().toISOString()
       };
     }
-    
+
     return statuses[0];
   }
 
   async getDeviceThreats(deviceId: string): Promise<Threat[]> {
     // JSON Server devuelve directamente el array filtrado
     const threats = await this.get<ThreatData[]>('threats', { deviceId });
-    
+
     if (!Array.isArray(threats)) {
       return [];
     }
-    
+
     return threats.map(threat => Threat.fromJSON({ ...threat, deviceId }));
   }
 
   async getDeviceMitigations(deviceId: string): Promise<Mitigation[]> {
     // JSON Server devuelve directamente el array filtrado
     const mitigations = await this.get<MitigationData[]>('mitigations', { deviceId });
-    
+
     if (!Array.isArray(mitigations)) {
       return [];
     }
-    
+
     return mitigations.map(mitigation => Mitigation.fromJSON(mitigation));
   }
 
@@ -204,11 +204,11 @@ export class JsonServerApiClient extends BaseApiClient {
       `/mitigations/${mitigationId}`,
       { method: 'GET' }
     );
-    
+
     if (!mitigation) {
       throw new Error(`Mitigation with id ${mitigationId} not found`);
     }
-    
+
     // Actualizar con PATCH usando el método helper de BaseApiClient
     const updatedMitigation = await this.patch<MitigationData>(
       'enforceMitigation',
@@ -219,7 +219,7 @@ export class JsonServerApiClient extends BaseApiClient {
       },
       { mitigationId }
     );
-    
+
     return Mitigation.fromJSON({ ...updatedMitigation, deviceId });
   }
 
@@ -229,11 +229,11 @@ export class JsonServerApiClient extends BaseApiClient {
       `/mitigations/${mitigationId}`,
       { method: 'GET' }
     );
-    
+
     if (!mitigation) {
       throw new Error(`Mitigation with id ${mitigationId} not found`);
     }
-    
+
     // Actualizar con PATCH usando el método helper de BaseApiClient
     const updatedMitigation = await this.patch<MitigationData>(
       'revokeMitigation',
@@ -244,28 +244,28 @@ export class JsonServerApiClient extends BaseApiClient {
       },
       { mitigationId }
     );
-    
+
     return Mitigation.fromJSON({ ...updatedMitigation, deviceId });
   }
 
   async updateDevice(deviceId: string, data: Partial<Device>): Promise<Device> {
     // Obtener el dispositivo actual
     const currentDevice = await this.get<DeviceData>('device', { id: deviceId });
-    
+
     if (!currentDevice) {
       throw new Error(`Device with id ${deviceId} not found`);
     }
-    
+
     // Preparar datos de actualización
     const updateData: Partial<DeviceData> = {
       ...currentDevice,
       ...(data.toJSON ? data.toJSON() : data),
       updatedAt: new Date().toISOString()
     };
-    
+
     // Actualizar con PUT
     const updatedDevice = await this.put<DeviceData>('updateDevice', updateData, { id: deviceId });
-    
+
     return Device.fromJSON(updatedDevice);
   }
 
@@ -277,7 +277,7 @@ export class JsonServerApiClient extends BaseApiClient {
     // Mock: buscar usuario en la colección users
     const users = await this.get<UserData[]>('users');
     const user = users.find(u => u.email === email);
-    
+
     if (!user) {
       throw new Error('Invalid credentials');
     }
@@ -285,7 +285,7 @@ export class JsonServerApiClient extends BaseApiClient {
     // Mock: validar password (en producción esto sería un hash)
     // Para el mock, asumimos que el password es válido si el usuario existe
     // En un mock real, podrías tener un campo password_hash y compararlo
-    
+
     // Generar tokens mock (en producción estos serían JWT reales)
     const accessToken = `mock_access_token_${user.id}_${Date.now()}`;
     const refreshToken = `mock_refresh_token_${user.id}_${Date.now()}`;
@@ -406,6 +406,12 @@ export class JsonServerApiClient extends BaseApiClient {
   async activateUser(id: string): Promise<UserData> {
     const currentUser = await this.getUser(id);
     const updatedUser = await this.put<UserData>('user', { ...currentUser, isActive: true }, { id });
+    return updatedUser;
+  }
+
+  async deactivateUser(id: string): Promise<UserData> {
+    const currentUser = await this.getUser(id);
+    const updatedUser = await this.put<UserData>('user', { ...currentUser, isActive: false }, { id });
     return updatedUser;
   }
 }
