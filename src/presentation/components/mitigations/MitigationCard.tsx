@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Mitigation } from '../../../core/domain/entities/Mitigation';
 import JsonViewer from '../common/JsonViewer';
+import { useToast } from '../../../infrastructure/notifications/useToast';
 
 interface MitigationCardProps {
   mitigation: Mitigation;
@@ -16,6 +17,7 @@ interface MitigationCardProps {
  */
 export default function MitigationCard({ mitigation, onEnforce, onRevoke }: MitigationCardProps): JSX.Element {
   const { t } = useTranslation();
+  const { showApiError } = useToast();
   const [expanded, setExpanded] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
@@ -46,7 +48,7 @@ export default function MitigationCard({ mitigation, onEnforce, onRevoke }: Miti
       setActionLoading(true);
       await action();
     } catch (err) {
-      alert(`${t('common.error')}: ${(err as Error).message}`);
+      showApiError(err);
     } finally {
       setActionLoading(false);
     }

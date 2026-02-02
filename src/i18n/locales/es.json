@@ -83,19 +83,31 @@
       "page": "Página {{page}} de {{totalPages}}"
     },
     "errors": {
+      "GENERIC": "Ha ocurrido un error inesperado",
+      "NETWORK_ERROR": "Error de conexión. Por favor verifica tu conexión a internet",
+      "TIMEOUT_ERROR": "La solicitud ha tardado demasiado. Por favor intenta de nuevo",
+      "AUTHENTICATION_ERROR": "Error de autenticación. Por favor inicia sesión nuevamente",
+      "TOKEN_EXPIRED": "Tu sesión ha expirado. Por favor inicia sesión nuevamente",
+      "INVALID_CREDENTIALS": "Credenciales inválidas. Por favor verifica tu email y contraseña",
+      "USER_INACTIVE": "Tu cuenta está inactiva. Por favor contacta al administrador",
+      "AUTHORIZATION_ERROR": "No tienes permisos para realizar esta acción",
+      "INVALID_REQUEST": "La solicitud es inválida. Por favor verifica los datos ingresados",
+      "DEVICE_NOT_FOUND": "Dispositivo no encontrado",
+      "USER_NOT_FOUND": "Usuario no encontrado",
+      "POLICY_NOT_FOUND": "Política no encontrada",
+      "UPDATE_FAILED": "Error al actualizar. Por favor intenta de nuevo",
+      "DELETE_FAILED": "Error al eliminar. Por favor intenta de nuevo",
+      "CREATE_FAILED": "Error al crear. Por favor intenta de nuevo",
       "CANNOT_DEACTIVATE_SELF": "No puedes desactivar tu propia cuenta",
       "CANNOT_DELETE_SELF": "No puedes eliminar tu propia cuenta",
-      "USER_NOT_FOUND": "Usuario no encontrado",
       "USER_MUST_BE_DEACTIVATED": "El usuario debe estar desactivado para poder eliminarlo",
       "EMAIL_EXISTS": "El email ya está registrado",
       "INVALID_ROLE": "Rol inválido",
       "DEACTIVATE_FAILED": "Error al desactivar usuario",
       "ACTIVATE_FAILED": "Error al activar usuario",
-      "UPDATE_FAILED": "Error al actualizar usuario",
-      "DELETE_FAILED": "Error al eliminar usuario",
-      "DATABASE_ERROR": "Error de base de datos",
-      "INITIALIZATION_ERROR": "Error de inicialización del servidor",
-      "GENERIC": "Ha ocurrido un error inesperado"
+      "DATABASE_ERROR": "Error de base de datos. Por favor intenta más tarde",
+      "INTERNAL_ERROR": "Error interno del servidor. Por favor intenta más tarde",
+      "INITIALIZATION_ERROR": "Error de inicialización del servidor. Por favor contacta al administrador"
     }
   },
   "auth": {

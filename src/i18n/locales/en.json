@@ -83,19 +83,31 @@
       "page": "Page {{page}} of {{totalPages}}"
     },
     "errors": {
+      "GENERIC": "An unexpected error occurred",
+      "NETWORK_ERROR": "Network error. Please check your internet connection",
+      "TIMEOUT_ERROR": "The request took too long. Please try again",
+      "AUTHENTICATION_ERROR": "Authentication error. Please log in again",
+      "TOKEN_EXPIRED": "Your session has expired. Please log in again",
+      "INVALID_CREDENTIALS": "Invalid credentials. Please check your email and password",
+      "USER_INACTIVE": "Your account is inactive. Please contact the administrator",
+      "AUTHORIZATION_ERROR": "You do not have permission to perform this action",
+      "INVALID_REQUEST": "Invalid request. Please check the entered data",
+      "DEVICE_NOT_FOUND": "Device not found",
+      "USER_NOT_FOUND": "User not found",
+      "POLICY_NOT_FOUND": "Policy not found",
+      "UPDATE_FAILED": "Failed to update. Please try again",
+      "DELETE_FAILED": "Failed to delete. Please try again",
+      "CREATE_FAILED": "Failed to create. Please try again",
       "CANNOT_DEACTIVATE_SELF": "You cannot deactivate your own account",
       "CANNOT_DELETE_SELF": "You cannot delete your own account",
-      "USER_NOT_FOUND": "User not found",
       "USER_MUST_BE_DEACTIVATED": "User must be deactivated before deletion",
       "EMAIL_EXISTS": "Email already registered",
       "INVALID_ROLE": "Invalid role",
       "DEACTIVATE_FAILED": "Failed to deactivate user",
       "ACTIVATE_FAILED": "Failed to activate user",
-      "UPDATE_FAILED": "Failed to update user",
-      "DELETE_FAILED": "Failed to delete user",
-      "DATABASE_ERROR": "Database error",
-      "INITIALIZATION_ERROR": "Server initialization error",
-      "GENERIC": "An unexpected error occurred"
+      "DATABASE_ERROR": "Database error. Please try again later",
+      "INTERNAL_ERROR": "Internal server error. Please try again later",
+      "INITIALIZATION_ERROR": "Server initialization error. Please contact the administrator"
     }
   },
   "auth": {

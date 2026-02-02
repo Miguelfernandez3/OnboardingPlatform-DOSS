@@ -2,6 +2,8 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../core/ports';
 import { Device, Policy, MUD, Passport } from '../../../core/domain';
 import { setupAuthInterceptor } from '../interceptors/authInterceptor';
+import { setupErrorInterceptor } from '../interceptors/errorInterceptor';
+import { extractApiError } from '../errors/errorUtils';
 
 /**
  * BaseApiClient - Clase base abstracta para adapters de API
@@ -25,6 +27,9 @@ export abstract class BaseApiClient extends IApiClient {
 
     // Configurar interceptor de autenticación
     setupAuthInterceptor(this.axiosInstance, onTokenRefresh, onAuthError);
+    
+    // Configurar interceptor de errores para logging
+    setupErrorInterceptor(this.axiosInstance);
   }
 
   /**
@@ -44,16 +49,8 @@ export abstract class BaseApiClient extends IApiClient {
       const response = await this.axiosInstance<T>(endpoint, defaultOptions);
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        const errorMessage = axiosError.response?.data 
-          ? (typeof axiosError.response.data === 'string' 
-              ? axiosError.response.data 
-              : JSON.stringify(axiosError.response.data))
-          : axiosError.message || 'Unknown error';
-        throw new Error(`API Error: ${axiosError.response?.status || 'Network'} - ${errorMessage}`);
-      }
-      throw error;
+      // Usar extractApiError para obtener un ApiError estructurado
+      throw extractApiError(error);
     }
   }
 

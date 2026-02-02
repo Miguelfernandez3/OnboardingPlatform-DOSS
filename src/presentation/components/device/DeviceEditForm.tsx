@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../../../core/domain/entities/Device';
+import { useToast } from '../../../infrastructure/notifications/useToast';
 
 interface DeviceEditFormProps {
   device: Device;
@@ -13,6 +14,7 @@ interface DeviceEditFormProps {
  */
 export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditFormProps): JSX.Element {
   const { t } = useTranslation();
+  const { showTranslated, showApiError } = useToast();
   const [formData, setFormData] = useState({
     name: device.name || '',
     type: device.type || '',
@@ -23,7 +25,6 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
     mudurl: device.mudurl || ''
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
@@ -51,16 +52,15 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    setError(null);
 
     // Validaciones
     if (formData.ip && !validateIP(formData.ip)) {
-      setError(t('device.info.invalidIP'));
+      showTranslated('device.info.invalidIP', 'error');
       return;
     }
 
     if (formData.mac && !validateMAC(formData.mac)) {
-      setError(t('device.info.invalidMAC'));
+      showTranslated('device.info.invalidMAC', 'error');
       return;
     }
 
@@ -68,7 +68,7 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
       setLoading(true);
       await onSave(formData);
     } catch (err) {
-      setError((err as Error).message || t('device.info.saveError'));
+      showApiError(err);
     } finally {
       setLoading(false);
     }
@@ -111,19 +111,6 @@ export default function DeviceEditForm({ device, onSave, onCancel }: DeviceEditF
         onClick={(e) => e.stopPropagation()}
       >
         <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>{t('device.info.editTitle')}</h2>
-
-        {error && (
-          <div style={{
-            marginBottom: '1rem',
-            padding: '1rem',
-            backgroundColor: '#f8d7da',
-            color: '#721c24',
-            borderRadius: '4px',
-            border: '1px solid #f5c6cb'
-          }}>
-            <strong>{t('common.error')}:</strong> {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

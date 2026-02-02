@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApplyResult } from '../../../core/ports/IApiClient';
 import EnforcementStatus from './EnforcementStatus';
+import { useToast } from '../../../infrastructure/notifications/useToast';
 
 interface IDSP2UploaderProps {
   deviceId: string;
@@ -13,28 +14,27 @@ interface IDSP2UploaderProps {
  */
 export default function IDSP2Uploader({ deviceId, onApply }: IDSP2UploaderProps): JSX.Element {
   const { t } = useTranslation();
+  const { showTranslated, showApiError } = useToast();
   const [idsp2Id, setIdsp2Id] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<ApplyResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     if (!idsp2Id.trim()) {
-      setError(t('policies.applyIdsp2.error'));
+      showTranslated('policies.applyIdsp2.error', 'error');
       return;
     }
 
     setLoading(true);
-    setError(null);
     setResult(null);
 
     try {
       const response = await onApply(deviceId, idsp2Id.trim());
       setResult(response);
     } catch (err) {
-      setError((err as Error).message || t('policies.applyIdsp2.error'));
+      showApiError(err);
     } finally {
       setLoading(false);
     }
@@ -81,19 +81,6 @@ export default function IDSP2Uploader({ deviceId, onApply }: IDSP2UploaderProps)
           {loading ? t('policies.applyIdsp2.applying') : t('policies.applyIdsp2.button')}
         </button>
       </form>
-
-      {error && (
-        <div style={{
-          marginTop: '1rem',
-          padding: '1rem',
-          backgroundColor: '#f8d7da',
-          color: '#721c24',
-          borderRadius: '4px',
-          border: '1px solid #f5c6cb'
-        }}>
-          <strong>{t('common.error')}:</strong> {error}
-        </div>
-      )}
 
       {result && (
         <div style={{ marginTop: '1rem' }}>

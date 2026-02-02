@@ -1,0 +1,58 @@
+/**
+ * Códigos de error estándar del backend
+ * Mantener sincronizado con los códigos que devuelve la API
+ */
+export enum ErrorCode {
+  // Errores de autenticación (401)
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  USER_INACTIVE = 'USER_INACTIVE',
+  
+  // Errores de autorización (403)
+  AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',
+  
+  // Errores de validación (400)
+  INVALID_REQUEST = 'INVALID_REQUEST',
+  
+  // Errores de recurso no encontrado (404)
+  DEVICE_NOT_FOUND = 'DEVICE_NOT_FOUND',
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+  POLICY_NOT_FOUND = 'POLICY_NOT_FOUND',
+  
+  // Errores de operación
+  UPDATE_FAILED = 'UPDATE_FAILED',
+  DELETE_FAILED = 'DELETE_FAILED',
+  CREATE_FAILED = 'CREATE_FAILED',
+  CANNOT_DEACTIVATE_SELF = 'CANNOT_DEACTIVATE_SELF',
+  CANNOT_DELETE_SELF = 'CANNOT_DELETE_SELF',
+  USER_MUST_BE_DEACTIVATED = 'USER_MUST_BE_DEACTIVATED',
+  EMAIL_EXISTS = 'EMAIL_EXISTS',
+  INVALID_ROLE = 'INVALID_ROLE',
+  DEACTIVATE_FAILED = 'DEACTIVATE_FAILED',
+  ACTIVATE_FAILED = 'ACTIVATE_FAILED',
+  
+  // Errores del servidor (500)
+  DATABASE_ERROR = 'DATABASE_ERROR',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  INITIALIZATION_ERROR = 'INITIALIZATION_ERROR',
+  
+  // Errores de red
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+  
+  // Error genérico
+  GENERIC = 'GENERIC',
+}
+
+/**
+ * Mapeo de códigos HTTP a códigos de error por defecto
+ */
+export const HTTP_STATUS_TO_ERROR_CODE: Record<number, ErrorCode> = {
+  400: ErrorCode.INVALID_REQUEST,
+  401: ErrorCode.AUTHENTICATION_ERROR,
+  403: ErrorCode.AUTHORIZATION_ERROR,
+  404: ErrorCode.DEVICE_NOT_FOUND,
+  500: ErrorCode.INTERNAL_ERROR,
+  503: ErrorCode.INITIALIZATION_ERROR,
+};

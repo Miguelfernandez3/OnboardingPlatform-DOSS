@@ -4,6 +4,7 @@ import { usePolicies, useDevice, useIsMobile } from '../hooks';
 import IDSP2Uploader from '../components/policies/IDSP2Uploader';
 import MSPLEditor from '../components/mspl/MSPLEditor';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useToast } from '../../infrastructure/notifications/useToast';
 
 /**
  * CreatePolicyPage - Página dedicada para crear nuevas políticas
@@ -13,6 +14,7 @@ export default function CreatePolicyPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { showTranslated, showApiError } = useToast();
   
   // Obtener información del dispositivo
   const { 
@@ -29,21 +31,21 @@ export default function CreatePolicyPage(): JSX.Element {
   const handleApplyPolicy = async (msplXml: string, name?: string): Promise<void> => {
     try {
       await applyPolicy(msplXml, name);
-      alert(t('policies.createEdit.success'));
+      showTranslated('policies.createEdit.success', 'success');
       navigate(`/devices/${id}#policies`);
     } catch (err) {
-      alert(`${t('policies.createEdit.error')}: ${(err as Error).message}`);
+      showApiError(err);
     }
   };
 
   const handleApplyIDSP2 = async (_deviceId: string, idsp2Id: string) => {
     try {
       const result = await applyIDSP2(idsp2Id);
-      alert(t('policies.createEdit.success'));
+      showTranslated('policies.createEdit.success', 'success');
       navigate(`/devices/${id}#policies`);
       return result;
     } catch (err) {
-      alert(`${t('policies.createEdit.error')}: ${(err as Error).message}`);
+      showApiError(err);
       throw err;
     }
   };

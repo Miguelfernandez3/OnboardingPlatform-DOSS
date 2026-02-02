@@ -7,15 +7,16 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useIsMobile } from '../hooks';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useToast } from '../../infrastructure/notifications/useToast';
 
 export default function LoginPage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
   const isMobile = useIsMobile();
+  const { showApiError } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirigir si ya está autenticado (usando useEffect para evitar warning)
@@ -32,14 +33,13 @@ export default function LoginPage(): JSX.Element {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
     setIsLoading(true);
 
     try {
       await login(email, password);
       // La redirección se hará automáticamente por el useEffect cuando isAuthenticated cambie
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.error'));
+      showApiError(err);
     } finally {
       setIsLoading(false);
     }
@@ -70,20 +70,6 @@ export default function LoginPage(): JSX.Element {
         }}>
           {t('auth.login')}
         </h1>
-
-        {error && (
-          <div style={{
-            padding: '0.75rem',
-            marginBottom: '1rem',
-            backgroundColor: '#f8d7da',
-            color: '#721c24',
-            borderRadius: '4px',
-            border: '1px solid #f5c6cb',
-            fontSize: '0.875rem'
-          }}>
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { QueryClientProvider } from './infrastructure/query/QueryClientProvider';
+import { ToastProvider } from './infrastructure/notifications/ToastProvider';
 import { useAuth, AuthProvider } from './presentation/contexts/AuthContext';
 import { ProtectedRoute } from './presentation/components/auth';
 import { Navbar } from './presentation/components/layout';
@@ -44,6 +45,7 @@ export default function App(): JSX.Element {
   return (
     <QueryClientProvider>
       <AuthProvider>
+        <ToastProvider />
         <Router>
           <Navbar />
           <AppRoutes />

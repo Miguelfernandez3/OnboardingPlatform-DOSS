@@ -8,12 +8,14 @@ import { AdminRoute } from '../components/auth';
 import { CreateUserModal, ConfirmDeleteModal } from '../components/users';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { UserData } from '../../core/ports';
+import { useToast } from '../../infrastructure/notifications/useToast';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function UsersPage(): JSX.Element {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const { showTranslated, showApiError } = useToast();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,81 +37,44 @@ export default function UsersPage(): JSX.Element {
     user: null,
   });
 
-  // Feedback state
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
   // Calculate pagination info
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
   const from = (currentPage - 1) * ITEMS_PER_PAGE + 1;
   const to = Math.min(currentPage * ITEMS_PER_PAGE, total);
 
-  const showFeedback = (type: 'success' | 'error', message: string) => {
-    setFeedback({ type, message });
-    setTimeout(() => setFeedback(null), 3000);
-  };
-
   const handleCreateUser = async (email: string, password: string, role: string) => {
     try {
       await createUserMutation.mutateAsync({ email, password, role });
-      showFeedback('success', t('users.createSuccess'));
+      showTranslated('users.createSuccess', 'success');
       refetch();
-    } catch {
-      showFeedback('error', t('users.createError'));
-      throw new Error(t('users.createError'));
+    } catch (err) {
+      showApiError(err);
+      throw err;
     }
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
       await updateRoleMutation.mutateAsync({ id: userId, role: newRole });
-      showFeedback('success', t('users.roleUpdateSuccess'));
+      showTranslated('users.roleUpdateSuccess', 'success');
       refetch();
     } catch (err) {
-      const errorCode = getErrorCode(err);
-      showFeedback('error', t(`users.errors.${errorCode}`, t('users.roleUpdateError')));
+      showApiError(err);
     }
-  };
-
-  // Helper function to extract error code from API error
-  const getErrorCode = (error: unknown): string => {
-    if (error && typeof error === 'object') {
-      // Check if it's an axios-style error with response data
-      const err = error as { response?: { data?: { code?: string } }; message?: string };
-      if (err.response?.data?.code) {
-        return err.response.data.code;
-      }
-      // Check if error message contains a code
-      if (err.message) {
-        // Try to parse JSON from error message
-        try {
-          const parsed = JSON.parse(err.message);
-          if (parsed.code) return parsed.code;
-        } catch {
-          // Not JSON, check if it contains known codes
-          const knownCodes = ['CANNOT_DEACTIVATE_SELF', 'CANNOT_DELETE_SELF', 'USER_NOT_FOUND', 'EMAIL_EXISTS'];
-          for (const code of knownCodes) {
-            if (err.message.includes(code)) return code;
-          }
-        }
-      }
-    }
-    return 'GENERIC';
   };
 
   const handleToggleActive = async (user: UserData) => {
     try {
       if (user.isActive) {
         await deactivateUserMutation.mutateAsync(user.id);
-        showFeedback('success', t('users.deactivateSuccess'));
+        showTranslated('users.deactivateSuccess', 'success');
       } else {
         await activateUserMutation.mutateAsync(user.id);
-        showFeedback('success', t('users.activateSuccess'));
+        showTranslated('users.activateSuccess', 'success');
       }
       refetch();
     } catch (err) {
-      const errorCode = getErrorCode(err);
-      const fallbackMsg = user.isActive ? t('users.deactivateError') : t('users.activateError');
-      showFeedback('error', t(`users.errors.${errorCode}`, fallbackMsg));
+      showApiError(err);
     }
   };
 
@@ -117,12 +82,11 @@ export default function UsersPage(): JSX.Element {
     if (!deleteModal.user) return;
     try {
       await deleteUserMutation.mutateAsync(deleteModal.user.id);
-      showFeedback('success', t('users.deleteSuccess'));
+      showTranslated('users.deleteSuccess', 'success');
       setDeleteModal({ isOpen: false, user: null });
       refetch();
     } catch (err) {
-      const errorCode = getErrorCode(err);
-      showFeedback('error', t(`users.errors.${errorCode}`, t('users.deleteError')));
+      showApiError(err);
       setDeleteModal({ isOpen: false, user: null });
     }
   };
@@ -199,20 +163,6 @@ export default function UsersPage(): JSX.Element {
             {t('users.createUser')}
           </button>
         </div>
-
-        {/* Feedback Message */}
-        {feedback && (
-          <div style={{
-            padding: '1rem',
-            marginBottom: '1rem',
-            borderRadius: '4px',
-            backgroundColor: feedback.type === 'success' ? '#d4edda' : '#f8d7da',
-            color: feedback.type === 'success' ? '#155724' : '#721c24',
-            border: `1px solid ${feedback.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
-          }}>
-            {feedback.message}
-          </div>
-        )}
 
         {users.length === 0 ? (
           <p>{t('users.noUsers')}</p>

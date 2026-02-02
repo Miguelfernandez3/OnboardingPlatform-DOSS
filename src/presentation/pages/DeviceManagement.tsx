@@ -6,6 +6,7 @@ import { Passport } from '../../core/domain/entities/Passport';
 import { MUD } from '../../core/domain/entities/MUD';
 import { usePolicies, useDevice, useThreats, useMitigations, useIsMobile } from '../hooks';
 import { PolicyList, EnforcementStatus, LoadingSpinner, DeviceInfo, DeviceEditForm, ThreatList, MitigationList } from '../components';
+import { useToast } from '../../infrastructure/notifications/useToast';
 
 interface Tab {
   id: string;
@@ -21,6 +22,7 @@ export default function DeviceManagement(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { showTranslated, showApiError } = useToast();
   
   // Inicializar el tab activo desde el hash de la URL o por defecto 'info'
   const getInitialTab = (): string => {
@@ -33,7 +35,6 @@ export default function DeviceManagement(): JSX.Element {
   const [passport, setPassport] = useState<Passport | null>(null);
   const [mud, setMud] = useState<MUD | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [showEditForm, setShowEditForm] = useState<boolean>(false);
   
   const { 
@@ -73,7 +74,6 @@ export default function DeviceManagement(): JSX.Element {
 
       try {
         setLoading(true);
-        setError(null);
         
         const [passportData, mudData] = await Promise.all([
           apiClient.getDevicePassport(id).catch(() => null),
@@ -83,7 +83,8 @@ export default function DeviceManagement(): JSX.Element {
         setPassport(passportData);
         setMud(mudData);
       } catch (err) {
-        setError((err as Error).message || 'Error al cargar datos del dispositivo');
+        // Los errores se mostrarán automáticamente como toast
+        // No necesitamos setError aquí ya que los errores de API se manejan globalmente
       } finally {
         setLoading(false);
       }
@@ -136,9 +137,9 @@ export default function DeviceManagement(): JSX.Element {
     try {
       await updateDevice(data);
       setShowEditForm(false);
-      alert(t('device.info.saveSuccess'));
+      showTranslated('device.info.saveSuccess', 'success');
     } catch (err) {
-      alert(`${t('common.error')}: ${(err as Error).message}`);
+      showApiError(err);
     }
   };
 
@@ -149,10 +150,10 @@ export default function DeviceManagement(): JSX.Element {
 
     try {
       await deleteDevice();
-      alert(t('device.info.deleteSuccess'));
+      showTranslated('device.info.deleteSuccess', 'success');
       navigate('/devices');
     } catch (err) {
-      alert(`${t('common.error')}: ${(err as Error).message}`);
+      showApiError(err);
     }
   };
 
@@ -169,19 +170,6 @@ export default function DeviceManagement(): JSX.Element {
       <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem', marginBottom: '1.5rem'  }}>
         {t('device.management', { deviceName: device?.name || id })}
       </h1>
-
-      {error && (
-        <div style={{
-          marginBottom: '1rem',
-          padding: '1rem',
-          backgroundColor: '#f8d7da',
-          color: '#721c24',
-          borderRadius: '4px',
-          border: '1px solid #f5c6cb'
-        }}>
-          <strong>{t('common.error')}:</strong> {error}
-        </div>
-      )}
 
       {/* Tabs - Dropdown en móvil, tabs en desktop */}
       {isMobile ? (
