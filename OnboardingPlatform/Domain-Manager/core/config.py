@@ -112,3 +112,43 @@ class Config:
         auth_config = self._config.get('Authentication', {})
         return auth_config.get('password_min_length', 8)
 
+    @property
+    def policy_enforcement_config(self) -> dict:
+        """
+        Policy enforcement configuration.
+        Returns fixed mappings profile->execution and policyType->profile.
+        """
+        default_config = {
+            'default_profile': 'era-default',
+            'profiles': {
+                'era-default': {
+                    'mode': 'era'
+                },
+                'homeassistant-rest': {
+                    'mode': 'rest',
+                    'endpoint': 'http://localhost:8123/api/services/automation/trigger',
+                    'method': 'POST',
+                    'timeout_seconds': 10,
+                    'headers': {
+                        'Content-Type': 'application/json'
+                    },
+                    'auth': {
+                        'type': 'bearer',
+                        'token_env': 'HOME_ASSISTANT_TOKEN'
+                    },
+                    'payload_template': {
+                        'entity_id': '{{automation-id}}'
+                    }
+                }
+            },
+            'type_mappings': {
+                'homeassistant-automation-mspl-type': 'homeassistant-rest',
+                'homeassistant-mspl-type': 'homeassistant-rest',
+                'boostrapping-mspl-type': 'era-default',
+                'bootstrapping-mspl-type': 'era-default',
+                'ipv4-mspl-type': 'era-default',
+                'ipv6-mspl-type': 'era-default',
+                'software-mspl-type': 'era-default'
+            }
+        }
+        return self._config.get('PolicyEnforcement', default_config)

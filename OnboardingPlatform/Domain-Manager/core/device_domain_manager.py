@@ -46,6 +46,7 @@ from services.threat_service import ThreatService
 from services.feam_service import FEAMService
 from services.device_service import DeviceService
 from services.policy_service import PolicyService
+from services.policy_enforcement_service import PolicyEnforcementService
 from services.mitigation_service import MitigationService
 from utils.xml_parser import parse_mitigations_tmud, parse_mitigations_mud
 
@@ -92,7 +93,14 @@ class DeviceDomainManager:
             self.mud_service,
             self.feam_service
         )
-        self.policy_service = PolicyService(self.db)
+        self.policy_enforcement_service = PolicyEnforcementService(
+            self.config,
+            self.reconfigureDevice
+        )
+        self.policy_service = PolicyService(
+            self.db,
+            self.policy_enforcement_service
+        )
         self.mitigation_service = MitigationService(
             self.db,
             self.threat_service
@@ -254,4 +262,3 @@ class DeviceDomainManager:
                 except Exception as e:
                     logging.error(f"Error closing Kafka consumer: {e}", exc_info=True)
             logging.info("Device and Domain manager is closing")
-
