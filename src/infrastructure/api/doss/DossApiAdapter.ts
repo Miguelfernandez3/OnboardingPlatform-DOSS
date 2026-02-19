@@ -189,13 +189,11 @@ export class DossApiAdapter extends BaseApiClient {
   }
 
   async applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult> {
-    // Si se proporciona un nombre, incluirlo en los parámetros de la petición
-    const params: Record<string, string> = { id: deviceId };
-    if (name) {
-      params.name = name;
-    }
-
-    const data = await this.postXml<ApplyResultApiResponse>('applyPolicy', msplXml, params);
+    const data = await this.post<ApplyResultApiResponse>(
+      'applyPolicy',
+      { msplXml, name },
+      { id: deviceId }
+    );
     return {
       status: data.status || 'pending',
       message: data.message || 'Policy application initiated'
@@ -208,6 +206,18 @@ export class DossApiAdapter extends BaseApiClient {
       status: data.status || 'unknown',
       message: data.message || '',
       timestamp: data.timestamp || new Date().toISOString()
+    };
+  }
+
+  async enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult> {
+    const data = await this.post<ApplyResultApiResponse>(
+      'enforcePolicy',
+      {},
+      { id: deviceId, policyId }
+    );
+    return {
+      status: data.status || 'pending',
+      message: data.message || 'Policy enforcement initiated'
     };
   }
 
@@ -409,4 +419,3 @@ export class DossApiAdapter extends BaseApiClient {
     return user;
   }
 }
-

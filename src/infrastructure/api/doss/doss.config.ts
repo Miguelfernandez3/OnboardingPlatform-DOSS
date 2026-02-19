@@ -15,6 +15,7 @@ export const dossConfig: AdapterConfig = {
     policies: '/devices/:id/policies',
     applyIdsp2: '/devices/:id/apply-idsp2',
     applyPolicy: '/devices/:id/apply-policy',
+    enforcePolicy: '/devices/:id/policies/:policyId/enforce',
     enforcementStatus: '/devices/:id/enforcement-status',
     threats: '/devices/:id/threats',
     mitigations: '/devices/:id/mitigations',
@@ -33,4 +34,3 @@ export const dossConfig: AdapterConfig = {
     userDeactivate: '/users/:id/deactivate'
   }
 };
-
