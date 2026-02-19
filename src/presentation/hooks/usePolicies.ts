@@ -11,6 +11,7 @@ interface UsePoliciesReturn {
   enforcementStatus: EnforcementStatus | null;
   applyPolicy: (msplXml: string, name?: string) => Promise<ApplyResult>;
   applyIDSP2: (idsp2Id: string) => Promise<ApplyResult>;
+  enforcePolicy: (policyId: string) => Promise<ApplyResult>;
 }
 
 /**
@@ -81,6 +82,21 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
     },
   });
 
+  // Mutation para ejecutar enforcement de una policy concreta
+  const enforcePolicyMutation = useMutation({
+    mutationFn: (policyId: string) => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return policyServiceActions.enforcePolicy(deviceId, policyId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.policies(deviceId!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.enforcementStatus(deviceId!) });
+    },
+    onError: (err) => {
+      console.error('Error al ejecutar enforcement de policy:', err);
+    },
+  });
+
   const applyPolicy = async (msplXml: string, name?: string): Promise<ApplyResult> => {
     try {
       return await applyPolicyMutation.mutateAsync({ msplXml, name });
@@ -97,6 +113,14 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
     }
   };
 
+  const enforcePolicy = async (policyId: string): Promise<ApplyResult> => {
+    try {
+      return await enforcePolicyMutation.mutateAsync(policyId);
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
     policies,
     loading: policiesLoading || enforcementLoading,
@@ -104,6 +128,6 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
     enforcementStatus,
     applyPolicy,
     applyIDSP2,
+    enforcePolicy,
   };
 }
-

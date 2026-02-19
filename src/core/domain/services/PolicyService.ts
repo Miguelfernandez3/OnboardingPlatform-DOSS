@@ -25,8 +25,8 @@ export class PolicyService {
       return { valid: false, error: 'MSPL XML debe ser una cadena de texto' };
     }
 
-    if (!msplXml.includes('<ITResourceOrchestration')) {
-      return { valid: false, error: 'MSPL XML debe contener ITResourceOrchestration' };
+    if (!msplXml.includes('<ITResourceOrchestration') && !msplXml.includes('<mspl')) {
+      return { valid: false, error: 'MSPL XML debe contener ITResourceOrchestration o mspl' };
     }
 
     return { valid: true };
@@ -71,5 +71,14 @@ export class PolicyService {
   async getEnforcementStatus(deviceId: string) {
     return await this.apiClient.getEnforcementStatus(deviceId);
   }
-}
 
+  /**
+   * Ejecuta enforcement de una política existente
+   */
+  async enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult> {
+    if (!policyId || typeof policyId !== 'string') {
+      throw new Error('Policy ID es requerido');
+    }
+    return await this.apiClient.enforcePolicy(deviceId, policyId);
+  }
+}

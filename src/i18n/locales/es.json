@@ -223,7 +223,12 @@
     "id": "ID",
     "status": "Estado",
     "enforcement": "Enforcement",
+    "enforce": "Enforce",
+    "enforcing": "Aplicando...",
+    "policyType": "Tipo de política",
+    "source": "Origen",
     "appliedAt": "Aplicada",
+    "enforceSuccess": "Enforcement ejecutado correctamente",
     "viewXml": "Ver XML de la política",
     "applyIdsp2": {
       "title": "Aplicar IDSP2",
@@ -256,6 +261,7 @@
     "status": {
       "pending": "Pendiente",
       "completed": "Completado",
+      "failed": "Fallido",
       "error": "Error",
       "unknown": "Desconocido"
     }

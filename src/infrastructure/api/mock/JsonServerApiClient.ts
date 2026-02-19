@@ -176,6 +176,32 @@ export class JsonServerApiClient extends BaseApiClient {
     return statuses[0];
   }
 
+  async enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult> {
+    const existingPolicy = await this.request<PolicyData>(`/policies/${policyId}`, {
+      method: 'GET'
+    });
+
+    if (!existingPolicy) {
+      throw new Error(`Policy with id ${policyId} not found`);
+    }
+
+    const now = new Date().toISOString();
+    await this.patch<PolicyData>(
+      'enforcePolicy',
+      {
+        status: 'active',
+        enforcementStatus: 'completed',
+        appliedAt: now
+      },
+      { policyId }
+    );
+
+    return {
+      status: 'completed',
+      message: `Policy ${policyId} enforced for device ${deviceId}`
+    };
+  }
+
   async getDeviceThreats(deviceId: string): Promise<Threat[]> {
     // JSON Server devuelve directamente el array filtrado
     const threats = await this.get<ThreatData[]>('threats', { deviceId });

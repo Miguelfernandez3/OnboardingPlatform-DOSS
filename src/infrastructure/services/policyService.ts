@@ -26,6 +26,13 @@ export const policyServiceActions = {
   },
 
   /**
+   * Ejecuta enforcement de una política existente
+   */
+  enforcePolicy: async (deviceId: string, policyId: string): Promise<ApplyResult> => {
+    return await policyService.enforcePolicy(deviceId, policyId);
+  },
+
+  /**
    * Aplica un IDSP2 ID a un dispositivo
    */
   applyIDSP2: async (deviceId: string, idsp2Id: string): Promise<ApplyResult> => {

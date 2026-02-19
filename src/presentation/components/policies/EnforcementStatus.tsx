@@ -25,6 +25,7 @@ export default function EnforcementStatus({ status, message, timestamp }: Enforc
       case 'pending':
         return { bg: '#fff3cd', color: '#856404', border: '#ffeaa7' };
       case 'error':
+      case 'failed':
         return { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' };
       default:
         return { bg: '#e2e3e5', color: '#383d41', border: '#d6d8db' };
@@ -68,4 +69,3 @@ export default function EnforcementStatus({ status, message, timestamp }: Enforc
     </div>
   );
 }
-

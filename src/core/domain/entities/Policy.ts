@@ -10,6 +10,9 @@ export interface PolicyData {
   status?: string;
   appliedAt?: string;
   enforcementStatus?: string;
+  policyType?: string;
+  source?: string;
+  canEnforce?: boolean;
 }
 
 export class Policy {
@@ -20,6 +23,9 @@ export class Policy {
   status: string;
   appliedAt?: string;
   enforcementStatus: string;
+  policyType?: string;
+  source?: string;
+  canEnforce: boolean;
 
   constructor({
     id,
@@ -28,7 +34,10 @@ export class Policy {
     msplXml,
     status = 'pending',
     appliedAt,
-    enforcementStatus = 'pending'
+    enforcementStatus = 'pending',
+    policyType,
+    source,
+    canEnforce = true
   }: PolicyData) {
     this.id = id;
     this.deviceId = deviceId;
@@ -37,6 +46,9 @@ export class Policy {
     this.status = status;
     this.appliedAt = appliedAt;
     this.enforcementStatus = enforcementStatus;
+    this.policyType = policyType;
+    this.source = source;
+    this.canEnforce = canEnforce;
   }
 
   static fromJSON(json: PolicyData): Policy {
@@ -51,8 +63,10 @@ export class Policy {
       msplXml: this.msplXml,
       status: this.status,
       appliedAt: this.appliedAt,
-      enforcementStatus: this.enforcementStatus
+      enforcementStatus: this.enforcementStatus,
+      policyType: this.policyType,
+      source: this.source,
+      canEnforce: this.canEnforce
     };
   }
 }
-

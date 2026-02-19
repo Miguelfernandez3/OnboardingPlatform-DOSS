@@ -146,5 +146,5 @@ export abstract class BaseApiClient extends IApiClient {
   abstract applyIDSP2(deviceId: string, idsp2Id: string): Promise<ApplyResult>;
   abstract applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult>;
   abstract getEnforcementStatus(deviceId: string): Promise<EnforcementStatus>;
+  abstract enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult>;
 }
-

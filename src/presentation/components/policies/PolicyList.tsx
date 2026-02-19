@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Policy } from '../../../core/domain/entities/Policy';
 import { useIsMobile } from '../../hooks';
@@ -6,14 +7,28 @@ import MSPLViewer from '../mspl/MSPLViewer';
 interface PolicyListProps {
   policies: Policy[];
   onCreateNew?: () => void;
+  onEnforcePolicy?: (policyId: string) => Promise<void>;
 }
 
 /**
  * PolicyList - Componente para listar políticas aplicadas
  */
-export default function PolicyList({ policies, onCreateNew }: PolicyListProps): JSX.Element {
+export default function PolicyList({ policies, onCreateNew, onEnforcePolicy }: PolicyListProps): JSX.Element {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const [runningPolicyId, setRunningPolicyId] = useState<string | null>(null);
+
+  const handleEnforce = async (policyId: string): Promise<void> => {
+    if (!onEnforcePolicy) return;
+    setRunningPolicyId(policyId);
+    try {
+      await onEnforcePolicy(policyId);
+    } catch (_err) {
+      // Parent component handles user feedback.
+    } finally {
+      setRunningPolicyId(null);
+    }
+  };
 
   return (
     <div>
@@ -115,20 +130,50 @@ export default function PolicyList({ policies, onCreateNew }: PolicyListProps): 
                   padding: '0.2rem 0.5rem',
                   borderRadius: '4px',
                   backgroundColor: policy.enforcementStatus === 'completed' ? '#d4edda' : 
-                                   policy.enforcementStatus === 'error' ? '#f8d7da' : '#fff3cd',
+                                   policy.enforcementStatus === 'error' || policy.enforcementStatus === 'failed' ? '#f8d7da' : '#fff3cd',
                   color: policy.enforcementStatus === 'completed' ? '#155724' : 
-                         policy.enforcementStatus === 'error' ? '#721c24' : '#856404',
+                         policy.enforcementStatus === 'error' || policy.enforcementStatus === 'failed' ? '#721c24' : '#856404',
                   display: 'inline-block'
                 }}>
                   {policy.enforcementStatus}
                 </span>
               </p>
+              {policy.policyType && (
+                <p style={{ marginBottom: '0.5rem', marginTop: 0 }}>
+                  <strong>{t('policies.policyType')}:</strong> {policy.policyType}
+                </p>
+              )}
+              {policy.source && (
+                <p style={{ marginBottom: '0.5rem', marginTop: 0 }}>
+                  <strong>{t('policies.source')}:</strong> {policy.source}
+                </p>
+              )}
               {policy.appliedAt && (
                 <p style={{ marginBottom: 0, marginTop: 0 }}>
                   <strong>{t('policies.appliedAt')}:</strong> {new Date(policy.appliedAt).toLocaleString()}
                 </p>
               )}
             </div>
+            {onEnforcePolicy && policy.canEnforce !== false && (
+              <div style={{ marginBottom: '1rem' }}>
+                <button
+                  onClick={() => handleEnforce(policy.id)}
+                  disabled={runningPolicyId === policy.id}
+                  style={{
+                    padding: isMobile ? '0.6rem 1rem' : '0.5rem 1rem',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: runningPolicyId === policy.id ? 'not-allowed' : 'pointer',
+                    opacity: runningPolicyId === policy.id ? 0.7 : 1,
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {runningPolicyId === policy.id ? t('policies.enforcing') : t('policies.enforce')}
+                </button>
+              </div>
+            )}
             {policy.msplXml && (
               <details>
                 <summary style={{ cursor: 'pointer', fontWeight: 'bold', marginBottom: '0.5rem' }}>
@@ -144,4 +189,3 @@ export default function PolicyList({ policies, onCreateNew }: PolicyListProps): 
     </div>
   );
 }
-

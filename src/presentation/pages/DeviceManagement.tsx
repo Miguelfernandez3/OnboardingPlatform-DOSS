@@ -49,6 +49,7 @@ export default function DeviceManagement(): JSX.Element {
     loading: policiesLoading, 
     error: policiesError,
     enforcementStatus,
+    enforcePolicy,
   } = usePolicies(id);
 
   const {
@@ -159,6 +160,15 @@ export default function DeviceManagement(): JSX.Element {
 
   const handleCreatePolicy = (): void => {
     navigate(`/devices/${id}/policies/create`);
+  };
+
+  const handleEnforcePolicy = async (policyId: string): Promise<void> => {
+    try {
+      await enforcePolicy(policyId);
+      showTranslated('policies.enforceSuccess', 'success');
+    } catch (err) {
+      showApiError(err);
+    }
   };
 
   if (loading || deviceLoading) {
@@ -307,6 +317,7 @@ export default function DeviceManagement(): JSX.Element {
               <PolicyList 
                 policies={policies}
                 onCreateNew={handleCreatePolicy}
+                onEnforcePolicy={handleEnforcePolicy}
               />
             )}
           </div>
@@ -315,4 +326,3 @@ export default function DeviceManagement(): JSX.Element {
     </div>
   );
 }
-

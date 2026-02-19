@@ -89,6 +89,11 @@ export abstract class IApiClient {
   abstract getEnforcementStatus(deviceId: string): Promise<EnforcementStatus>;
 
   /**
+   * Ejecuta el enforcement de una política concreta
+   */
+  abstract enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult>;
+
+  /**
    * Obtiene las threats asociadas a un dispositivo
    */
   abstract getDeviceThreats(deviceId: string): Promise<Threat[]>;
@@ -173,4 +178,3 @@ export abstract class IApiClient {
    */
   abstract deactivateUser(id: string): Promise<UserData>;
 }
-

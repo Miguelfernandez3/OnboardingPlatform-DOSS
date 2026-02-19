@@ -17,6 +17,7 @@ export const jsonServerConfig: AdapterConfig = {
     mitigations: '/mitigations?deviceId=:deviceId',
     applyIdsp2: '/devices/:id/apply-idsp2',
     applyPolicy: '/devices/:id/apply-policy',
+    enforcePolicy: '/policies/:policyId',
     enforcementStatus: '/enforcementStatuses?deviceId=:deviceId',
     enforceMitigation: '/mitigations/:mitigationId',
     revokeMitigation: '/mitigations/:mitigationId',
