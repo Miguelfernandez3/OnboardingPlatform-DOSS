@@ -246,7 +246,14 @@
       "success": "Policy applied successfully",
       "error": "Error applying policy",
       "policyName": "Policy Name",
-      "policyNamePlaceholder": "Enter a name for the policy (optional)"
+      "policyNamePlaceholder": "Enter a name for the policy (optional)",
+      "inputMode": "Input mode",
+      "builderMode": "Generate with visual editor",
+      "manualMode": "Upload/Paste XML",
+      "manualModeDescription": "Upload an XML file or paste the MSPL policy content directly.",
+      "uploadXml": "Upload XML file",
+      "pasteXml": "Paste XML content",
+      "pasteXmlPlaceholder": "Paste the full policy XML here (for example, <mspl>...</mspl>)"
     },
     "createPage": {
       "title": "Create New Policy for device {{deviceName}}",

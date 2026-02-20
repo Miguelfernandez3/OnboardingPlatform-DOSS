@@ -246,7 +246,14 @@
       "success": "Política aplicada correctamente",
       "error": "Error al aplicar política",
       "policyName": "Nombre de la política",
-      "policyNamePlaceholder": "Ingrese un nombre para la política (opcional)"
+      "policyNamePlaceholder": "Ingrese un nombre para la política (opcional)",
+      "inputMode": "Modo de entrada",
+      "builderMode": "Generar con editor visual",
+      "manualMode": "Subir/Pegar XML",
+      "manualModeDescription": "Sube un fichero XML o pega directamente el contenido de la política MSPL.",
+      "uploadXml": "Subir fichero XML",
+      "pasteXml": "Pegar contenido XML",
+      "pasteXmlPlaceholder": "Pega aquí el XML completo de la política (por ejemplo, <mspl>...</mspl>)"
     },
     "createPage": {
       "title": "Crear Nueva Política para dispositivo {{deviceName}}",
