@@ -843,6 +843,13 @@ def update_device(device_id):
             device.status = data['status']
         if 'edk' in data:
             device.edk = data['edk']
+        # MUD URL compatibility (snake_case, camelCase and legacy key)
+        if 'mudurl' in data:
+            device.mudurl = data['mudurl']
+        elif 'mud_url' in data:
+            device.mudurl = data['mud_url']
+        elif 'mudUrl' in data:
+            device.mudurl = data['mudUrl']
         
         success = dadm.db.updateDevice(device)
         if success:
@@ -1799,4 +1806,3 @@ if __name__ == '__main__':
     except Exception as e:
         logging.critical(f"Fatal error starting DeviceDomainManager: {e}", exc_info=True)
         raise
-

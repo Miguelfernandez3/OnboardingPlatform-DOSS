@@ -10,6 +10,24 @@ from datetime import datetime, timezone
 import logging
 
 policies_bp = Blueprint('policies', __name__)
+logger = logging.getLogger(__name__)
+
+
+def _user_for_log(current_user) -> str:
+    """Returns a compact user identifier for logs."""
+    if isinstance(current_user, dict):
+        return str(
+            current_user.get('username')
+            or current_user.get('email')
+            or current_user.get('id')
+            or 'unknown'
+        )
+    return str(
+        getattr(current_user, 'username', None)
+        or getattr(current_user, 'email', None)
+        or getattr(current_user, 'id', None)
+        or 'unknown'
+    )
 
 
 def _policy_to_response(policy) -> dict:
@@ -57,11 +75,16 @@ def translate_mud(current_user):
 
     try:
         policies = dadm.policy_service.translate_mud_json_to_policies(mud_json)
+        logger.info(
+            "MUD JSON translated to MSPL policies: translatedCount=%d, requestedBy='%s'",
+            len(policies),
+            _user_for_log(current_user),
+        )
         return jsonify({
             'policies': policies
         }), 200
     except Exception as exc:
-        logging.error(f"Error translating MUD JSON: {exc}", exc_info=True)
+        logger.error("Error translating MUD JSON: %s", exc, exc_info=True)
         return jsonify({
             'error': str(exc),
             'code': 'TRANSLATION_FAILED',
@@ -75,6 +98,7 @@ def translate_mud(current_user):
 def apply_policy(device_id, device, current_user):
     """Creates an MSPL policy for a device and leaves it ready for enforcement."""
     dadm = get_dadm_instance()
+    user_id = _user_for_log(current_user)
     
     # Get XML from body (can come as XML or JSON with msplXml field)
     content_type = request.headers.get('Content-Type', '')
@@ -83,6 +107,12 @@ def apply_policy(device_id, device, current_user):
     policy_type = 'manual'
     source = 'user'
     enforce_now = False
+    logger.info(
+        "Policy creation request received: deviceId='%s', contentType='%s', requestedBy='%s'",
+        device_id,
+        content_type,
+        user_id,
+    )
     
     if 'application/xml' in content_type:
         mspl_xml = request.data.decode('utf-8')
@@ -111,6 +141,15 @@ def apply_policy(device_id, device, current_user):
     # Create policy in Policy table (separate from mitigations)
     try:
         policy_name_final = policy_name or f'Policy {datetime.now().isoformat()}'
+        logger.info(
+            "Creating policy record: deviceId='%s', policyName='%s', policyType='%s', source='%s', enforceNow=%s, requestedBy='%s'",
+            device_id,
+            policy_name_final,
+            policy_type,
+            source,
+            enforce_now,
+            user_id,
+        )
         policy = dadm.db.createPolicy(
             device_id=device_id,
             name=policy_name_final,
@@ -128,27 +167,77 @@ def apply_policy(device_id, device, current_user):
                 'details': {}
             }), 500
 
+        logger.info(
+            "Policy record created: deviceId='%s', policyId='%s', policyName='%s', status='%s', enforcementStatus='%s'",
+            device_id,
+            str(policy.id),
+            policy_name_final,
+            policy.status,
+            policy.enforcement_status,
+        )
+
         # Optional compatibility mode: enforce immediately when explicitly requested.
         if enforce_now:
             try:
+                logger.info(
+                    "Immediate policy enforcement requested: deviceId='%s', policyId='%s', policyName='%s'",
+                    device_id,
+                    str(policy.id),
+                    policy_name_final,
+                )
                 dadm.policy_enforcement_service.enforce_policy(mspl_xml, device, policy_name_final)
                 policy.status = 'active'
                 policy.enforcement_status = 'completed'
                 policy.applied_at = datetime.now(timezone.utc)
+                logger.info(
+                    "Immediate policy enforcement completed: deviceId='%s', policyId='%s', policyName='%s'",
+                    device_id,
+                    str(policy.id),
+                    policy_name_final,
+                )
             except Exception as exc:
-                logging.error(f"Error enforcing policy immediately: {exc}", exc_info=True)
+                logger.error(
+                    "Immediate policy enforcement failed: deviceId='%s', policyId='%s', policyName='%s', error='%s'",
+                    device_id,
+                    str(policy.id),
+                    policy_name_final,
+                    exc,
+                    exc_info=True,
+                )
                 policy.status = 'failed'
                 policy.enforcement_status = 'failed'
             finally:
                 dadm.db.updatePolicy(policy)
+                logger.info(
+                    "Immediate enforcement result persisted: deviceId='%s', policyId='%s', status='%s', enforcementStatus='%s'",
+                    device_id,
+                    str(policy.id),
+                    policy.status,
+                    policy.enforcement_status,
+                )
         
+        logger.info(
+            "Policy creation flow finished: deviceId='%s', policyId='%s', policyName='%s', finalStatus='%s', finalEnforcementStatus='%s'",
+            device_id,
+            str(policy.id),
+            policy_name_final,
+            policy.status,
+            policy.enforcement_status,
+        )
         return jsonify({
             'status': policy.enforcement_status or 'pending',
             'message': 'Policy saved and ready for enforcement',
             'policy': _policy_to_response(policy)
         }), 200
     except Exception as e:
-        logging.error(f"Error creating policy: {e}", exc_info=True)
+        logger.error(
+            "Error creating policy: deviceId='%s', policyName='%s', requestedBy='%s', error='%s'",
+            device_id,
+            policy_name,
+            user_id,
+            e,
+            exc_info=True,
+        )
         raise
 
 @policies_bp.route('/api/devices/<device_id>/policies/<policy_id>/enforce', methods=['POST'])
@@ -158,9 +247,22 @@ def apply_policy(device_id, device, current_user):
 def enforce_policy(device_id, device, policy_id, current_user):
     """Enforces a policy by ID using the configured type->enforcement mapping."""
     dadm = get_dadm_instance()
+    user_id = _user_for_log(current_user)
+    logger.info(
+        "Policy enforcement request received: deviceId='%s', policyId='%s', requestedBy='%s'",
+        device_id,
+        policy_id,
+        user_id,
+    )
 
     policy_data = dadm.policy_service.get_policy_for_enforcement(device_id, policy_id, device)
     if policy_data is None:
+        logger.warning(
+            "Policy enforcement target not found: deviceId='%s', policyId='%s', requestedBy='%s'",
+            device_id,
+            policy_id,
+            user_id,
+        )
         return jsonify({
             'error': f'Policy with id {policy_id} not found',
             'code': 'POLICY_NOT_FOUND',
@@ -170,18 +272,49 @@ def enforce_policy(device_id, device, policy_id, current_user):
     policy_name = policy_data.get('name')
     mspl_xml = policy_data.get('msplXml')
     if not mspl_xml:
+        logger.warning(
+            "Policy enforcement rejected due to missing MSPL: deviceId='%s', policyId='%s', policyName='%s', requestedBy='%s'",
+            device_id,
+            policy_id,
+            policy_name,
+            user_id,
+        )
         return jsonify({
             'error': 'Policy has no MSPL content',
             'code': 'INVALID_POLICY',
             'details': {'policyId': policy_id}
         }), 400
 
+    logger.info(
+        "Policy enforcement target resolved: deviceId='%s', policyId='%s', policyName='%s', source='%s', policyType='%s', persisted=%s",
+        device_id,
+        policy_id,
+        policy_name,
+        policy_data.get('source'),
+        policy_data.get('policyType'),
+        policy_data.get('isPersisted'),
+    )
+
     persisted_policy = policy_data.get('policyModel')
     try:
+        logger.info(
+            "Policy enforcement execution started: deviceId='%s', policyId='%s', policyName='%s'",
+            device_id,
+            policy_id,
+            policy_name,
+        )
         enforcement_result = dadm.policy_enforcement_service.enforce_policy(
             mspl_xml,
             device,
             policy_name
+        )
+        logger.info(
+            "Policy enforcement execution completed: deviceId='%s', policyId='%s', policyName='%s', profileId='%s', mode='%s'",
+            device_id,
+            policy_id,
+            policy_name,
+            enforcement_result.get('profileId'),
+            (enforcement_result.get('execution') or {}).get('mode'),
         )
 
         if policy_data.get('isPersisted'):
@@ -193,6 +326,13 @@ def enforce_policy(device_id, device, policy_id, current_user):
             if not persisted_policy.source:
                 persisted_policy.source = policy_data.get('source') or 'user'
             dadm.db.updatePolicy(persisted_policy)
+            logger.info(
+                "Policy enforcement persisted existing policy: deviceId='%s', policyId='%s', status='%s', enforcementStatus='%s'",
+                device_id,
+                str(persisted_policy.id),
+                persisted_policy.status,
+                persisted_policy.enforcement_status,
+            )
         else:
             persisted_policy = dadm.db.createPolicy(
                 device_id=device_id,
@@ -203,7 +343,19 @@ def enforce_policy(device_id, device, policy_id, current_user):
                 status='active',
                 enforcement_status='completed'
             )
+            logger.info(
+                "Policy enforcement persisted dynamic MUD policy: deviceId='%s', policyId='%s', persistedPolicyId='%s'",
+                device_id,
+                policy_id,
+                str(persisted_policy.id) if persisted_policy else None,
+            )
 
+        logger.info(
+            "Policy enforcement flow finished successfully: deviceId='%s', policyId='%s', policyName='%s'",
+            device_id,
+            policy_id,
+            policy_name,
+        )
         return jsonify({
             'status': 'completed',
             'message': 'Policy enforcement completed',
@@ -213,16 +365,31 @@ def enforce_policy(device_id, device, policy_id, current_user):
             'policyType': enforcement_result.get('policyType'),
         }), 200
     except Exception as exc:
-        logging.error(f"Policy enforcement failed for policy {policy_id}: {exc}", exc_info=True)
+        logger.error(
+            "Policy enforcement failed: deviceId='%s', policyId='%s', policyName='%s', source='%s', policyType='%s', requestedBy='%s', error='%s'",
+            device_id,
+            policy_id,
+            policy_name,
+            policy_data.get('source'),
+            policy_data.get('policyType'),
+            user_id,
+            exc,
+            exc_info=True,
+        )
 
         if policy_data.get('isPersisted') and persisted_policy is not None:
             persisted_policy.status = 'failed'
             persisted_policy.enforcement_status = 'failed'
             persisted_policy.applied_at = datetime.now(timezone.utc)
             dadm.db.updatePolicy(persisted_policy)
+            logger.info(
+                "Failed enforcement status persisted on existing policy: deviceId='%s', policyId='%s'",
+                device_id,
+                str(persisted_policy.id),
+            )
         elif not policy_data.get('isPersisted'):
             # Persist failed executions from dynamic MUD policy for traceability.
-            dadm.db.createPolicy(
+            failed_policy = dadm.db.createPolicy(
                 device_id=device_id,
                 name=policy_name or f'MUD Policy {policy_id}',
                 mspl_xml=mspl_xml,
@@ -230,6 +397,12 @@ def enforce_policy(device_id, device, policy_id, current_user):
                 source=policy_data.get('source') or 'mud_file',
                 status='failed',
                 enforcement_status='failed'
+            )
+            logger.info(
+                "Failed enforcement persisted for dynamic MUD policy: deviceId='%s', originalPolicyId='%s', persistedPolicyId='%s'",
+                device_id,
+                policy_id,
+                str(failed_policy.id) if failed_policy else None,
             )
 
         return jsonify({

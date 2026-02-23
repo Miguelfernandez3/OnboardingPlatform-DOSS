@@ -45,6 +45,10 @@ app = Flask(__name__)
 
 manager = None
 
+def _env_flag(name: str, default: str = "false") -> bool:
+    """Parse common boolean env values."""
+    return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
+
 class MUDManager:
 
     def __init__(self):
@@ -251,9 +255,7 @@ class MUDManager:
             logging.info("MUD Server is closing")
 '''
 
-@app.route('/mud', methods=['POST'])
-@require_auth
-def newConnexion(current_user):
+def _handle_new_connection():
     logging.info(f"Received POST request: /mud")
     js = request.get_json()
     logging.info(f"Request payload: {js}")
@@ -267,6 +269,19 @@ def newConnexion(current_user):
     print(response)
 
     return response
+
+# Internal endpoint consumed by Domain-Manager.
+# In local development we allow unauthenticated calls by default because
+# Domain-Manager does not forward user JWT to this service.
+if _env_flag("MUD_MANAGER_REQUIRE_AUTH", "false"):
+    @app.route('/mud', methods=['POST'])
+    @require_auth
+    def newConnexion(current_user):
+        return _handle_new_connection()
+else:
+    @app.route('/mud', methods=['POST'])
+    def newConnexion():
+        return _handle_new_connection()
 
 if __name__ == '__main__':
     # Configure logging with more detailed level for debugging
@@ -282,6 +297,7 @@ if __name__ == '__main__':
     logging.info("=" * 80)
     logging.info("Starting MUDManager")
     logging.info("=" * 80)
+    logging.info(f"MUD /mud auth enabled: {_env_flag('MUD_MANAGER_REQUIRE_AUTH', 'false')}")
     
     try:
         logging.debug("Creating MUDManager instance")
@@ -293,5 +309,4 @@ if __name__ == '__main__':
     except Exception as e:
         logging.critical(f"Fatal error starting MUDManager: {e}", exc_info=True)
         raise
-
 

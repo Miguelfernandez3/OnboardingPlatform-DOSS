@@ -126,6 +126,7 @@ class Config:
                 },
                 'homeassistant-rest': {
                     'mode': 'rest',
+                    'dry_run': True,
                     'endpoint': 'http://localhost:8123/api/services/automation/trigger',
                     'method': 'POST',
                     'timeout_seconds': 10,

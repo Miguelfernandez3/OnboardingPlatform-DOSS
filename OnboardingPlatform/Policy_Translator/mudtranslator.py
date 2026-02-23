@@ -619,6 +619,9 @@ def translate(mud):
     mspl = msplgenerator.create_mspl_object("mspl_example", "Filtering_L4", "rule_set"+str(uuid.uuid4()), "deny")
     configuration = msplObject.yc_configuration_mspl__configuration()
     for rule in rules:
+        # Skip ACL entries that cannot be mapped to an MSPL rule.
+        if rule is None:
+            continue
         #print("rule ", rule)
         msplgenerator.add_rule_to_configurationrule(mspl, rule)
     #print(pybindJSON.dumps(mspl))
@@ -627,7 +630,10 @@ def translate(mud):
         #in bytes
         #mspl_from_mud_acls = msplgenerator.dicttoxml(json.loads(pybindJSON.dumps(mspl)))
         #in str
-        mspl_from_mud_acls = replace_underscores_with_dashes(str(msplgenerator.dicttoxml(json.loads(pybindJSON.dumps(mspl)))))
+        raw_mspl_xml = msplgenerator.dicttoxml(json.loads(pybindJSON.dumps(mspl)))
+        if isinstance(raw_mspl_xml, (bytes, bytearray)):
+            raw_mspl_xml = raw_mspl_xml.decode("utf-8")
+        mspl_from_mud_acls = replace_underscores_with_dashes(str(raw_mspl_xml))
         mspls_to_return.append(mspl_from_mud_acls)
     #print(mspls_to_return)
     if 'umu-mspl-list:mspls' in mud:
@@ -679,9 +685,14 @@ def translate_mud(mud):
         mspl = msplgenerator.create_mspl_object("mspl_example", "Filtering_L4", "rule_set"+str(uuid.uuid4()), "deny")
         configuration = msplObject.yc_configuration_mspl__configuration()
         for rule in rules:
+            # Skip ACL entries that cannot be mapped to an MSPL rule.
+            if rule is None:
+                continue
             msplgenerator.add_rule_to_configurationrule(mspl, rule)
         #print(pybindJSON.dumps(mspl))
         mspl_from_mud_acls = msplgenerator.dicttoxml(json.loads(pybindJSON.dumps(mspl)), custom_root="mspl")
+        if isinstance(mspl_from_mud_acls, (bytes, bytearray)):
+            mspl_from_mud_acls = mspl_from_mud_acls.decode("utf-8")
         #print(mspl_from_mud_acls)
         return mspl_from_mud_acls
     else:

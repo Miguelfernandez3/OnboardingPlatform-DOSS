@@ -16,6 +16,7 @@ import xmltodict
 
 
 PLACEHOLDER_REGEX = re.compile(r"\{\{([a-zA-Z0-9_\-\.]+)\}\}")
+logger = logging.getLogger(__name__)
 
 
 class PolicyEnforcementService:
@@ -32,6 +33,22 @@ class PolicyEnforcementService:
         self.config = config
         self.legacy_enforcer = legacy_enforcer
         self.enforcement_config = self.config.policy_enforcement_config
+
+    @staticmethod
+    def _safe_preview(value: Any, max_length: int = 500) -> str:
+        """Builds a compact preview string for logging."""
+        try:
+            if isinstance(value, (dict, list)):
+                preview = json.dumps(value, ensure_ascii=True)
+            else:
+                preview = str(value)
+        except Exception:
+            preview = str(value)
+
+        if len(preview) <= max_length:
+            return preview
+        remaining = len(preview) - max_length
+        return f"{preview[:max_length]}...(truncated {remaining} chars)"
 
     @staticmethod
     def normalize_key(key: str) -> str:
@@ -59,7 +76,7 @@ class PolicyEnforcementService:
         try:
             mspl_node, flat_values = self._extract_mspl_and_flat_values(mspl_xml)
         except Exception as exc:
-            logging.warning(f"Could not parse MSPL metadata: {exc}")
+            logger.warning("Could not parse MSPL metadata: %s", exc)
             return {
                 "policyType": None,
                 "capability": None,
@@ -84,6 +101,12 @@ class PolicyEnforcementService:
             if isinstance(raw_type, str) and raw_type.strip():
                 policy_type = raw_type.strip()
 
+        logger.debug(
+            "MSPL metadata extracted: policyType='%s', capability='%s', explicitProfile='%s'",
+            policy_type,
+            capability,
+            explicit_profile,
+        )
         return {
             "policyType": policy_type,
             "capability": capability,
@@ -94,16 +117,39 @@ class PolicyEnforcementService:
         """
         Executes enforcement according to configured profile.
         """
+        device_id = getattr(device, "identifier", "") or ""
+        device_ip = getattr(device, "ip", "") or ""
+        logger.info(
+            "Policy enforcement started: policyName='%s', deviceId='%s', deviceIp='%s', msplSize=%d",
+            policy_name or "",
+            device_id,
+            device_ip,
+            len(mspl_xml or ""),
+        )
         mspl_node, flat_values = self._extract_mspl_and_flat_values(mspl_xml)
         metadata = self.extract_policy_metadata(mspl_xml)
 
         profile_id, profile = self._resolve_profile(metadata)
         mode = str(profile.get("mode", "era")).strip().lower()
+        logger.info(
+            "Policy enforcement profile resolved: policyName='%s', policyType='%s', capability='%s', profileId='%s', mode='%s'",
+            policy_name or "",
+            metadata.get("policyType"),
+            metadata.get("capability"),
+            profile_id,
+            mode,
+        )
+        logger.debug(
+            "Policy enforcement MSPL scalar extraction: policyName='%s', scalarCount=%d, sampleKeys=%s",
+            policy_name or "",
+            len(flat_values),
+            sorted(flat_values.keys())[:20],
+        )
 
         base_context = {
             "policy_name": policy_name or "",
-            "device_id": getattr(device, "identifier", "") or "",
-            "device_ip": getattr(device, "ip", "") or "",
+            "device_id": device_id,
+            "device_ip": device_ip,
             "policy_type": metadata.get("policyType") or "",
             "capability": metadata.get("capability") or "",
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -119,17 +165,41 @@ class PolicyEnforcementService:
             context[self.normalize_key(key)] = value
 
         if mode == "era":
+            logger.info(
+                "Policy enforcement executing ERA mode: policyName='%s', profileId='%s', deviceId='%s'",
+                policy_name or "",
+                profile_id,
+                device_id,
+            )
             self.legacy_enforcer(mspl_xml, device)
+            logger.info(
+                "Policy enforcement ERA mode completed: policyName='%s', profileId='%s', deviceId='%s'",
+                policy_name or "",
+                profile_id,
+                device_id,
+            )
             execution_data: Dict[str, Any] = {
                 "profileId": profile_id,
                 "mode": "era",
                 "target": "device",
             }
         elif mode == "rest":
+            logger.info(
+                "Policy enforcement executing REST mode: policyName='%s', profileId='%s', deviceId='%s'",
+                policy_name or "",
+                profile_id,
+                device_id,
+            )
             execution_data = self._execute_rest_profile(profile_id, profile, context)
         else:
             raise ValueError(f"Unsupported enforcement mode '{mode}' for profile '{profile_id}'")
 
+        logger.info(
+            "Policy enforcement completed: policyName='%s', profileId='%s', mode='%s', resultStatus='completed'",
+            policy_name or "",
+            profile_id,
+            mode,
+        )
         return {
             "status": "completed",
             "message": f"Policy enforced using profile '{profile_id}'",
@@ -145,6 +215,13 @@ class PolicyEnforcementService:
         """
         metadata = self.extract_policy_metadata(mspl_xml)
         profile_id, profile = self._resolve_profile(metadata)
+        logger.debug(
+            "Enforcement profile resolution (preview): policyType='%s', capability='%s', profileId='%s', mode='%s'",
+            metadata.get("policyType"),
+            metadata.get("capability"),
+            profile_id,
+            str(profile.get("mode", "era")).strip().lower(),
+        )
         return {
             "profileId": profile_id,
             "mode": str(profile.get("mode", "era")).strip().lower(),
@@ -165,18 +242,22 @@ class PolicyEnforcementService:
 
         auth_cfg = profile.get("auth", {}) if isinstance(profile.get("auth"), dict) else {}
         auth_type = str(auth_cfg.get("type", "none")).strip().lower()
+        auth_source = "none"
 
         if auth_type == "bearer":
             token = None
             if isinstance(auth_cfg.get("token"), str) and auth_cfg["token"].strip():
                 token = self._render_value(auth_cfg["token"], context)
+                auth_source = "profile.token"
             if token is None and isinstance(auth_cfg.get("token_env"), str):
                 token = os.getenv(auth_cfg["token_env"])
+                auth_source = f"env:{auth_cfg['token_env']}"
             if token is None and bool(auth_cfg.get("allow_mspl_token", False)):
                 token = self._pick_first(
                     context,
                     ["token", "bearer-token", "auth-token", "authorization-token"],
                 )
+                auth_source = "mspl"
             if not token:
                 raise ValueError(
                     f"Profile '{profile_id}' uses bearer auth but no token is available"
@@ -193,17 +274,78 @@ class PolicyEnforcementService:
                 # Keep plain string payload if not JSON.
                 pass
 
+        json_payload = payload if isinstance(payload, (dict, list)) else None
+        data_payload = payload if isinstance(payload, str) else None
+        dry_run = bool(profile.get("dry_run", False))
+
+        safe_headers = deepcopy(headers)
+        if "Authorization" in safe_headers:
+            safe_headers["Authorization"] = "Bearer ***"
+        logger.info(
+            "REST enforcement request: profileId='%s', method='%s', endpoint='%s', timeoutSeconds=%s, authType='%s', authSource='%s'",
+            profile_id,
+            method,
+            endpoint,
+            timeout_seconds,
+            auth_type,
+            auth_source,
+        )
+        logger.debug(
+            "REST enforcement request details: profileId='%s', headers=%s, payloadPreview=%s",
+            profile_id,
+            self._safe_preview(safe_headers),
+            self._safe_preview(payload),
+        )
+
+        if dry_run:
+            dry_run_request = {
+                "method": method,
+                "url": endpoint,
+                "headers": headers,
+                "json": json_payload,
+                "data": data_payload,
+                "timeout": timeout_seconds,
+            }
+            logger.warning(
+                "REST enforcement dry-run enabled for profile '%s'. Real HTTP request is skipped.",
+                profile_id,
+            )
+            logger.info(
+                "REST enforcement dry-run full request: %s",
+                self._safe_preview(dry_run_request, max_length=8000),
+            )
+            return {
+                "profileId": profile_id,
+                "mode": "rest-dry-run",
+                "endpoint": endpoint,
+                "method": method,
+                "dryRun": True,
+                "request": dry_run_request,
+            }
+
         response = requests.request(
             method=method,
             url=endpoint,
             headers=headers,
-            json=payload if isinstance(payload, (dict, list)) else None,
-            data=payload if isinstance(payload, str) else None,
+            json=json_payload,
+            data=data_payload,
             timeout=timeout_seconds,
         )
         response.raise_for_status()
+        logger.info(
+            "REST enforcement response: profileId='%s', httpStatus=%s, endpoint='%s'",
+            profile_id,
+            response.status_code,
+            endpoint,
+        )
 
         response_excerpt = response.text[:300] if response.text else ""
+        if response_excerpt:
+            logger.debug(
+                "REST enforcement response excerpt: profileId='%s', excerpt=%s",
+                profile_id,
+                self._safe_preview(response_excerpt),
+            )
         return {
             "profileId": profile_id,
             "mode": "rest",
@@ -224,6 +366,11 @@ class PolicyEnforcementService:
             normalized_profile = self.normalize_key(explicit_profile)
             for profile_id, profile_cfg in profiles.items():
                 if self.normalize_key(profile_id) == normalized_profile:
+                    logger.debug(
+                        "Enforcement profile selected from explicit MSPL profile: explicitProfile='%s' -> profileId='%s'",
+                        explicit_profile,
+                        profile_id,
+                    )
                     return profile_id, profile_cfg
             raise ValueError(f"Explicit enforcement profile '{explicit_profile}' is not configured")
 
@@ -239,11 +386,21 @@ class PolicyEnforcementService:
                         raise ValueError(
                             f"Mapping '{mapping_key}' points to unknown profile '{mapping_profile}'"
                         )
+                    logger.debug(
+                        "Enforcement profile selected from type mapping: candidate='%s', mappingKey='%s', profileId='%s'",
+                        candidate,
+                        mapping_key,
+                        mapping_profile,
+                    )
                     return mapping_profile, profile_cfg
 
         profile_cfg = profiles.get(default_profile)
         if profile_cfg is None:
             raise ValueError(f"Default profile '{default_profile}' is not configured")
+        logger.debug(
+            "Enforcement profile selected from default profile: defaultProfile='%s'",
+            default_profile,
+        )
         return default_profile, profile_cfg
 
     def _extract_mspl_and_flat_values(self, mspl_xml: str) -> tuple[Dict[str, Any], Dict[str, str]]:

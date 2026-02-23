@@ -70,6 +70,13 @@ def update_device(device_id, device, current_user):
         device.status = data['status']
     if 'edk' in data:
         device.edk = data['edk']
+    # MUD URL compatibility (snake_case, camelCase and legacy key)
+    if 'mudurl' in data:
+        device.mudurl = data['mudurl']
+    elif 'mud_url' in data:
+        device.mudurl = data['mud_url']
+    elif 'mudUrl' in data:
+        device.mudurl = data['mudUrl']
     
     success = dadm.db.updateDevice(device)
     if success:
@@ -307,4 +314,3 @@ def list_endpoints():
         }
     ]
     return endpoints
-

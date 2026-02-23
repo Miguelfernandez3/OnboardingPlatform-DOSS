@@ -41,8 +41,10 @@ class BaseHTTPClient:
             Dict with JSON response or None if error
         """
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        # Allow per-request timeout override without duplicating the argument
+        timeout = kwargs.pop('timeout', self.timeout)
         try:
-            response = requests.get(url, timeout=self.timeout, **kwargs)
+            response = requests.get(url, timeout=timeout, **kwargs)
             logging.debug(f"{self.__class__.__name__}.get: {url} -> {response.status_code}")
             
             if response.status_code == 200:
@@ -78,9 +80,11 @@ class BaseHTTPClient:
         """
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         headers = {**self._get_headers(), **kwargs.pop('headers', {})}
+        # Allow per-request timeout override without duplicating the argument
+        timeout = kwargs.pop('timeout', self.timeout)
         
         try:
-            response = requests.post(url, json=data, headers=headers, timeout=self.timeout, **kwargs)
+            response = requests.post(url, json=data, headers=headers, timeout=timeout, **kwargs)
             logging.debug(f"{self.__class__.__name__}.post: {url} -> {response.status_code}")
             
             if response.status_code == 200:
@@ -101,4 +105,3 @@ class BaseHTTPClient:
         except Exception as e:
             logging.error(f"{self.__class__.__name__}.post: Unexpected error: {e}", exc_info=True)
             return None
-

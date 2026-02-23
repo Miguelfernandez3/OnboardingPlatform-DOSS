@@ -17,9 +17,22 @@ from decorators import require_auth
 
 app = Flask(__name__)
 
+def _env_flag(name: str, default: str = "false") -> bool:
+    """Parse common boolean env values."""
+    return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
+
+def _optional_auth(decorator, enabled: bool):
+    """Apply auth decorator only when enabled."""
+    if enabled:
+        return decorator
+    return lambda f: f
+
+AUTH_ENABLED = _env_flag("MUD_SERVER_REQUIRE_AUTH", "false")
+auth_guard = _optional_auth(require_auth, AUTH_ENABLED)
+
 @app.route('/list',methods = ['GET'])
-@require_auth
-def getList(current_user):
+@auth_guard
+def getList(current_user=None):
     lst = os.listdir('./files')
     ret = []
     print(lst)
@@ -31,8 +44,8 @@ def getList(current_user):
     return json.dumps(ret)
 
 @app.route('/<hash>', methods = ['GET'])
-@require_auth
-def getThreatMudFile(hash, current_user):
+@auth_guard
+def getThreatMudFile(hash, current_user=None):
     print("hash ", hash)
     splited = hash.split(".")
     if len(splited) == 1:
@@ -54,10 +67,11 @@ def getThreatMudFile(hash, current_user):
         abort(404)
 
 @app.route("/signature", methods = ['GET'])
-@require_auth
-def getSignature(current_user):
+@auth_guard
+def getSignature(current_user=None):
     return "signature"
 
 if __name__ == "__main__":
     #app.run(debug=True, port=5050)
+    print(f"MUD Server auth enabled: {AUTH_ENABLED}")
     app.run(debug=True, host="0.0.0.0", port=8091)

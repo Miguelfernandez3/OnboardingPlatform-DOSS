@@ -1,0 +1,82 @@
+{
+    "ietf-mud:mud": {
+      "mud-version": 1,
+      "mud-url": "https://ariamanufacturer.com/device_uuid",
+      "last-update": "2024-02-16T11:35:25+01:00",
+      "cache-validity": 48,
+      "is-supported": true,
+      "modelname": "Aria",
+      "systeminfo": "The Aria device Current MUD File",
+      "extensions": [
+        "network-fingerprint",
+        "monitor-mode",
+        "so-hash",
+        "integrity-fingerprint",
+        "mud-signature-certification-authority",
+        "umu-mspl-list:mspls"
+      ],
+      "network-fingerprint": "((PortclSrc-42,UDP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,UDP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,UDP-45)=([2.0,2.0],[1.0,1.0])) AND ((PortclSrc-42,DHCP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,DHCP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,DHCP-45)=([2.0,2.0],[1.0,1.0]))",
+      "monitor-mode": "active",
+      "so-hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "integrity-fingerprint": "{'moore_machine': {'initial-state': '0', 'input-alphabet': ['0', '3', '2', '1'], 'output-alphabet': ['0', '2', '1'], 'output-function': {'0': '0', '1': '0', '10': '2', '11': '2', '12': '0', '13': '2', '14': '2', '15': '2', '16': '2', '17': '2', '18': '2', '19': '2', '2': '0', '20': '2', '21': '0', '22': '0', '23': '0', '24': '0', '25': '0', '26': '0', '3': '0', '4': '0', '5': '2', '6': '2', '7': '2', '8': '2', '9': '1'}, 'states': ['0', '26', '17', '15', '24', '19', '6', '10', '1', '8', '13', '21', '12', '14', '23', '3', '5', '4', '22', '20', '7', '2', '11', '16', '25', '18', '9'], 'transition-function': {'0': {'0': '9', '1': '1', '2': '9', '3': '9'}, '1': {'0': '9', '1': '2', '2': '24', '3': '9'}, '10': {'0': '9', '1': '9', '2': '11', '3': '13'}, '11': {'0': '9', '1': '9', '2': '12', '3': '9'}, '12': {'0': '9', '1': '9', '2': '9', '3': '9'}, '13': {'0': '14', '1': '9', '2': '9', '3': '9'}, '14': {'0': '9', '1': '9', '2': '11', '3': '15'}, '15': {'0': '16', '1': '9', '2': '9', '3': '9'}, '16': {'0': '9', '1': '9', '2': '11', '3': '17'}, '17': {'0': '18', '1': '9', '2': '9', '3': '9'}, '18': {'0': '9', '1': '9', '2': '11', '3': '19'}, '19': {'0': '20', '1': '9', '2': '9', '3': '9'}, '2': {'0': '10', '1': '3', '2': '21', '3': '9'}, '20': {'0': '9', '1': '9', '2': '11', '3': '9'}, '21': {'0': '9', '1': '22', '2': '10', '3': '9'}, '22': {'0': '9', '1': '23', '2': '9', '3': '9'}, '23': {'0': '14', '1': '9', '2': '9', '3': '9'}, '24': {'0': '9', '1': '25', '2': '9', '3': '9'}, '25': {'0': '9', '1': '22', '2': '26', '3': '9'}, '26': {'0': '9', '1': '22', '2': '9', '3': '9'}, '3': {'0': '9', '1': '4', '2': '9', '3': '9'}, '4': {'0': '10', '1': '5', '2': '9', '3': '9'}, '5': {'0': '5', '1': '5', '2': '6', '3': '7'}, '6': {'0': '8', '1': '6', '2': '7', '3': '0'}, '7': {'0': '7', '1': '6', '2': '0', '3': '6'}, '8': {'0': '5', '1': '5', '2': '8', '3': '0'}, '9': {'0': '9', '1': '9', '2': '9', '3': '9'}}}, 'moore_alpha_maps': [{'input-map': {'fclose@plt': '2', 'fopen@plt': '1', 'fread@plt': '0', 'fwrite@plt': '3'}, 'output-map': {'ACCEPT': '0', 'OK': '2', 'REJECT': '1'}}, {'input-map': {'0': 'fread@plt', '1': 'fopen@plt', '2': 'fclose@plt', '3': 'fwrite@plt'}, 'output-map': {'0': 'ACCEPT', '1': 'REJECT', '2': 'OK'}}]}",
+      "from-device-policy": {
+        "access-lists": {
+          "access-list": []
+        },
+        "mspl-list": {
+          "mspls":[
+            {
+                "name": "mspl_6ccf1735-d981-4e30-87ad-34a43d5f72fa"
+              }]
+        }
+      },
+      "to-device-policy": {
+        "access-lists": {
+          "access-list": []
+        },
+        "mspl-list": {
+          "mspls":[
+            {
+              "name": "mspl_6ccf1735-d981-4e30-87ad-34a43d5f72fa"
+              }]
+        }
+      }
+    },
+    "ietf-access-control-list:acls": {
+      "acl": []
+    },
+    "umu-mspl-list:mspls": {
+      "mspl":[
+        {
+          "name": "mspl_6ccf1735-d981-4e30-87ad-34a43d5f72fa",
+          "type": "boostrapping-mspl-type",
+          "configuration": {
+              "capability": "bootstrapping",
+              "rule-set-configuration": {
+                  "name": "mspl_set_11868758-2e8f-4674-8a20-685ce351d3d1",
+                  "configuration-rule": [
+                      {
+                          "name": "Rule_71405326-8629-42f5-92aa-391b4de1a841",
+                          "isCNF": false,
+                          "external-data": {
+                              "priority": 500
+                          },
+                          "configuration-action": {
+                              "bootstrapping-action": {
+                                  "bootstrapping-action-type": "BOOTSTRAPPING",
+                                  "bootstrapping-model-version": "0.1",
+                                  "network-bootstrapping-model": "((PortclSrc-42,UDP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,UDP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,UDP-45)=([2.0,2.0],[1.0,1.0])) AND ((PortclSrc-42,DHCP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,DHCP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,DHCP-45)=([2.0,2.0],[1.0,1.0]))",
+                                  "network-bootstrapping-model-signature": "3ca5d818857d9f13efe6d78864f88a37d726d4c71"
+                              }
+                          },
+                          "configuration-condition": {
+                              "bootstrapping-configuration-condition": {}
+                          }
+                      }
+                  ]
+              }
+          }
+      }
+      ]
+    }
+  }

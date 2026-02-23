@@ -25,14 +25,17 @@ CORS(app)
 dadm = None
 
 if __name__ == '__main__':
-    # Configure logging with more detailed level for debugging
+    # Configure logging early and force override in case any module already created handlers.
+    log_level_name = os.getenv('LOG_LEVEL', 'DEBUG').upper()
+    log_level = getattr(logging, log_level_name, logging.DEBUG)
     logging.basicConfig(
-        level=logging.DEBUG,  # Changed to DEBUG for more detailed logs
+        level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.StreamHandler(),  # Log to console
             logging.FileHandler('DeviceDomainManager.log')  # Also log to file
-        ]
+        ],
+        force=True,
     )
     
     logging.info("=" * 80)
@@ -63,4 +66,3 @@ if __name__ == '__main__':
     except Exception as e:
         logging.critical(f"Fatal error starting DeviceDomainManager: {e}", exc_info=True)
         raise
-

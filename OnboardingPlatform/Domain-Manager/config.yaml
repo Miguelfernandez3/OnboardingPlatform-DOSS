@@ -23,9 +23,10 @@ PolicyEnforcement:
   profiles:
     era-default:
       mode: "era"
-    homeassistant-rest:
+    homeassistant-rest-example:
       mode: "rest"
-      endpoint: "http://localhost:8123/api/services/automation/trigger"
+      dry_run: true
+      endpoint: "http://100.0.8:8123/api/services/rest_command/lock_bedroom_external"
       method: "POST"
       timeout_seconds: 10
       headers:
@@ -35,9 +36,21 @@ PolicyEnforcement:
         token_env: "HOME_ASSISTANT_TOKEN"
       payload_template:
         entity_id: "{{automation-id}}"
+    homeassistant-rest-lock-bedroom-external:
+      mode: "rest"
+      dry_run: true
+      endpoint: "http://160.40.54.46:8123/api/services/rest_command/{{automation-id}}"
+      method: "POST"
+      timeout_seconds: 10
+      auth:
+        type: "bearer"
+        token_env: "HOME_ASSISTANT_TOKEN"
+      payload_template: ""
+
   type_mappings:
-    homeassistant-automation-mspl-type: "homeassistant-rest"
-    homeassistant-mspl-type: "homeassistant-rest"
+    homeassistant-rest-command-mspl-type: "homeassistant-rest-lock-bedroom-external"
+    homeassistant-automation-mspl-type: "homeassistant-rest-lock-bedroom-external"
+    homeassistant-mspl-type: "homeassistant-rest-lock-bedroom-external"
     boostrapping-mspl-type: "era-default"
     bootstrapping-mspl-type: "era-default"
     ipv4-mspl-type: "era-default"
