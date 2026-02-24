@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../core/ports';
 import { Device, Policy, MUD, Passport } from '../../../core/domain';
 import { setupAuthInterceptor } from '../interceptors/authInterceptor';

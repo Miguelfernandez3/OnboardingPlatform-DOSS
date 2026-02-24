@@ -107,7 +107,6 @@ function formatXmlManual(xml: string): string {
   // Procesar el XML caracter por caracter para manejar correctamente los tags
   let i = 0;
   let currentTag = '';
-  let inTag = false;
   let inQuotes = false;
   let quoteChar = '';
   
@@ -130,7 +129,6 @@ function formatXmlManual(xml: string): string {
         formatted += tab.repeat(indent) + currentTag.trim() + '\n';
         currentTag = '';
       }
-      inTag = true;
       currentTag += char;
     } else if (char === '>' && !inQuotes) {
       // Fin de tag
@@ -154,7 +152,6 @@ function formatXmlManual(xml: string): string {
       }
       
       currentTag = '';
-      inTag = false;
     } else {
       currentTag += char;
     }
@@ -173,7 +170,7 @@ function formatXmlManual(xml: string): string {
 /**
  * MSPLViewer - Componente para visualizar políticas MSPL en formato XML
  */
-export default function MSPLViewer({ msplXml, title }: MSPLViewerProps): JSX.Element {
+export default function MSPLViewer({ msplXml, title: _title }: MSPLViewerProps): JSX.Element {
   const { t } = useTranslation();
   
   // Formatear el XML antes de mostrarlo (usar useMemo para evitar recalcular)
@@ -212,4 +209,3 @@ export default function MSPLViewer({ msplXml, title }: MSPLViewerProps): JSX.Ele
     </div>
   );
 }
-

@@ -46,7 +46,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Si el token está expirado o próximo a expirar (menos de 5 minutos), refrescar
       if (isTokenExpired(accessToken)) {
-        const response = await authService.refreshToken(refreshToken);
+        await authService.refreshToken(refreshToken);
         const userData = await authService.getCurrentUser();
         setUser(User.fromJSON(userData));
       } else {

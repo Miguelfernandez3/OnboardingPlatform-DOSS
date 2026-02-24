@@ -299,7 +299,7 @@ export class JsonServerApiClient extends BaseApiClient {
     await this.delete<void>('deleteDevice', { id: deviceId });
   }
 
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async login(email: string, _password: string): Promise<AuthResponse> {
     // Mock: buscar usuario en la colección users
     const users = await this.get<UserData[]>('users');
     const user = users.find(u => u.email === email);
@@ -356,7 +356,7 @@ export class JsonServerApiClient extends BaseApiClient {
     return users[0];
   }
 
-  async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+  async changePassword(_oldPassword: string, _newPassword: string): Promise<void> {
     // Mock: actualizar password del usuario actual
     // En producción, esto validaría el oldPassword y actualizaría el hash
     const user = await this.getCurrentUser();
@@ -405,7 +405,7 @@ export class JsonServerApiClient extends BaseApiClient {
     return user;
   }
 
-  async createUser(email: string, password: string, role: string): Promise<UserData> {
+  async createUser(email: string, _password: string, role: string): Promise<UserData> {
     const newUser: UserData = {
       id: `user_${Date.now()}`,
       email,

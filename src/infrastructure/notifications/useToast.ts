@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import toast, { ToastType } from 'react-hot-toast';
-import { ApiError } from '../api/errors/ApiError';
+import toast from 'react-hot-toast';
 import { ErrorCode } from '../api/errors/ErrorCode';
 import { extractApiError } from '../api/errors/errorUtils';
+
+type ToastVariant = 'success' | 'error' | 'warning' | 'info';
 
 /**
  * Hook personalizado para mostrar notificaciones toast con soporte i18n
@@ -95,7 +96,7 @@ export function useToast() {
   /**
    * Muestra un mensaje genérico con traducción
    */
-  const showTranslated = (key: string, type: ToastType = 'info', options?: Record<string, string>) => {
+  const showTranslated = (key: string, type: ToastVariant = 'info', options?: Record<string, string>) => {
     const message = t(key, options);
     switch (type) {
       case 'success':

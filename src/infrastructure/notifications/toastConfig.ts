@@ -40,25 +40,5 @@ export const toastConfig: ToasterProps = {
         background: '#ef4444',
       },
     },
-    warning: {
-      duration: 5000,
-      iconTheme: {
-        primary: '#f59e0b',
-        secondary: '#fff',
-      },
-      style: {
-        background: '#f59e0b',
-      },
-    },
-    info: {
-      duration: 4000,
-      iconTheme: {
-        primary: '#3b82f6',
-        secondary: '#fff',
-      },
-      style: {
-        background: '#3b82f6',
-      },
-    },
   },
 };

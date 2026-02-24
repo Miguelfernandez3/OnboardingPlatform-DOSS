@@ -23,8 +23,11 @@ export class ApiError extends Error {
     this.originalError = originalError;
     
     // Mantener el stack trace correcto
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ApiError);
+    const errorConstructor = Error as ErrorConstructor & {
+      captureStackTrace?: (targetObject: object, constructorOpt?: Function) => void;
+    };
+    if (errorConstructor.captureStackTrace) {
+      errorConstructor.captureStackTrace(this, ApiError);
     }
   }
 
