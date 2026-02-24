@@ -10,6 +10,7 @@ import yaml
 from confluent_kafka import Consumer, Producer
 from Database import TMUD, Database
 import sys
+from urllib.parse import urlparse
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 
@@ -36,6 +37,22 @@ manager = None
 from Policy_Translator import mudtranslator
 
 
+def _env_flag(name: str, default: str = "false") -> bool:
+    """Parse common boolean env values."""
+    return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
+
+
+def _optional_auth(decorator, enabled: bool):
+    """Apply auth decorator only when enabled."""
+    if enabled:
+        return decorator
+    return lambda f: f
+
+
+AUTH_ENABLED = _env_flag("THREAT_MUD_MANAGER_REQUIRE_AUTH", "false")
+auth_guard = _optional_auth(require_auth, AUTH_ENABLED)
+
+
 class ThreatMUDManager:
 
     def __init__(self):
@@ -48,6 +65,8 @@ class ThreatMUDManager:
             self.broker = config['TMUDManager']['broker']
             self.receivetopic = config['TMUDManager']['receivetopic']
             self.sendtopic = config['TMUDManager']['sendtopic']
+        self.localhost_alias_by_port = self._parse_localhost_alias_map()
+        self.default_localhost_alias = os.getenv("THREAT_MUD_LOCALHOST_ALIAS", "").strip()
 
         self.db = Database()
 
@@ -93,6 +112,72 @@ class ThreatMUDManager:
 
         return False
 
+    def _parse_localhost_alias_map(self):
+        """
+        Parse LOCALHOST_ALIAS_BY_PORT env var like:
+        8091:mud-server,8888:mud-manager
+        """
+        mapping = {}
+        raw = os.getenv("LOCALHOST_ALIAS_BY_PORT", "").strip()
+        if not raw:
+            return mapping
+
+        for entry in raw.split(","):
+            item = entry.strip()
+            if not item:
+                continue
+            if ":" not in item:
+                logging.warning(f"Ignoring invalid LOCALHOST_ALIAS_BY_PORT entry: '{item}'")
+                continue
+
+            port_str, alias = item.split(":", 1)
+            port_str = port_str.strip()
+            alias = alias.strip()
+
+            if not port_str.isdigit() or not alias:
+                logging.warning(f"Ignoring invalid LOCALHOST_ALIAS_BY_PORT entry: '{item}'")
+                continue
+
+            mapping[int(port_str)] = alias
+        return mapping
+
+    def _resolve_tmud_url(self, tmudurl):
+        """
+        Rewrites localhost URLs so they are reachable from inside Docker networks.
+        """
+        try:
+            parsed = urlparse(tmudurl)
+            if parsed.hostname not in ("localhost", "127.0.0.1", "0.0.0.0"):
+                return tmudurl
+
+            localhost_alias = (
+                self.localhost_alias_by_port.get(parsed.port)
+                or self.default_localhost_alias
+            )
+            if not localhost_alias:
+                return tmudurl
+
+            if parsed.port:
+                netloc = f"{localhost_alias}:{parsed.port}"
+            else:
+                netloc = localhost_alias
+
+            if parsed.username:
+                auth = parsed.username
+                if parsed.password:
+                    auth = f"{auth}:{parsed.password}"
+                netloc = f"{auth}@{netloc}"
+
+            resolved_url = parsed._replace(netloc=netloc).geturl()
+            if resolved_url != tmudurl:
+                logging.info(
+                    f"Rewriting local TMUD URL for container networking: {tmudurl} -> {resolved_url}"
+                )
+            return resolved_url
+        except Exception as e:
+            logging.warning(f"Failed to rewrite TMUD URL '{tmudurl}': {e}. Using original URL.")
+            return tmudurl
+
     def compareTMUD(self, tmudurl, tmudfileDB):
 
         tmudfile = self.getTMUDFile(tmudurl)
@@ -102,16 +187,18 @@ class ThreatMUDManager:
         return False
 
     def getTMUDFile(self, tmudurl):
-        r = requests.get(tmudurl)
+        resolved_tmudurl = self._resolve_tmud_url(tmudurl)
+        r = requests.get(resolved_tmudurl)
 
         return r.text
 
     def verifyTMUDFile(self, tmudurl):
+        resolved_tmudurl = self._resolve_tmud_url(tmudurl)
 
-        tmudsignurl = tmudurl.replace(".json", ".p7s")
+        tmudsignurl = resolved_tmudurl.replace(".json", ".p7s")
 
-        logging.info("Downloading tmudfile from: " + tmudurl)
-        r = requests.get(tmudurl)
+        logging.info("Downloading tmudfile from: " + resolved_tmudurl)
+        r = requests.get(resolved_tmudurl)
         tmudfile = "temp" + str(random.randint(1, 100000000)) + ".json"
 
         open(tmudfile, "w+").write(r.text)
@@ -233,8 +320,8 @@ class ThreatMUDManager:
             logging.info("TMUD Server is closing")
 
 @app.route('/tmud', methods=['POST'])
-@require_auth
-def newtmud(current_user):
+@auth_guard
+def newtmud(current_user=None):
     logging.info(f"Received POST request: /tmud")
     js = request.get_json()
     logging.info(f"Request payload: {js}")
@@ -250,8 +337,8 @@ def newtmud(current_user):
     return response
 
 @app.route('/api/threats', methods=['GET'])
-@require_auth
-def get_all_threats(current_user):
+@auth_guard
+def get_all_threats(current_user=None):
     """Obtiene todos los threats (TMUDs)"""
     logging.info(f"Received GET request: /api/threats")
     try:
@@ -279,8 +366,8 @@ def get_all_threats(current_user):
         }), 500
 
 @app.route('/api/threats/device/<device_identifier>', methods=['GET'])
-@require_auth
-def get_threats_by_device(device_identifier, current_user):
+@auth_guard
+def get_threats_by_device(device_identifier, current_user=None):
     """Obtiene todos los threats asociados a un dispositivo"""
     logging.info(f"Received GET request: /api/threats/device/{device_identifier}")
     try:
@@ -309,8 +396,8 @@ def get_threats_by_device(device_identifier, current_user):
         }), 500
 
 @app.route('/api/threats/<threat_id>', methods=['GET'])
-@require_auth
-def get_threat_by_id(threat_id, current_user):
+@auth_guard
+def get_threat_by_id(threat_id, current_user=None):
     """Obtiene un threat específico por ID"""
     logging.info(f"Received GET request: /api/threats/{threat_id}")
     try:
@@ -366,6 +453,7 @@ if __name__ == '__main__':
     logging.info("=" * 80)
     logging.info("Starting ThreatMUDManager")
     logging.info("=" * 80)
+    logging.info(f"Threat MUD Manager auth enabled: {AUTH_ENABLED}")
     
     try:
         logging.debug("Creating ThreatMUDManager instance")

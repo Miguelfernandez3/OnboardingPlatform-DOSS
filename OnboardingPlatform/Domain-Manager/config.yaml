@@ -38,7 +38,7 @@ PolicyEnforcement:
         entity_id: "{{automation-id}}"
     homeassistant-rest-lock-bedroom-external:
       mode: "rest"
-      dry_run: true
+      dry_run: false
       endpoint: "http://160.40.54.46:8123/api/services/rest_command/{{automation-id}}"
       method: "POST"
       timeout_seconds: 10

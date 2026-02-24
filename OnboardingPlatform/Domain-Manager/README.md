@@ -35,6 +35,7 @@ El usuario administrador se creará automáticamente al iniciar la aplicación s
 - INV_REG_URL (e.g. http://localhost:8080/chain/): Url where inventory and registry is listening
 - IDM_URL (e.g. https://localhost:9082/fluidos/idm/): Url where idm is listening for verification requests
 - SUUA_URL (e.g. https://suua.api.certify.digital-worx.de/): Url where SUUA API is offered
+- HOME_ASSISTANT_TOKEN: Bearer token used by the `homeassistant-rest` policy enforcement profile
  
 
  ## Running the Server
@@ -74,6 +75,13 @@ Para más información sobre la API de autenticación, consulta los endpoints en
 
 ## API Calls
 The API calls cover functionality described in the flows (such as software upgrade demo) as REST APIs.
+
+### Policy enforcement endpoint
+- `POST /api/devices/<device_id>/policies/<policy_id>/enforce`
+  - Enforces an existing policy using configured type->enforcement mappings.
+  - For MUD-derived policies, use IDs returned by `GET /api/devices/<device_id>/policies` (e.g., `mud-policy-0`).
+- `POST /api/policies/translate-mud`
+  - Receives a full MUD JSON and returns translated policies in MSPL format plus enforcement metadata preview.
 
  ### Error Handling
  - **200 OK**: Success, with a field including data as needed.
@@ -130,4 +138,3 @@ To register software:
      "status": "success"
  }'
  ```
-

@@ -40,7 +40,11 @@ class Config:
     @property
     def feam_server(self) -> str:
         """FEAM server URL."""
-        return self._config['DeviceDomainManager']['FEAM_server']
+        return (
+            os.getenv('FEAM_SERVER_URL')
+            or os.getenv('FEAM_SERVER')
+            or self._config['DeviceDomainManager']['FEAM_server']
+        )
     
     @property
     def feam_session_id(self) -> str:
@@ -50,12 +54,18 @@ class Config:
     @property
     def threat_mud_manager_url(self) -> str:
         """ThreatMUD Manager URL."""
-        return self._config['DeviceDomainManager'].get('ThreatMUDManager_url', 'http://localhost:8889')
+        return (
+            os.getenv('THREAT_MUD_MANAGER_URL')
+            or self._config['DeviceDomainManager'].get('ThreatMUDManager_url', 'http://localhost:8889')
+        )
     
     @property
     def mud_manager_url(self) -> str:
         """MUD Manager URL."""
-        return self._config['DeviceDomainManager'].get('MUDManager_url', 'http://localhost:8888')
+        return (
+            os.getenv('MUD_MANAGER_URL')
+            or self._config['DeviceDomainManager'].get('MUDManager_url', 'http://localhost:8888')
+        )
     
     @property
     def topics(self) -> list:

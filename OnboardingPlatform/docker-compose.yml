@@ -1,0 +1,101 @@
+name: onboarding-platform
+
+services:
+  mud-manager:
+    build:
+      context: .
+      dockerfile: Extended-MUD-Manager/Dockerfile
+    env_file:
+      - .env.compose
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      LOCALHOST_ALIAS_BY_PORT: "${LOCALHOST_ALIAS_BY_PORT:-8091:mud-server,8888:mud-manager,8889:threat-mud-manager,4321:domain-manager,3001:gui}"
+      MUD_MANAGER_REQUIRE_AUTH: ${MUD_MANAGER_REQUIRE_AUTH:-false}
+      MUD_LOCALHOST_ALIAS: ${MUD_LOCALHOST_ALIAS:-mud-server}
+    ports:
+      - "8888:8888"
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
+  threat-mud-manager:
+    build:
+      context: .
+      dockerfile: Extended-MUD-Manager/Dockerfile
+    command: ["python", "ThreatMUDManager.py"]
+    env_file:
+      - .env.compose
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      LOCALHOST_ALIAS_BY_PORT: "${LOCALHOST_ALIAS_BY_PORT:-8091:mud-server,8888:mud-manager,8889:threat-mud-manager,4321:domain-manager,3001:gui}"
+      THREAT_MUD_MANAGER_REQUIRE_AUTH: ${THREAT_MUD_MANAGER_REQUIRE_AUTH:-false}
+      THREAT_MUD_LOCALHOST_ALIAS: ${THREAT_MUD_LOCALHOST_ALIAS:-mud-server}
+    ports:
+      - "8889:8889"
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
+  mud-server:
+    build:
+      context: .
+      dockerfile: Extended-MUD-Server/Dockerfile
+    env_file:
+      - .env.compose
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      MUD_SERVER_REQUIRE_AUTH: ${MUD_SERVER_REQUIRE_AUTH:-false}
+    ports:
+      - "8091:8091"
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
+  domain-manager:
+    build:
+      context: .
+      dockerfile: Domain-Manager/Dockerfile
+    depends_on:
+      mud-manager:
+        condition: service_started
+      threat-mud-manager:
+        condition: service_started
+      mud-server:
+        condition: service_started
+    env_file:
+      - .env.compose
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      FEAM_SERVER_URL: ${FEAM_SERVER_URL:-http://host.docker.internal:8181}
+      MUD_MANAGER_URL: http://mud-manager:8888
+      THREAT_MUD_MANAGER_URL: http://threat-mud-manager:8889
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "4321:4321"
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
+  gui:
+    build:
+      context: ../../onboarding_platform_gui
+      dockerfile: Dockerfile
+      args:
+        VITE_API_ADAPTER: ${GUI_VITE_API_ADAPTER:-doss}
+        VITE_API_BASE_URL: ${GUI_VITE_API_BASE_URL:-http://localhost:4321/api}
+        VITE_ENV: ${GUI_VITE_ENV:-production}
+    depends_on:
+      domain-manager:
+        condition: service_started
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
+networks:
+  onboarding-net:
+    driver: bridge

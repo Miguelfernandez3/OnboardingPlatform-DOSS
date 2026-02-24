@@ -17,6 +17,7 @@ from Database import Database, MUD
 from confluent_kafka import Consumer, Producer
 import json
 import sys
+from urllib.parse import urlparse
 
 # Load environment variables from .env file
 load_dotenv()
@@ -61,6 +62,8 @@ class MUDManager:
             self.broker = config['MUDManager']['broker']
             self.receivetopic = config['MUDManager']['receivetopic']
             self.sendtopic = config['MUDManager']['sendtopic']
+        self.localhost_alias_by_port = self._parse_localhost_alias_map()
+        self.default_localhost_alias = os.getenv("MUD_LOCALHOST_ALIAS", "").strip()
         self.db = Database()
 
         if self.SetInterval:
@@ -134,17 +137,85 @@ class MUDManager:
 
         return False
 
+    def _parse_localhost_alias_map(self):
+        """
+        Parse LOCALHOST_ALIAS_BY_PORT env var like:
+        8091:mud-server,8888:mud-manager
+        """
+        mapping = {}
+        raw = os.getenv("LOCALHOST_ALIAS_BY_PORT", "").strip()
+        if not raw:
+            return mapping
+
+        for entry in raw.split(","):
+            item = entry.strip()
+            if not item:
+                continue
+            if ":" not in item:
+                logging.warning(f"Ignoring invalid LOCALHOST_ALIAS_BY_PORT entry: '{item}'")
+                continue
+
+            port_str, alias = item.split(":", 1)
+            port_str = port_str.strip()
+            alias = alias.strip()
+
+            if not port_str.isdigit() or not alias:
+                logging.warning(f"Ignoring invalid LOCALHOST_ALIAS_BY_PORT entry: '{item}'")
+                continue
+
+            mapping[int(port_str)] = alias
+        return mapping
+
+    def _resolve_mud_url(self, mudurl):
+        """
+        Rewrites localhost URLs so they are reachable from inside Docker networks.
+        """
+        try:
+            parsed = urlparse(mudurl)
+            if parsed.hostname not in ("localhost", "127.0.0.1", "0.0.0.0"):
+                return mudurl
+
+            localhost_alias = (
+                self.localhost_alias_by_port.get(parsed.port)
+                or self.default_localhost_alias
+            )
+            if not localhost_alias:
+                return mudurl
+
+            if parsed.port:
+                netloc = f"{localhost_alias}:{parsed.port}"
+            else:
+                netloc = localhost_alias
+
+            if parsed.username:
+                auth = parsed.username
+                if parsed.password:
+                    auth = f"{auth}:{parsed.password}"
+                netloc = f"{auth}@{netloc}"
+
+            resolved_url = parsed._replace(netloc=netloc).geturl()
+            if resolved_url != mudurl:
+                logging.info(
+                    f"Rewriting local MUD URL for container networking: {mudurl} -> {resolved_url}"
+                )
+            return resolved_url
+        except Exception as e:
+            logging.warning(f"Failed to rewrite MUD URL '{mudurl}': {e}. Using original URL.")
+            return mudurl
+
     def getMUDFile(self,mudurl):
-        r = requests.get(mudurl)
+        resolved_mudurl = self._resolve_mud_url(mudurl)
+        r = requests.get(resolved_mudurl)
 
         return r.text
 
     def verifyMUDFile(self,mudurl):
+        resolved_mudurl = self._resolve_mud_url(mudurl)
 
-        mudsignurl = mudurl.replace(".json",".p7s")
+        mudsignurl = resolved_mudurl.replace(".json",".p7s")
 
-        logging.info("Downloading mudfile from: " + mudurl)
-        r = requests.get(mudurl)
+        logging.info("Downloading mudfile from: " + resolved_mudurl)
+        r = requests.get(resolved_mudurl)
         mudfile = "temp" + str(random.randint(1,100000000)) + ".json"
 
         open(mudfile,"w+").write(r.text)
@@ -309,4 +380,3 @@ if __name__ == '__main__':
     except Exception as e:
         logging.critical(f"Fatal error starting MUDManager: {e}", exc_info=True)
         raise
-
