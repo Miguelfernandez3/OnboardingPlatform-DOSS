@@ -1,0 +1,3 @@
+[submodule "FDO/pri-fidoiot"]
+	path = FDO/pri-fidoiot
+	url = https://github.com/fido-device-onboard/pri-fidoiot.git
