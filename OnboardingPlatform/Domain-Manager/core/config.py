@@ -48,8 +48,12 @@ class Config:
     
     @property
     def feam_session_id(self) -> str:
-        """Session ID for FEAM."""
-        return self._config['DeviceDomainManager']['FEAM_sessionId']
+        """Session ID for FEAM (env overrides config.yaml; used by docker compose env_file)."""
+        return (
+            os.getenv('FEAM_SESSION_ID')
+            or os.getenv('FEAM_SESSIONID')
+            or self._config['DeviceDomainManager']['FEAM_sessionId']
+        )
     
     @property
     def threat_mud_manager_url(self) -> str:
@@ -123,43 +127,79 @@ class Config:
         return auth_config.get('password_min_length', 8)
 
     @property
-    def policy_enforcement_config(self) -> dict:
-        """
-        Policy enforcement configuration.
-        Returns fixed mappings profile->execution and policyType->profile.
-        """
-        default_config = {
-            'default_profile': 'era-default',
-            'profiles': {
-                'era-default': {
-                    'mode': 'era'
-                },
-                'homeassistant-rest': {
-                    'mode': 'rest',
-                    'dry_run': True,
-                    'endpoint': 'http://localhost:8123/api/services/automation/trigger',
-                    'method': 'POST',
-                    'timeout_seconds': 10,
-                    'headers': {
-                        'Content-Type': 'application/json'
-                    },
-                    'auth': {
-                        'type': 'bearer',
-                        'token_env': 'HOME_ASSISTANT_TOKEN'
-                    },
-                    'payload_template': {
-                        'entity_id': '{{automation-id}}'
-                    }
-                }
-            },
-            'type_mappings': {
-                'homeassistant-automation-mspl-type': 'homeassistant-rest',
-                'homeassistant-mspl-type': 'homeassistant-rest',
-                'boostrapping-mspl-type': 'era-default',
-                'bootstrapping-mspl-type': 'era-default',
-                'ipv4-mspl-type': 'era-default',
-                'ipv6-mspl-type': 'era-default',
-                'software-mspl-type': 'era-default'
-            }
-        }
-        return self._config.get('PolicyEnforcement', default_config)
+    def dsp_threat_poll_interval_seconds(self) -> int:
+        """Polling interval for DSP threat refresh."""
+        raw_value = os.getenv('DSP_THREAT_POLL_INTERVAL_SECONDS')
+        if raw_value:
+            try:
+                return max(1, int(raw_value))
+            except ValueError:
+                logging.warning(
+                    "Invalid DSP_THREAT_POLL_INTERVAL_SECONDS='%s'. Falling back to default 5s.",
+                    raw_value,
+                )
+        return 5
+
+    @property
+    def feam_sync_poll_interval_seconds(self) -> int:
+        """Polling interval for FEAM read-model synchronization."""
+        raw_value = os.getenv('FEAM_SYNC_POLL_INTERVAL_SECONDS')
+        if raw_value:
+            try:
+                return max(10, int(raw_value))
+            except ValueError:
+                logging.warning(
+                    "Invalid FEAM_SYNC_POLL_INTERVAL_SECONDS='%s'. Falling back to default 60s.",
+                    raw_value,
+                )
+        return 60
+
+    @property
+    def log_retention_days(self) -> int:
+        """Retention window in days for policy execution logs."""
+        raw_value = os.getenv('LOG_RETENTION_DAYS')
+        if raw_value:
+            try:
+                return max(0, int(raw_value))
+            except ValueError:
+                logging.warning(
+                    "Invalid LOG_RETENTION_DAYS='%s'. Falling back to default 3.",
+                    raw_value,
+                )
+        return 3
+
+    @property
+    def log_retention_interval_seconds(self) -> int:
+        """Polling interval for retention loop."""
+        raw_value = os.getenv('LOG_RETENTION_INTERVAL_SECONDS')
+        if raw_value:
+            try:
+                return max(60, int(raw_value))
+            except ValueError:
+                logging.warning(
+                    "Invalid LOG_RETENTION_INTERVAL_SECONDS='%s'. Falling back to default 21600s.",
+                    raw_value,
+                )
+        return 21600
+
+    @property
+    def log_retention_vacuum_enabled(self) -> bool:
+        """Whether SQLite VACUUM is enabled in retention loop."""
+        raw_value = os.getenv('LOG_RETENTION_VACUUM_ENABLED')
+        if raw_value is None:
+            return True
+        return raw_value.strip().lower() in {'1', 'true', 'yes', 'on'}
+
+    @property
+    def log_retention_vacuum_interval_seconds(self) -> int:
+        """Minimum interval between VACUUM runs."""
+        raw_value = os.getenv('LOG_RETENTION_VACUUM_INTERVAL_SECONDS')
+        if raw_value:
+            try:
+                return max(300, int(raw_value))
+            except ValueError:
+                logging.warning(
+                    "Invalid LOG_RETENTION_VACUUM_INTERVAL_SECONDS='%s'. Falling back to default 86400s.",
+                    raw_value,
+                )
+        return 86400

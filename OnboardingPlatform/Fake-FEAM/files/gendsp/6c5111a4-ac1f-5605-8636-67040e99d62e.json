@@ -1,0 +1,165 @@
+{
+  "doss-dsp": {
+    "uuid": "6c5111a4-ac1f-5605-8636-67040e99d62e",
+    "metadata": {
+      "title": "Athom LB01-15W E27 Smart Bulb generic DSP",
+      "published": "2025-08-01T12:00:00Z",
+      "last-modified": "2025-10-01T12:00:00Z",
+      "version": "1.0.0",
+      "dsp-model-version": "1.0.0",
+      "revisions": [
+        {
+          "title": "Initial Release",
+          "published": "2025-10-01",
+          "description": "CT compatible version of the DSP document.",
+          "version": "1.0.0",
+          "dsp-model-version": "1.0.0",
+          "modified-by": {
+            "role-id": "manufacturer",
+            "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+          }
+        }
+      ],
+      "links": [
+        {
+          "href": "https://www.athom.tech/blank-1/15w-color-bulb",
+          "rel": "Technical documentation",
+          "text": "Official product page"
+        },
+        {
+          "href": "https://example.com/athom_lb01/signature.p7s",
+          "rel": "DSP signature",
+          "text": "Digital signature of the DSP"
+        }
+      ],
+      "roles": [
+        {
+          "id": "manufacturer",
+          "title": "Manufacturer",
+          "description": "Creator of the device"
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8",
+          "type": "organization",
+          "name": "Athom.tech",
+          "remarks": "Manufacturer of LB01-15W E27 smart bulb"
+        }
+      ],
+      "responsible-parties": [
+        {
+          "role-id": "manufacturer",
+          "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "9932b157-b5f6-59d2-81a1-1cf2533e6088"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "5879e198-81f5-5606-94fe-83f7ea5c874c"
+        },
+        {
+          "role-id": "ObP",
+          "party-uuid": "d7d9410e-28da-502d-91e1-cd9da65af43c"
+        }
+      ]
+    },
+    "local-definitions": {
+      "components": [
+        {
+          "uuid": "ffb8d3f7-e095-5fa6-a2c7-2af83c3178fc",
+          "type": "this-system",
+          "title": "Athom LB01-15W E27 RGBCCT Bulb",
+          "description": "WiFi-enabled RGBCCT smart bulb (15W, E27 base) for home automation.",
+          "purpose": "Smart lighting device.",
+          "props": [
+            {
+              "name": "vendor",
+              "value": "Athom.tech"
+            },
+            {
+              "name": "model",
+              "value": "LB01-15W-E27"
+            },
+            {
+              "name": "version",
+              "value": "1.0.0"
+            },
+            {
+              "name": "git_url",
+              "value": "https://github.com/arendst/Tasmota"
+            },
+            {
+              "name": "language",
+              "value": "cpp"
+            },
+            {
+              "name": "token",
+              "value": ""
+            },
+            {
+              "name": "branch",
+              "value": "development"
+            },
+            {
+              "name": "commit_sha",
+              "value": "b5ac09d0df73eba0c7e8aa9f8631b4c728262ebd"
+            }
+          ],
+          "links": [
+            {
+              "href": "https://drive.google.com/uc?export=download&id=1zVJ3d00BOrlqWp5HiDn9VKSLdczedvZe",
+              "rel": "SBOM file",
+              "media-type": "application/vnd.spdx+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/smart-lamp-mud",
+              "rel": "MUD file",
+              "media-type": "application/mud+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/smart-lamp-threatmud",
+              "rel": "threat mud",
+              "media-type": "application/json"
+            }
+          ],
+          "status": {
+            "state": "operational"
+          }
+        }
+      ],
+      "assessment-assets": {
+        "components": [],
+        "assessment-platforms": [
+          {
+            "uuid": "3f7a6c8e-1111-45b9-9ae8-4c6b1b7a9f8e",
+            "title": "CT-SAST"
+          },
+          {
+            "uuid": "3f7a6c8e-2222-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-VP"
+          },
+          {
+            "uuid": "f7a6c8e-3333-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-DAST"
+          },
+          {
+            "uuid": "3f7a6c8e-4444-45b9-9ae8-555555555555",
+            "title": "CT-IAST"
+          },
+          {
+            "uuid": "3f7a6c8e-5555-45b9-9ae8-555555555555",
+            "title": "CT-SPV"
+          },
+          {
+            "uuid": "3f7a6c8e-6666-45b9-9ae8-555555555555",
+            "title": "CT-firmware-fuzzing"
+          }
+        ]
+      },
+      "observations": []
+    }
+  }
+}

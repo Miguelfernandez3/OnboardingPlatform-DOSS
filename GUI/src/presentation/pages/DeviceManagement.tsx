@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../config';
 import { Passport } from '../../core/domain/entities/Passport';
 import { MUD } from '../../core/domain/entities/MUD';
-import { usePolicies, useDevice, useThreats, useMitigations, useIsMobile } from '../hooks';
-import { PolicyList, EnforcementStatus, LoadingSpinner, DeviceInfo, DeviceEditForm, ThreatList, MitigationList } from '../components';
+import { usePolicies, useDevice, useThreats, useMitigations, useIsMobile, useDeviceLogs } from '../hooks';
+import { PolicyList, EnforcementStatus, LoadingSpinner, DeviceInfo, DeviceEditForm, ThreatList, MitigationList, ConfirmDeleteDeviceModal } from '../components';
+import DeviceLogsTimeline from '../components/device/DeviceLogsTimeline';
 import { useToast } from '../../infrastructure/notifications/useToast';
+import { policyServiceActions } from '../../infrastructure/services/policyService';
+import {
+  getEnforcementPrerequisitesMissing,
+  isEnforcementPrerequisitesConflict
+} from '../../infrastructure/api/errors/errorUtils';
+import EnforceContextModal from '../components/enforcement/EnforceContextModal';
+import { splitUpdateFromForm, type MissingItem } from '../utils/enforcementContextForm';
+import { queryKeys } from '../../infrastructure/query/queryKeys';
 
 interface Tab {
   id: string;
@@ -22,12 +32,13 @@ export default function DeviceManagement(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
   const { showTranslated, showApiError } = useToast();
   
   // Inicializar el tab activo desde el hash de la URL o por defecto 'info'
   const getInitialTab = (): string => {
     const hash = window.location.hash.replace('#', '');
-    const validTabs = ['info', 'threats', 'mitigations', 'policies'];
+    const validTabs = ['info', 'threats', 'mitigations', 'policies', 'logs'];
     return validTabs.includes(hash) ? hash : 'info';
   };
   
@@ -36,13 +47,23 @@ export default function DeviceManagement(): JSX.Element {
   const [mud, setMud] = useState<MUD | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [showEditForm, setShowEditForm] = useState<boolean>(false);
+  const [ctxModal, setCtxModal] = useState<{
+    target: { kind: 'policy'; policyId: string } | { kind: 'mitigation'; mitigationId: string };
+    missing: MissingItem[];
+  } | null>(null);
   
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [deleteBusy, setDeleteBusy] = useState<boolean>(false);
+
   const { 
     device,
     loading: deviceLoading,
     updateDevice,
     deleteDevice,
+    isDeviceDeleted,
   } = useDevice(id);
+
+  const activeScopeId = id && !isDeviceDeleted ? id : undefined;
 
   const { 
     policies, 
@@ -50,13 +71,13 @@ export default function DeviceManagement(): JSX.Element {
     error: policiesError,
     enforcementStatus,
     enforcePolicy,
-  } = usePolicies(id);
+  } = usePolicies(activeScopeId);
 
   const {
     threats,
     loading: threatsLoading,
     error: threatsError
-  } = useThreats(id);
+  } = useThreats(activeScopeId);
 
   const {
     mitigations,
@@ -64,41 +85,65 @@ export default function DeviceManagement(): JSX.Element {
     error: mitigationsError,
     enforceMitigation,
     revokeMitigation
-  } = useMitigations(id);
+  } = useMitigations(activeScopeId);
+
+  const {
+    logs: deviceLogs,
+    loading: deviceLogsLoading,
+    error: deviceLogsError,
+  } = useDeviceLogs(activeScopeId);
 
   useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      if (!id) {
-        setLoading(false);
-        return;
-      }
+    if (!id || isDeviceDeleted) {
+      setPassport(null);
+      setMud(null);
+      setLoading(false);
+      return;
+    }
 
+    let cancelled = false;
+
+    const fetchData = async (showLoading = false): Promise<void> => {
       try {
-        setLoading(true);
+        if (showLoading) {
+          setLoading(true);
+        }
         
         const [passportData, mudData] = await Promise.all([
           apiClient.getDevicePassport(id).catch(() => null),
           apiClient.getDeviceMUD(id).catch(() => null)
         ]);
-        
-        setPassport(passportData);
-        setMud(mudData);
+
+        if (!cancelled) {
+          setPassport(passportData);
+          setMud(mudData);
+        }
       } catch (err) {
         // Los errores se mostrarán automáticamente como toast
         // No necesitamos setError aquí ya que los errores de API se manejan globalmente
       } finally {
-        setLoading(false);
+        if (!cancelled && showLoading) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchData();
-  }, [id]);
+    void fetchData(true);
+    const intervalId = window.setInterval(() => {
+      void fetchData(false);
+    }, 15000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [id, isDeviceDeleted]);
 
   // Sincronizar el hash de la URL con el tab activo cuando cambia la URL
   useEffect(() => {
     const handleHashChange = (): void => {
       const hash = window.location.hash.replace('#', '');
-      const validTabs = ['info', 'threats', 'mitigations', 'policies'];
+      const validTabs = ['info', 'threats', 'mitigations', 'policies', 'logs'];
       if (hash && validTabs.includes(hash)) {
         setActiveTab(hash);
       } else if (!hash) {
@@ -127,7 +172,8 @@ export default function DeviceManagement(): JSX.Element {
     { id: 'info', label: t('device.tabs.info') },
     { id: 'threats', label: t('device.tabs.threats') },
     { id: 'mitigations', label: t('device.tabs.mitigations') },
-    { id: 'policies', label: t('device.tabs.policies') }
+    { id: 'policies', label: t('device.tabs.policies') },
+    { id: 'logs', label: t('device.tabs.logs') },
   ];
 
   const handleEdit = (): void => {
@@ -144,17 +190,21 @@ export default function DeviceManagement(): JSX.Element {
     }
   };
 
-  const handleDelete = async (): Promise<void> => {
-    if (!window.confirm(t('device.info.deleteConfirm'))) {
-      return;
-    }
+  const handleRequestDelete = (): void => {
+    setShowDeleteModal(true);
+  };
 
+  const handleConfirmDeleteDevice = async (): Promise<void> => {
     try {
+      setDeleteBusy(true);
       await deleteDevice();
       showTranslated('device.info.deleteSuccess', 'success');
-      navigate('/devices');
+      setShowDeleteModal(false);
+      navigate('/devices', { replace: true });
     } catch (err) {
       showApiError(err);
+    } finally {
+      setDeleteBusy(false);
     }
   };
 
@@ -163,12 +213,90 @@ export default function DeviceManagement(): JSX.Element {
   };
 
   const handleEnforcePolicy = async (policyId: string): Promise<void> => {
+    if (!id || !device) return;
+    let missing: MissingItem[] = [];
+    try {
+      const g = await policyServiceActions.getPolicyEnforcementGaps(id, policyId);
+      missing = (g.missing || []) as MissingItem[];
+    } catch {
+      /* gaps no disponibles: seguimos e intentamos enforce */
+    }
+    if (missing.length > 0) {
+      setCtxModal({ target: { kind: 'policy', policyId }, missing });
+      return;
+    }
     try {
       await enforcePolicy(policyId);
       showTranslated('policies.enforceSuccess', 'success');
     } catch (err) {
+      if (isEnforcementPrerequisitesConflict(err)) {
+        const fallbackMissing = getEnforcementPrerequisitesMissing(err) as MissingItem[];
+        if (fallbackMissing.length > 0) {
+          setCtxModal({
+            target: { kind: 'policy', policyId },
+            missing: fallbackMissing
+          });
+          return;
+        }
+      }
       showApiError(err);
     }
+  };
+
+  const handleEnforceMitigation = async (mitigationId: string): Promise<void> => {
+    if (!id || !device) return;
+    const mitigation = mitigations.find((m) => m.id === mitigationId);
+    if (!mitigation) {
+      showApiError(new Error('Mitigation not found'));
+      return;
+    }
+    const fromList = (mitigation.enforcementGaps?.missing || []) as MissingItem[];
+    if (fromList.length > 0) {
+      setCtxModal({ target: { kind: 'mitigation', mitigationId }, missing: fromList });
+      return;
+    }
+    try {
+      await enforceMitigation(mitigationId);
+      showTranslated('device.mitigations.enforceSuccess', 'success');
+    } catch (err) {
+      if (isEnforcementPrerequisitesConflict(err)) {
+        const fallbackMissing = getEnforcementPrerequisitesMissing(err) as MissingItem[];
+        if (fallbackMissing.length > 0) {
+          setCtxModal({
+            target: { kind: 'mitigation', mitigationId },
+            missing: fallbackMissing
+          });
+          return;
+        }
+      }
+      showApiError(err);
+    }
+  };
+
+  const handleEnforceContextSubmit = async (form: Record<string, string>): Promise<void> => {
+    if (!id || !ctxModal) return;
+    if (!device) {
+      showApiError(new Error(t('common.error')));
+      return;
+    }
+    const { update, extraContext } = splitUpdateFromForm(ctxModal.missing, form, device);
+    if (Object.keys(update).length > 0) {
+      await updateDevice(update);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.devices.mitigations(id!) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.devices.detail(id!) });
+    }
+    const extra =
+      Object.keys(extraContext).length > 0 ? { extraContext } : undefined;
+    if (ctxModal.target.kind === 'policy') {
+      await enforcePolicy(ctxModal.target.policyId, extra);
+    } else {
+      await enforceMitigation(ctxModal.target.mitigationId, extra);
+    }
+    setCtxModal(null);
+    showTranslated(
+      ctxModal.target.kind === 'policy' ? 'policies.enforceSuccess' : 'device.mitigations.enforceSuccess',
+      'success'
+    );
   };
 
   if (loading || deviceLoading) {
@@ -253,7 +381,7 @@ export default function DeviceManagement(): JSX.Element {
                   passport={passport}
                   mud={mud}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={handleRequestDelete}
                 />
                 {showEditForm && (
                   <DeviceEditForm
@@ -266,6 +394,20 @@ export default function DeviceManagement(): JSX.Element {
             ) : (
               <p>{t('device.info.noData')}</p>
             )}
+          </div>
+        )}
+
+        {activeTab === 'logs' && (
+          <div>
+            <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', marginBottom: '1rem' }}>
+              {t('device.tabs.logs')}
+            </h2>
+            <DeviceLogsTimeline
+              timeline={deviceLogs}
+              loading={deviceLogsLoading}
+              error={deviceLogsError}
+              showTitle={false}
+            />
           </div>
         )}
 
@@ -285,7 +427,7 @@ export default function DeviceManagement(): JSX.Element {
               mitigations={mitigations}
               loading={mitigationsLoading}
               error={mitigationsError}
-              onEnforce={enforceMitigation}
+              onEnforce={handleEnforceMitigation}
               onRevoke={revokeMitigation}
             />
           </div>
@@ -323,6 +465,28 @@ export default function DeviceManagement(): JSX.Element {
           </div>
         )}
       </div>
+      {ctxModal && (
+        <EnforceContextModal
+          open
+          title={
+            ctxModal.target.kind === 'policy'
+              ? t('enforceContext.titlePolicy')
+              : t('enforceContext.titleMitigation')
+          }
+          missing={ctxModal.missing}
+          onCancel={() => setCtxModal(null)}
+          onSubmit={handleEnforceContextSubmit}
+        />
+      )}
+      <ConfirmDeleteDeviceModal
+        isOpen={showDeleteModal}
+        deviceLabel={(device?.name || device?.identifier || id || '').trim()}
+        onClose={() => {
+          if (!deleteBusy) setShowDeleteModal(false);
+        }}
+        onConfirm={handleConfirmDeleteDevice}
+        isLoading={deleteBusy}
+      />
     </div>
   );
 }

@@ -1,0 +1,175 @@
+{
+  "ietf-threatmud:mud": {
+    "threat-mud-version": 1,
+    "threat-mud-url": "https://ThreatMudServer/bme-bb-sen65-env-sensor-threatmud",
+    "threat-id": "bme-bb-sen65-env-sensor-threatmud",
+    "last-update": "2026-04-17T12:00:00Z",
+    "cache-validity": 48,
+    "is-supported": true,
+    "models-affected": "bme-bb-sen65-env-sensor",
+    "Threat-Intelligence-Providers": [
+      "Industrial IoT Demo (BeagleBone)",
+      "Vendor Security Advisory (demo)"
+    ],
+    "cvss-vector": "CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+    "systeminfo": "SEN65 ThreatMUD (reduced functionality): keep my-controller path and Modbus TCP 502 only; deny lateral (local-networks TCP, same-manufacturer); blocks optional supervision push; MSPL minimum register profile",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_bme_bb_sen65_fr_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-sen65-minimum-profile-mitigation"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_bme_bb_sen65_to_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-sen65-minimum-profile-mitigation"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:acls": {
+    "acl": [
+      {
+        "name": "threatmud_bme_bb_sen65_to_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "to_allow_controller_modbus_tcp_502",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 502
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "to_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "to_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "threatmud_bme_bb_sen65_fr_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "fr_my_controller_allow",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "fr_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "umu-mspl-list:mspls": {
+    "mspl": [
+      {
+        "name": "bme-bb-sen65-minimum-profile-mitigation",
+        "type": "bme-rest-configure-service-mspl-type",
+        "configuration": {
+          "capability": "service-configuration"
+        },
+        "enforcement-profile": "bme-rest-configure-service",
+        "description": "Mitigation (demo): push a constrained Modbus map (disable extended/diagnostic registers, stop optional telemetry push) via same configure path as onboarding"
+      }
+    ]
+  }
+}

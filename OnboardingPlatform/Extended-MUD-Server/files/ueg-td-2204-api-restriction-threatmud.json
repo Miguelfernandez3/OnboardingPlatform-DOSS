@@ -1,0 +1,192 @@
+{
+    "ietf-threatmud:mud": {
+      "threat-mud-version": 1,
+      "threat-mud-url": "https://ThreatMudServer/ubuntu-edge-gateway-api-restriction-threatmud",
+      "threat-id": "ubuntu-edge-gateway-api-restriction-threatmud",
+      "last-update": "2026-05-04T10:20:00Z",
+      "cache-validity": 48,
+      "is-supported": true,
+      "models-affected": "UEG-TD-2204",
+      "Threat-Intelligence-Providers": [
+        "DOSS Test Devices Ltd.",
+        "Ubuntu Edge Gateway Security Advisory",
+        "DOSS Threat Intelligence Lab"
+      ],
+      "cvss-vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L",
+      "systeminfo": "Restrictive ThreatMUD response for Ubuntu Edge Gateway Test Device: blocks exposed management/API services and applies an MSPL mitigation to disable the local API service on port 8080.",
+      "from-device-policy": {
+        "access-lists": {
+          "access-list": [
+            {
+              "name": "threatmud_ueg_td_2204_fr_restrict"
+            }
+          ]
+        },
+        "mspl-list": {
+          "mspls": [
+            {
+              "name": "ueg-disable-local-api-mitigation"
+            }
+          ]
+        }
+      },
+      "to-device-policy": {
+        "access-lists": {
+          "access-list": [
+            {
+              "name": "threatmud_ueg_td_2204_to_restrict"
+            }
+          ]
+        },
+        "mspl-list": {
+          "mspls": [
+            {
+              "name": "ueg-disable-local-api-mitigation"
+            }
+          ]
+        }
+      }
+    },
+    "ietf-access-control-list:acls": {
+      "acl": [
+        {
+          "name": "threatmud_ueg_td_2204_to_restrict",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "toace-deny-local-api-8080",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "local-networks": [
+                      null
+                    ]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  },
+                  "tcp": {
+                    "destination-port": {
+                      "operator": "eq",
+                      "port": 8080
+                    }
+                  }
+                },
+                "actions": {
+                  "forwarding": "drop"
+                }
+              },
+              {
+                "name": "toace-deny-ssh-management-22",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "local-networks": [
+                      null
+                    ]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  },
+                  "tcp": {
+                    "destination-port": {
+                      "operator": "eq",
+                      "port": 22
+                    }
+                  }
+                },
+                "actions": {
+                  "forwarding": "drop"
+                }
+              },
+              {
+                "name": "toace-deny-metrics-9100",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "local-networks": [
+                      null
+                    ]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  },
+                  "tcp": {
+                    "destination-port": {
+                      "operator": "eq",
+                      "port": 9100
+                    }
+                  }
+                },
+                "actions": {
+                  "forwarding": "drop"
+                }
+              },
+              {
+                "name": "toace-deny-my-controller-temporary",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "my-controller": [
+                      null
+                    ]
+                  }
+                },
+                "actions": {
+                  "forwarding": "drop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "threatmud_ueg_td_2204_fr_restrict",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "frace-deny-external-https-telemetry",
+                "matches": {
+                  "ipv4": {
+                    "protocol": 6
+                  },
+                  "tcp": {
+                    "destination-port": {
+                      "operator": "eq",
+                      "port": 443
+                    }
+                  }
+                },
+                "actions": {
+                  "forwarding": "drop"
+                }
+              },
+              {
+                "name": "frace-deny-my-controller-temporary",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "my-controller": [
+                      null
+                    ]
+                  }
+                },
+                "actions": {
+                  "forwarding": "drop"
+                }
+              },
+              {
+                "name": "frace-deny-same-manufacturer-temporary",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "same-manufacturer": [
+                      null
+                    ]
+                  }
+                },
+                "actions": {
+                  "forwarding": "drop"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }

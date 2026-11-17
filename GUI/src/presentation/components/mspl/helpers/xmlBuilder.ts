@@ -69,8 +69,20 @@ function appendChildren(node: XMLNode, obj: Record<string, unknown>): void {
       return;
     }
 
+    // Manejar arrays (p. ej. varias configurationRule)
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        const child = node.ele(cleanKey);
+        if (typeof item === 'object' && item !== null) {
+          appendChildren(child, item as Record<string, unknown>);
+        } else {
+          child.txt(String(item));
+        }
+      });
+      return;
+    }
+
     // Manejar objetos (igual que en frontend-bastion)
-    // Nota: Array.isArray() retorna false para objetos, así que esto maneja tanto objetos como arrays
     if (typeof value === 'object' && value !== null) {
       const child = node.ele(cleanKey);
       const valueObj = value as Record<string, unknown>;

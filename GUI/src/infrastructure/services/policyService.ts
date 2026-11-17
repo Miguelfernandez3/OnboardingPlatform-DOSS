@@ -28,8 +28,12 @@ export const policyServiceActions = {
   /**
    * Ejecuta enforcement de una política existente
    */
-  enforcePolicy: async (deviceId: string, policyId: string): Promise<ApplyResult> => {
-    return await policyService.enforcePolicy(deviceId, policyId);
+  enforcePolicy: async (
+    deviceId: string,
+    policyId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ): Promise<ApplyResult> => {
+    return await policyService.enforcePolicy(deviceId, policyId, options);
   },
 
   /**
@@ -44,5 +48,12 @@ export const policyServiceActions = {
    */
   getEnforcementStatus: async (deviceId: string): Promise<EnforcementStatus> => {
     return await policyService.getEnforcementStatus(deviceId);
+  },
+
+  /**
+   * Gaps de enforcement para una política ya registrada o mud-policy-*
+   */
+  getPolicyEnforcementGaps: async (deviceId: string, policyId: string) => {
+    return await policyService.getPolicyEnforcementGaps(deviceId, policyId);
   },
 };

@@ -73,6 +73,8 @@ VITE_API_ADAPTER=json-server
 VITE_API_BASE_URL=http://localhost:3000
 ```
 
+Cuando la GUI se sirve desde Docker (OnboardingPlatform con docker-compose), el contenedor usa nginx para servir los estáticos y hacer proxy de `/api` al domain-manager. En ese caso el build debe usar `VITE_API_BASE_URL=/api` (configurado vía `GUI_VITE_API_BASE_URL=/api` en el compose) para que las peticiones vayan al mismo origen y el proxy funcione.
+
 ### Adapters Disponibles
 
 - **json-server**: JSON Server mock API (por defecto en desarrollo)

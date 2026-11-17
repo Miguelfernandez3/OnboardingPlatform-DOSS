@@ -218,7 +218,8 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
           marginTop: isMobile ? '1rem' : '2rem' 
         }}>
           <div style={{ 
-            flex: isMobile ? 'none' : 4, 
+            flex: isMobile ? 'none' : '1 1 50%',
+            minWidth: isMobile ? undefined : 0,
             borderRight: isMobile ? 'none' : '1px solid #ccc', 
             borderBottom: isMobile ? '1px solid #ccc' : 'none',
             paddingRight: isMobile ? 0 : '2rem',
@@ -233,7 +234,8 @@ export default function MSPLEditor({ schema, initialData, onChange, onApply }: M
           </div>
 
           <div style={{
-            flex: isMobile ? 'none' : 6,
+            flex: isMobile ? 'none' : '1 1 50%',
+            minWidth: isMobile ? undefined : 0,
             maxWidth: '100%',
             overflowX: 'auto',
           }}>

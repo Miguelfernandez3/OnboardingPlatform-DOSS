@@ -2,6 +2,7 @@ from datetime import date,timedelta,datetime
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+import json
 
 
 Base = declarative_base()
@@ -95,14 +96,33 @@ class Database:
         except:
             return None
 
+    @staticmethod
+    def serialize_mspl(mspl):
+        if isinstance(mspl, str):
+            return mspl
+        try:
+            return json.dumps(mspl)
+        except Exception:
+            return str(mspl)
+
+    @staticmethod
+    def deserialize_mspl(mspl):
+        if not isinstance(mspl, str):
+            return mspl
+        try:
+            parsed = json.loads(mspl)
+        except Exception:
+            return mspl
+        return parsed
+
     def updateTMUD(self,tmud):
         try:
             tmud_to_update = self.session.query(TMUD).filter_by(id=tmud.id).first()
             if tmud_to_update:
-                tmud_to_update.mudurl = tmud.mudurl
-                tmud_to_update.mudfile = tmud.mudfile
+                tmud_to_update.tmudurl = tmud.tmudurl
+                tmud_to_update.tmudfile = tmud.tmudfile
                 tmud_to_update.device_identifier = tmud.device_identifier
-                tmud_to_update.mspl = tmud.mspl
+                tmud_to_update.mspl = self.serialize_mspl(tmud.mspl)
                 self.session.commit()
                 return True
             return False
@@ -116,7 +136,12 @@ class Database:
             return None
     def createTMUD(self, tmudurl, tmudfile, device_identifier, mspl):
         # Create and add new entry
-        new_tmud = TMUD(tmudurl=tmudurl, tmudfile=tmudfile, device_identifier=device_identifier, mspl=mspl)
+        new_tmud = TMUD(
+            tmudurl=tmudurl,
+            tmudfile=tmudfile,
+            device_identifier=device_identifier,
+            mspl=self.serialize_mspl(mspl),
+        )
         try:
             if self.session.query(TMUD).filter_by(tmudurl=tmudurl).first() is None:
                 self.session.add(new_tmud)

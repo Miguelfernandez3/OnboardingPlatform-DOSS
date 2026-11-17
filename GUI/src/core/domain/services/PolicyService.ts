@@ -75,10 +75,18 @@ export class PolicyService {
   /**
    * Ejecuta enforcement de una política existente
    */
-  async enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult> {
+  async enforcePolicy(
+    deviceId: string,
+    policyId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ): Promise<ApplyResult> {
     if (!policyId || typeof policyId !== 'string') {
       throw new Error('Policy ID es requerido');
     }
-    return await this.apiClient.enforcePolicy(deviceId, policyId);
+    return await this.apiClient.enforcePolicy(deviceId, policyId, options);
+  }
+
+  async getPolicyEnforcementGaps(deviceId: string, policyId: string) {
+    return await this.apiClient.getPolicyEnforcementGaps(deviceId, policyId);
   }
 }

@@ -1,0 +1,166 @@
+{
+  "ietf-threatmud:mud": {
+    "threat-mud-version": 1,
+    "threat-mud-url": "https://ThreatMudServer/bme-bb-sps30-dust-sensor-threatmud",
+    "threat-id": "bme-bb-sps30-dust-sensor-threatmud",
+    "last-update": "2026-04-17T12:00:00Z",
+    "cache-validity": 48,
+    "is-supported": true,
+    "models-affected": "bme-bb-sps30-dust-sensor",
+    "Threat-Intelligence-Providers": [
+      "Industrial IoT Demo (BeagleBone)",
+      "Vendor Security Advisory (demo)"
+    ],
+    "cvss-vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+    "systeminfo": "SPS30 ThreatMUD (strong containment / emergency): deny my-controller, local-networks TCP, and same-manufacturer on both directions — quarantine-style response to Modbus DoS; MSPL safe-mode / shutdown profile",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_bme_bb_sps30_fr_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-sps30-safe-mode-mitigation"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_bme_bb_sps30_to_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-sps30-safe-mode-mitigation"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:acls": {
+    "acl": [
+      {
+        "name": "threatmud_bme_bb_sps30_to_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "to_my_controller_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "to_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "to_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "threatmud_bme_bb_sps30_fr_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "fr_my_controller_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "umu-mspl-list:mspls": {
+    "mspl": [
+      {
+        "name": "bme-bb-sps30-safe-mode-mitigation",
+        "type": "bme-rest-shutdown-mspl-type",
+        "configuration": {
+          "capability": "shutdown-mitigation"
+        },
+        "enforcement-profile": "bme-rest-shutdown",
+        "description": "Mitigation (demo): invoke device endpoint to enter Modbus safe mode (lower poll rate / pause TCP server) instead of full shutdown; maps to same enforcement profile as BME shutdown in lab"
+      }
+    ]
+  }
+}

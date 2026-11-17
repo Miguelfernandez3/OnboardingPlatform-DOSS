@@ -1,0 +1,190 @@
+{
+    "doss-dsp": {
+      "uuid": "8f4c2a91-3b7e-5d62-91a4-4e8b7c2f9d13",
+      "metadata": {
+        "title": "Ubuntu Edge Gateway Test Device generic DSP",
+        "published": "2026-04-15T09:30:00Z",
+        "last-modified": "2026-05-04T10:00:00Z",
+        "version": "1.0.0",
+        "dsp-model-version": "1.0.0",
+        "revisions": [
+          {
+            "title": "Initial Release",
+            "published": "2026-05-04",
+            "description": "Initial CT compatible DSP document for a test Ubuntu-based edge gateway device.",
+            "version": "1.0.0",
+            "dsp-model-version": "1.0.0",
+            "modified-by": {
+              "role-id": "manufacturer",
+              "party-uuid": "2d9a1e7c-4f63-5a91-8c2b-6e1f3d7a9b45"
+            }
+          }
+        ],
+        "links": [
+          {
+            "href": "https://example.com/ubuntu-edge-gateway/docs",
+            "rel": "Technical documentation",
+            "text": "Ubuntu Edge Gateway technical documentation"
+          },
+          {
+            "href": "https://example.com/ubuntu-edge-gateway/dsp/signature.p7s",
+            "rel": "DSP signature",
+            "text": "Digital signature of the DSP"
+          }
+        ],
+        "roles": [
+          {
+            "id": "manufacturer",
+            "title": "Manufacturer",
+            "description": "Creator of the device"
+          }
+        ],
+        "parties": [
+          {
+            "uuid": "2d9a1e7c-4f63-5a91-8c2b-6e1f3d7a9b45",
+            "type": "organization",
+            "name": "DOSS Test Devices Ltd.",
+            "remarks": "Fictional manufacturer of Ubuntu-based edge gateway devices for cybersecurity testing and onboarding validation."
+          }
+        ],
+        "responsible-parties": [
+          {
+            "role-id": "manufacturer",
+            "party-uuid": "2d9a1e7c-4f63-5a91-8c2b-6e1f3d7a9b45"
+          },
+          {
+            "role-id": "ComponentTester",
+            "party-uuid": "9932b157-b5f6-59d2-81a1-1cf2533e6088"
+          },
+          {
+            "role-id": "ComponentTester",
+            "party-uuid": "5879e198-81f5-5606-94fe-83f7ea5c874c"
+          },
+          {
+            "role-id": "ObP",
+            "party-uuid": "d7d9410e-28da-502d-91e1-cd9da65af43c"
+          }
+        ]
+      },
+      "local-definitions": {
+        "components": [
+          {
+            "uuid": "b3f9a721-0e6c-5d4a-9c81-3a72e4d6f5b8",
+            "type": "this-system",
+            "title": "Ubuntu Edge Gateway Test Device",
+            "description": "Ubuntu-based edge gateway used as a test device for secure onboarding, telemetry collection, local API exposure and controlled network policy validation.",
+            "purpose": "Test edge gateway device for validating DOSS onboarding flows, MUD policies and security assessment procedures.",
+            "props": [
+              {
+                "name": "vendor",
+                "value": "DOSS Test Devices Ltd."
+              },
+              {
+                "name": "model",
+                "value": "UEG-TD-2204"
+              },
+              {
+                "name": "version",
+                "value": "1.0.0"
+              },
+              {
+                "name": "operating_system",
+                "value": "Ubuntu Server 22.04 LTS"
+              },
+              {
+                "name": "architecture",
+                "value": "x86_64"
+              },
+              {
+                "name": "git_url",
+                "value": "https://github.com/example-org/ubuntu-edge-gateway-test-device"
+              },
+              {
+                "name": "language",
+                "value": "python"
+              },
+              {
+                "name": "runtime",
+                "value": "python3.10"
+              },
+              {
+                "name": "token",
+                "value": ""
+              },
+              {
+                "name": "branch",
+                "value": "main"
+              },
+              {
+                "name": "commit_sha",
+                "value": "7f3a91d4c2b8e65f9a0c3d1e4b6a8f52c9d701ab"
+              },
+              {
+                "name": "exposed_services",
+                "value": "ssh:22,http-api:8080,metrics:9100"
+              },
+              {
+                "name": "network_profile",
+                "value": "local-lan-management-with-secure-cloud-telemetry"
+              }
+            ],
+            "links": [
+              {
+                "href": "https://example.com/ubuntu-edge-gateway/sbom/ueg-td-2204.spdx.json",
+                "rel": "SBOM file",
+                "media-type": "application/vnd.spdx+json"
+              },
+              {
+                "href": "http://mud-server:8091/ueg-td-2204-mud",
+                "rel": "MUD file",
+                "media-type": "application/mud+json"
+              },
+              {
+                "href": "http://mud-server:8091/ueg-td-2204-api-restriction-threatmud",
+                "rel": "threat mud",
+                "media-type": "application/json"
+              },
+              {
+                "href": "https://example.com/ubuntu-edge-gateway/firmware/ueg-td-2204-v1.0.0.tar.gz",
+                "rel": "Firmware archive",
+                "media-type": "application/gzip"
+              }
+            ],
+            "status": {
+              "state": "operational"
+            }
+          }
+        ],
+        "assessment-assets": {
+          "components": [],
+          "assessment-platforms": [
+            {
+              "uuid": "3f7a6c8e-1111-45b9-9ae8-4c6b1b7a9f8e",
+              "title": "CT-SAST"
+            },
+            {
+              "uuid": "3f7a6c8e-2222-45b9-9ae8-4c6a1b7a9f8a",
+              "title": "CT-VP"
+            },
+            {
+              "uuid": "f7a6c8e-3333-45b9-9ae8-4c6a1b7a9f8a",
+              "title": "CT-DAST"
+            },
+            {
+              "uuid": "3f7a6c8e-4444-45b9-9ae8-555555555555",
+              "title": "CT-IAST"
+            },
+            {
+              "uuid": "3f7a6c8e-5555-45b9-9ae8-555555555555",
+              "title": "CT-SPV"
+            },
+            {
+              "uuid": "3f7a6c8e-6666-45b9-9ae8-555555555555",
+              "title": "CT-firmware-fuzzing"
+            }
+          ]
+        },
+        "observations": []
+      }
+    }
+  }

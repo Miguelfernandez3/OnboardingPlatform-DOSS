@@ -16,8 +16,12 @@ export const mitigationService = {
   /**
    * Aplica (enforce) una mitigación
    */
-  enforceMitigation: async (deviceId: string, mitigationId: string): Promise<Mitigation> => {
-    return await apiClient.enforceMitigation(deviceId, mitigationId);
+  enforceMitigation: async (
+    deviceId: string,
+    mitigationId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ): Promise<Mitigation> => {
+    return await apiClient.enforceMitigation(deviceId, mitigationId, options);
   },
 
   /**

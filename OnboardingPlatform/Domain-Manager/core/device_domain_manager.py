@@ -48,6 +48,7 @@ from services.device_service import DeviceService
 from services.policy_service import PolicyService
 from services.policy_enforcement_service import PolicyEnforcementService
 from services.mitigation_service import MitigationService
+from services.log_retention_service import LogRetentionService
 from utils.xml_parser import parse_mitigations_tmud, parse_mitigations_mud
 
 class DeviceDomainManager:
@@ -86,28 +87,56 @@ class DeviceDomainManager:
         
         # Initialize services
         self.mud_service = MUDService(self.mud_manager_client)
-        self.threat_service = ThreatService(self.threat_mud_client)
-        self.feam_service = FEAMService(self.feam_client)
+        self.threat_service = ThreatService(self.threat_mud_client, self.db)
+        self.feam_service = FEAMService(self.feam_client, self.db)
         self.device_service = DeviceService(
             self.db,
             self.mud_service,
             self.feam_service
         )
         self.policy_enforcement_service = PolicyEnforcementService(
-            self.config,
+            self.db,
             self.reconfigureDevice
         )
         self.policy_service = PolicyService(
             self.db,
             self.policy_enforcement_service
         )
+        self.device_service.set_policy_services(
+            self.policy_service,
+            self.policy_enforcement_service
+        )
+        self.device_service.configure_polling(
+            poll_interval_seconds=self.config.dsp_threat_poll_interval_seconds,
+            db_factory=self.db.__class__,
+        )
+        self.log_retention_service = LogRetentionService(
+            self.db,
+            db_factory=self.db.__class__,
+        )
+        self.log_retention_service.configure(
+            retention_days=self.config.log_retention_days,
+            interval_seconds=self.config.log_retention_interval_seconds,
+            vacuum_enabled=self.config.log_retention_vacuum_enabled,
+            vacuum_interval_seconds=self.config.log_retention_vacuum_interval_seconds,
+        )
         self.mitigation_service = MitigationService(
             self.db,
-            self.threat_service
+            self.threat_service,
+            self.policy_enforcement_service
         )
-        
+        self.device_service.set_mitigation_service(self.mitigation_service)
+
         # Initialize FEAM
         self.feam_service.prepare()
+        logging.info(
+            "Polling configurado al inicio: FEAM_SYNC_POLL_INTERVAL_SECONDS=%ss, DSP_THREAT_POLL_INTERVAL_SECONDS=%ss",
+            self.config.feam_sync_poll_interval_seconds,
+            self.config.dsp_threat_poll_interval_seconds,
+        )
+        self.feam_service.start_sync_jobs(self.config.feam_sync_poll_interval_seconds)
+        self.device_service.start_dsp_threat_polling()
+        self.log_retention_service.start_retention_jobs()
         
         # Kafka (maintain compatibility with original code)
         self.broker = self.config.broker
@@ -145,9 +174,9 @@ class DeviceDomainManager:
         """Compatibility: redirects to feam_service.check_pin()"""
         return self.feam_service.check_pin(pin)
     
-    def FEAMgetDSPfromID(self, dsp_id):
-        """Compatibility: redirects to feam_service.get_dsp_from_id()"""
-        return self.feam_service.get_dsp_from_id(dsp_id)
+    def FEAMgetGendspFromIdspId(self, idsp_id):
+        """Compatibility: redirects to feam_service.get_gendsp_from_idsp_id()"""
+        return self.feam_service.get_gendsp_from_idsp_id(idsp_id)
     
     def configBroker(self):
         """Configures the Kafka broker (only if Kafka is available)"""
@@ -207,9 +236,9 @@ class DeviceDomainManager:
         """Compatibility: redirects to threat_service.get_tmud_file()"""
         return self.threat_service.get_tmud_file(tmudurl)
     
-    def getDSP(self, DSP_id):
-        """Compatibility: redirects to device_service.get_dsp()"""
-        return self.device_service.get_dsp(DSP_id)
+    def getGendspFromIdsp(self, idsp_id):
+        """Compatibility: redirects to device_service.get_gendsp_from_idsp()"""
+        return self.device_service.get_gendsp_from_idsp(idsp_id)
     
     def register_dsp(self, device):
         """Compatibility: redirects to device_service.register_dsp()"""

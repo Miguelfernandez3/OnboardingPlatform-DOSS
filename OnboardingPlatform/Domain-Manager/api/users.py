@@ -254,6 +254,14 @@ def update_user_role(current_user, user_id):
                 'details': {}
             }), 404
         
+        # No permitir cambiar el rol del superadmin
+        if user.role == 'superadmin':
+            return jsonify({
+                'error': 'Cannot change superadmin role',
+                'code': 'CANNOT_CHANGE_SUPERADMIN_ROLE',
+                'details': {}
+            }), 400
+        
         # Actualizar rol
         success = dadm.db.updateUserRole(user_id, new_role)
         if success:
@@ -303,6 +311,14 @@ def delete_user(current_user, user_id):
             return jsonify({
                 'error': 'Cannot delete your own account',
                 'code': 'CANNOT_DELETE_SELF',
+                'details': {}
+            }), 400
+        
+        # No permitir eliminar al superadmin
+        if user.role == 'superadmin':
+            return jsonify({
+                'error': 'Cannot delete superadmin account',
+                'code': 'CANNOT_DELETE_SUPERADMIN',
                 'details': {}
             }), 400
         
@@ -402,6 +418,14 @@ def deactivate_user(current_user, user_id):
             return jsonify({
                 'error': 'Cannot deactivate your own account',
                 'code': 'CANNOT_DEACTIVATE_SELF',
+                'details': {}
+            }), 400
+        
+        # No permitir desactivar al superadmin
+        if user.role == 'superadmin':
+            return jsonify({
+                'error': 'Cannot deactivate superadmin account',
+                'code': 'CANNOT_DEACTIVATE_SUPERADMIN',
                 'details': {}
             }), 400
         

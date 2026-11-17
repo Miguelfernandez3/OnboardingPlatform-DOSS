@@ -4,7 +4,17 @@ import { ToastProvider } from './infrastructure/notifications/ToastProvider';
 import { useAuth, AuthProvider } from './presentation/contexts/AuthContext';
 import { ProtectedRoute } from './presentation/components/auth';
 import { Navbar } from './presentation/components/layout';
-import { DeviceList, DeviceManagement, DevicePassport, CreatePolicyPage, LoginPage, UsersPage } from './presentation/pages';
+import {
+  DeviceList,
+  DeviceManagement,
+  DevicePassport,
+  CreatePolicyPage,
+  EnforcementAdminPage,
+  LoginPage,
+  UsersPage,
+  NotificationsPage,
+  SettingsPage
+} from './presentation/pages';
 
 function ProtectedLayout(): JSX.Element {
   return (
@@ -31,6 +41,10 @@ function AppRoutes(): JSX.Element {
         <Route path="/devices/:id/passport" element={<DevicePassport />} />
         <Route path="/devices/:id/policies/create" element={<CreatePolicyPage />} />
         <Route path="/users" element={<UsersPage />} />
+        <Route path="/notifications" element={<NotificationsPage key="notif-unread" readFilter="unread" />} />
+        <Route path="/notifications/read" element={<NotificationsPage key="notif-read" readFilter="read" />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/admin/enforcement" element={<EnforcementAdminPage />} />
       </Route>
 
       <Route

@@ -6,38 +6,33 @@ from flask import Blueprint, jsonify, request
 from utils.error_handlers import handle_api_errors, require_device
 from utils.app_context import get_dadm_instance
 from core.auth.decorators import require_auth
+from utils.formatters import user_for_log
 from datetime import datetime, timezone
+import json
 import logging
+from services.policy_enforcement_service import EnforcementNotConfiguredError, EnforcementPrerequisitesError
+from services.notifications.service import NotificationService
 
 policies_bp = Blueprint('policies', __name__)
 logger = logging.getLogger(__name__)
 
 
-def _user_for_log(current_user) -> str:
-    """Returns a compact user identifier for logs."""
-    if isinstance(current_user, dict):
-        return str(
-            current_user.get('username')
-            or current_user.get('email')
-            or current_user.get('id')
-            or 'unknown'
-        )
-    return str(
-        getattr(current_user, 'username', None)
-        or getattr(current_user, 'email', None)
-        or getattr(current_user, 'id', None)
-        or 'unknown'
-    )
-
-
 def _policy_to_response(policy) -> dict:
     """Serializes a policy DB model to API response format."""
+    blockers = None
+    raw = getattr(policy, 'enforcement_blockers', None)
+    if raw and str(raw).strip():
+        try:
+            blockers = json.loads(str(raw))
+        except (json.JSONDecodeError, TypeError, ValueError):
+            blockers = None
     return {
         'id': str(policy.id),
         'deviceId': policy.device_id,
         'name': policy.name,
         'status': policy.status,
         'enforcementStatus': policy.enforcement_status,
+        'enforcementBlockers': blockers,
         'appliedAt': policy.applied_at.isoformat() if policy.applied_at else None,
         'policyType': policy.policy_type,
         'source': policy.source,
@@ -78,7 +73,7 @@ def translate_mud(current_user):
         logger.info(
             "MUD JSON translated to MSPL policies: translatedCount=%d, requestedBy='%s'",
             len(policies),
-            _user_for_log(current_user),
+            user_for_log(current_user),
         )
         return jsonify({
             'policies': policies
@@ -98,7 +93,7 @@ def translate_mud(current_user):
 def apply_policy(device_id, device, current_user):
     """Creates an MSPL policy for a device and leaves it ready for enforcement."""
     dadm = get_dadm_instance()
-    user_id = _user_for_log(current_user)
+    user_id = user_for_log(current_user)
     
     # Get XML from body (can come as XML or JSON with msplXml field)
     content_type = request.headers.get('Content-Type', '')
@@ -185,16 +180,42 @@ def apply_policy(device_id, device, current_user):
                     str(policy.id),
                     policy_name_final,
                 )
-                dadm.policy_enforcement_service.enforce_policy(mspl_xml, device, policy_name_final)
+                dadm.policy_enforcement_service.enforce_policy(
+                    mspl_xml,
+                    device,
+                    policy_name_final,
+                    policy_id=str(policy.id),
+                    requested_by=user_id,
+                )
                 policy.status = 'active'
                 policy.enforcement_status = 'completed'
                 policy.applied_at = datetime.now(timezone.utc)
+                policy.enforcement_blockers = None
                 logger.info(
                     "Immediate policy enforcement completed: deviceId='%s', policyId='%s', policyName='%s'",
                     device_id,
                     str(policy.id),
                     policy_name_final,
                 )
+            except EnforcementPrerequisitesError as exc:
+                policy.status = 'pending'
+                policy.enforcement_status = 'deferred'
+                policy.enforcement_blockers = json.dumps({"missing": exc.missing}, ensure_ascii=True)
+                logger.info(
+                    "Immediate policy enforcement deferred (prerequisites): deviceId='%s', policyId='%s', missing=%s",
+                    device_id,
+                    str(policy.id),
+                    exc.missing,
+                )
+                try:
+                    NotificationService(dadm.db).notify_policy_prerequisites(
+                        device=device,
+                        policy_id=str(policy.id),
+                        policy_name=policy_name_final,
+                        missing=list(exc.missing or []),
+                    )
+                except Exception as notify_exc:
+                    logger.warning("Policy prerequisite notification failed: %s", notify_exc, exc_info=True)
             except Exception as exc:
                 logger.error(
                     "Immediate policy enforcement failed: deviceId='%s', policyId='%s', policyName='%s', error='%s'",
@@ -204,8 +225,12 @@ def apply_policy(device_id, device, current_user):
                     exc,
                     exc_info=True,
                 )
-                policy.status = 'failed'
-                policy.enforcement_status = 'failed'
+                if isinstance(exc, EnforcementNotConfiguredError):
+                    policy.status = 'pending'
+                    policy.enforcement_status = 'pending'
+                else:
+                    policy.status = 'failed'
+                    policy.enforcement_status = 'failed'
             finally:
                 dadm.db.updatePolicy(policy)
                 logger.info(
@@ -240,6 +265,38 @@ def apply_policy(device_id, device, current_user):
         )
         raise
 
+@policies_bp.route('/api/devices/<device_id>/policies/<policy_id>/enforcement-gaps', methods=['GET'])
+@handle_api_errors
+@require_auth
+@require_device
+def get_policy_enforcement_gaps(device_id, device, policy_id, current_user):
+    """Returns missing enforcement context keys for a policy (no HTTP to device)."""
+    dadm = get_dadm_instance()
+    policy_data = dadm.policy_service.get_policy_for_enforcement(device_id, policy_id, device)
+    if policy_data is None:
+        return jsonify({
+            'error': f'Policy with id {policy_id} not found',
+            'code': 'POLICY_NOT_FOUND',
+            'details': {}
+        }), 404
+    mspl_xml = policy_data.get('msplXml')
+    if not mspl_xml:
+        return jsonify({
+            'error': 'Policy has no MSPL content',
+            'code': 'INVALID_POLICY',
+            'details': {'policyId': policy_id}
+        }), 400
+    try:
+        gaps = dadm.policy_enforcement_service.compute_enforcement_gaps(mspl_xml, device, None)
+        return jsonify(gaps), 200
+    except EnforcementNotConfiguredError as exc:
+        return jsonify({
+            'error': str(exc),
+            'code': 'ENFORCEMENT_NOT_CONFIGURED',
+            'details': {'deviceId': device_id, 'policyId': policy_id}
+        }), 503
+
+
 @policies_bp.route('/api/devices/<device_id>/policies/<policy_id>/enforce', methods=['POST'])
 @handle_api_errors
 @require_auth
@@ -247,7 +304,7 @@ def apply_policy(device_id, device, current_user):
 def enforce_policy(device_id, device, policy_id, current_user):
     """Enforces a policy by ID using the configured type->enforcement mapping."""
     dadm = get_dadm_instance()
-    user_id = _user_for_log(current_user)
+    user_id = user_for_log(current_user)
     logger.info(
         "Policy enforcement request received: deviceId='%s', policyId='%s', requestedBy='%s'",
         device_id,
@@ -271,6 +328,8 @@ def enforce_policy(device_id, device, policy_id, current_user):
 
     policy_name = policy_data.get('name')
     mspl_xml = policy_data.get('msplXml')
+    body = request.get_json(silent=True) or {}
+    extra_context = body.get('extraContext') if isinstance(body.get('extraContext'), dict) else None
     if not mspl_xml:
         logger.warning(
             "Policy enforcement rejected due to missing MSPL: deviceId='%s', policyId='%s', policyName='%s', requestedBy='%s'",
@@ -296,6 +355,21 @@ def enforce_policy(device_id, device, policy_id, current_user):
     )
 
     persisted_policy = policy_data.get('policyModel')
+    if persisted_policy is not None:
+        policy_status = str(getattr(persisted_policy, 'status', '') or '').strip().lower()
+        enforcement_status = str(getattr(persisted_policy, 'enforcement_status', '') or '').strip().lower()
+        if policy_status == 'superseded' or enforcement_status == 'superseded':
+            logger.info(
+                "Policy enforcement rejected because policy is superseded: deviceId='%s', policyId='%s'",
+                device_id,
+                policy_id,
+            )
+            return jsonify({
+                'error': 'Policy has been superseded by the current MUD and cannot be enforced',
+                'code': 'POLICY_SUPERSEDED',
+                'details': {'policyId': str(policy_id)}
+            }), 409
+
     try:
         logger.info(
             "Policy enforcement execution started: deviceId='%s', policyId='%s', policyName='%s'",
@@ -306,7 +380,10 @@ def enforce_policy(device_id, device, policy_id, current_user):
         enforcement_result = dadm.policy_enforcement_service.enforce_policy(
             mspl_xml,
             device,
-            policy_name
+            policy_name,
+            policy_id=str(policy_id),
+            requested_by=user_id,
+            extra_context=extra_context,
         )
         logger.info(
             "Policy enforcement execution completed: deviceId='%s', policyId='%s', policyName='%s', profileId='%s', mode='%s'",
@@ -321,6 +398,7 @@ def enforce_policy(device_id, device, policy_id, current_user):
             persisted_policy.status = 'active'
             persisted_policy.enforcement_status = 'completed'
             persisted_policy.applied_at = datetime.now(timezone.utc)
+            persisted_policy.enforcement_blockers = None
             if not persisted_policy.policy_type:
                 persisted_policy.policy_type = policy_data.get('policyType')
             if not persisted_policy.source:
@@ -364,6 +442,55 @@ def enforce_policy(device_id, device, policy_id, current_user):
             'profileId': enforcement_result.get('profileId'),
             'policyType': enforcement_result.get('policyType'),
         }), 200
+    except EnforcementPrerequisitesError as exc:
+        logger.info(
+            "Policy enforcement deferred (prerequisites): deviceId='%s', policyId='%s', missing=%s",
+            device_id,
+            policy_id,
+            exc.missing,
+        )
+        if policy_data.get('isPersisted') and persisted_policy is not None:
+            persisted_policy.status = 'pending'
+            persisted_policy.enforcement_status = 'deferred'
+            persisted_policy.enforcement_blockers = json.dumps({"missing": exc.missing}, ensure_ascii=True)
+            dadm.db.updatePolicy(persisted_policy)
+        try:
+            NotificationService(dadm.db).notify_policy_prerequisites(
+                device=device,
+                policy_id=str(policy_id),
+                policy_name=policy_name or str(policy_id),
+                missing=list(exc.missing or []),
+            )
+        except Exception as notify_exc:
+            logger.warning("Policy prerequisite notification failed: %s", notify_exc, exc_info=True)
+        return jsonify({
+            'error': 'Enforcement prerequisites not satisfied',
+            'code': 'ENFORCEMENT_PREREQUISITES',
+            'missing': exc.missing,
+            'details': {
+                'deviceId': device_id,
+                'policyId': policy_id,
+            }
+        }), 409
+    except EnforcementNotConfiguredError as exc:
+        logger.warning(
+            "Policy enforcement skipped because enforcement is not configured: deviceId='%s', policyId='%s', reason='%s'",
+            device_id,
+            policy_id,
+            exc,
+        )
+        if policy_data.get('isPersisted') and persisted_policy is not None:
+            persisted_policy.status = 'pending'
+            persisted_policy.enforcement_status = 'pending'
+            dadm.db.updatePolicy(persisted_policy)
+        return jsonify({
+            'error': str(exc),
+            'code': 'ENFORCEMENT_NOT_CONFIGURED',
+            'details': {
+                'deviceId': device_id,
+                'policyId': policy_id,
+            }
+        }), 503
     except Exception as exc:
         logger.error(
             "Policy enforcement failed: deviceId='%s', policyId='%s', policyName='%s', source='%s', policyType='%s', requestedBy='%s', error='%s'",
@@ -423,12 +550,11 @@ def update_policy_enforcement_status(device_id, policy_id, current_user):
     from DSP Enforcer/ERA after applying a policy
     """
     dadm = get_dadm_instance()
-    logging.info(f"Received enforcement status update request for policy {policy_id} on device {device_id}")
+    logging.info("Received enforcement status update request for policy %s on device %s", policy_id, device_id)
     
-    # 1. Validate request body
     data = request.get_json()
     if not data:
-        logging.warning(f"Empty request body for enforcement status update")
+        logging.warning("Empty request body for enforcement status update")
         return jsonify({
             'error': 'Request body is required',
             'code': 'INVALID_REQUEST',
@@ -439,11 +565,10 @@ def update_policy_enforcement_status(device_id, policy_id, current_user):
     message = data.get('message', '')
     timestamp_str = data.get('timestamp')
     
-    logging.debug(f"Enforcement status update data: status={new_status}, message={message}, timestamp={timestamp_str}")
+    logging.debug("Enforcement status update data: status=%s, message=%s, timestamp=%s", new_status, message, timestamp_str)
     
-    # 2. Validate status
     if new_status not in ['completed', 'failed']:
-        logging.warning(f"Invalid status received: {new_status}")
+        logging.warning("Invalid status received: %s", new_status)
         return jsonify({
             'error': 'Invalid status. Must be "completed" or "failed"',
             'code': 'INVALID_STATUS',
@@ -453,19 +578,17 @@ def update_policy_enforcement_status(device_id, policy_id, current_user):
             }
         }), 400
     
-    # 3. Get policy
     policy = dadm.db.getPolicy(policy_id)
     if policy is None:
-        logging.warning(f"Policy {policy_id} not found")
+        logging.warning("Policy %s not found", policy_id)
         return jsonify({
             'error': f'Policy with id {policy_id} not found',
             'code': 'POLICY_NOT_FOUND',
             'details': {}
         }), 404
     
-    # 4. Verify that policy belongs to device
     if policy.device_id != device_id:
-        logging.warning(f"Policy {policy_id} does not belong to device {device_id}. Policy belongs to {policy.device_id}")
+        logging.warning("Policy %s does not belong to device %s. Policy belongs to %s", policy_id, device_id, policy.device_id)
         return jsonify({
             'error': 'Policy does not belong to this device',
             'code': 'POLICY_DEVICE_MISMATCH',
@@ -475,45 +598,39 @@ def update_policy_enforcement_status(device_id, policy_id, current_user):
             }
         }), 400
     
-    # 5. Update status
     old_enforcement_status = policy.enforcement_status
     old_status = policy.status
     
     policy.enforcement_status = new_status
     policy.status = 'active' if new_status == 'completed' else 'failed'
     
-    # 6. Update applied_at if timestamp is provided
     if timestamp_str:
         try:
             # Parse timestamp (supports ISO 8601 with and without Z)
             if timestamp_str.endswith('Z'):
                 timestamp_str = timestamp_str.replace('Z', '+00:00')
             policy.applied_at = datetime.fromisoformat(timestamp_str)
-            logging.debug(f"Applied timestamp from request: {policy.applied_at}")
+            logging.debug("Applied timestamp from request: %s", policy.applied_at)
         except ValueError as e:
-            logging.warning(f"Invalid timestamp format '{timestamp_str}': {e}. Using current time.")
+            logging.warning("Invalid timestamp format '%s': %s. Using current time.", timestamp_str, e)
             policy.applied_at = datetime.now(timezone.utc)
     else:
-        # If no timestamp provided and still doesn't have applied_at, use now
         if policy.applied_at is None:
             policy.applied_at = datetime.now(timezone.utc)
-            logging.debug(f"Set applied_at to current time: {policy.applied_at}")
+            logging.debug("Set applied_at to current time: %s", policy.applied_at)
     
-    # 7. Save changes using updatePolicy
     policy.updated_at = datetime.now(timezone.utc)
     success = dadm.db.updatePolicy(policy)
     
     if not success:
-        logging.error(f"Failed to update policy {policy_id} in database")
+        logging.error("Failed to update policy %s in database", policy_id)
         return jsonify({
             'error': 'Failed to update policy',
             'code': 'UPDATE_FAILED',
             'details': {}
         }), 500
     
-    logging.info(f"Policy {policy_id} enforcement status updated: {old_enforcement_status} -> {new_status}, status: {old_status} -> {policy.status}")
-    
-    # 8. Return response
+    logging.info("Policy %s enforcement status updated: %s -> %s, status: %s -> %s", policy_id, old_enforcement_status, new_status, old_status, policy.status)
     return jsonify({
         'status': 'success',
         'message': 'Enforcement status updated',

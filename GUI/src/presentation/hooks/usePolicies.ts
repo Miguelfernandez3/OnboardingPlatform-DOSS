@@ -11,7 +11,10 @@ interface UsePoliciesReturn {
   enforcementStatus: EnforcementStatus | null;
   applyPolicy: (msplXml: string, name?: string) => Promise<ApplyResult>;
   applyIDSP2: (idsp2Id: string) => Promise<ApplyResult>;
-  enforcePolicy: (policyId: string) => Promise<ApplyResult>;
+  enforcePolicy: (
+    policyId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ) => Promise<ApplyResult>;
 }
 
 /**
@@ -34,6 +37,9 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
       return policyServiceActions.getDevicePolicies(deviceId);
     },
     enabled: !!deviceId,
+    staleTime: 1000 * 15,
+    refetchInterval: 1000 * 10,
+    refetchIntervalInBackground: true,
   });
 
   // Query para obtener estado de enforcement
@@ -48,6 +54,8 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
     },
     enabled: !!deviceId,
     staleTime: 1000 * 60 * 2, // 2 minutos
+    refetchInterval: 1000 * 10,
+    refetchIntervalInBackground: true,
   });
 
   // Mutation para aplicar política
@@ -84,9 +92,9 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
 
   // Mutation para ejecutar enforcement de una policy concreta
   const enforcePolicyMutation = useMutation({
-    mutationFn: (policyId: string) => {
+    mutationFn: (args: { policyId: string; options?: { extraContext?: Record<string, unknown> } }) => {
       if (!deviceId) throw new Error('Device ID is required');
-      return policyServiceActions.enforcePolicy(deviceId, policyId);
+      return policyServiceActions.enforcePolicy(deviceId, args.policyId, args.options);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.devices.policies(deviceId!) });
@@ -98,27 +106,18 @@ export function usePolicies(deviceId: string | undefined): UsePoliciesReturn {
   });
 
   const applyPolicy = async (msplXml: string, name?: string): Promise<ApplyResult> => {
-    try {
-      return await applyPolicyMutation.mutateAsync({ msplXml, name });
-    } catch (err) {
-      throw err;
-    }
+    return await applyPolicyMutation.mutateAsync({ msplXml, name });
   };
 
   const applyIDSP2 = async (idsp2Id: string): Promise<ApplyResult> => {
-    try {
-      return await applyIDSP2Mutation.mutateAsync(idsp2Id);
-    } catch (err) {
-      throw err;
-    }
+    return await applyIDSP2Mutation.mutateAsync(idsp2Id);
   };
 
-  const enforcePolicy = async (policyId: string): Promise<ApplyResult> => {
-    try {
-      return await enforcePolicyMutation.mutateAsync(policyId);
-    } catch (err) {
-      throw err;
-    }
+  const enforcePolicy = async (
+    policyId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ): Promise<ApplyResult> => {
+    return await enforcePolicyMutation.mutateAsync({ policyId, options });
   };
 
   return {

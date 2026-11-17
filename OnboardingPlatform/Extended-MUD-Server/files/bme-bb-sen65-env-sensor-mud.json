@@ -1,0 +1,226 @@
+{
+  "ietf-mud:mud": {
+    "mud-version": 1,
+    "cache-validity": 48,
+    "is-supported": true,
+    "last-change": "2026-04-17T00:00:00Z",
+    "mud-url": "https://MudServer/bme-bb-sen65-env-sensor-mud",
+    "mud-signature": "https://example.com/mud/bme-bb-sen65-env-sensor-mud.p7s",
+    "mfg-name": "Industrial IoT Demo (BeagleBone)",
+    "documentation": "https://example.com/devices/bme-bb-sen65-env-sensor",
+    "systeminfo": "BeagleBone Black + Qt: SEN65 environmental sensor (multi-parameter) via QTSerialBus 6.9.3 Modbus TCP server on port 502; optional reporting to internal supervision",
+    "extensions": [
+      "umu-mspl-list:mspls"
+    ],
+    "ietf-access-control-list:acls": {
+      "acl": [
+        {
+          "name": "bme_bb_sen65_toipv4_acl",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "to_my_controller_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "my-controller": [
+                      null
+                    ]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "to_local_networks_tcp_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "local-networks": [
+                      null
+                    ]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "to_same_manufacturer_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "same-manufacturer": [
+                      null
+                    ]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "bme_bb_sen65_fripv4_acl",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "fr_my_controller_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "my-controller": [
+                      null
+                    ]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "fr_local_networks_tcp_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "local-networks": [
+                      null
+                    ]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "fr_same_manufacturer_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "same-manufacturer": [
+                      null
+                    ]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "bme_bb_sen65_to_device_modbus502",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "allow_modbus_tcp_502_inbound",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "my-controller": [
+                      null
+                    ]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  },
+                  "tcp": {
+                    "destination-port": {
+                      "operator": "eq",
+                      "port": 502
+                    }
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "bme_bb_sen65_from_device_rv",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "allow_rv_tcp_8080_supervision",
+                "matches": {
+                  "ipv4": {
+                    "protocol": 6
+                  },
+                  "tcp": {
+                    "destination-port": {
+                      "operator": "eq",
+                      "port": 8080
+                    }
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "bme_bb_sen65_fripv4_acl"
+          },
+          {
+            "name": "bme_bb_sen65_from_device_rv"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-sen65-configure-service"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "bme_bb_sen65_toipv4_acl"
+          },
+          {
+            "name": "bme_bb_sen65_to_device_modbus502"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-sen65-configure-service"
+          }
+        ]
+      }
+    }
+  },
+  "umu-mspl-list:mspls": {
+    "mspl": [
+      {
+        "name": "bme-bb-sen65-configure-service",
+        "type": "bme-rest-configure-service-mspl-type",
+        "configuration": {
+          "capability": "service-configuration"
+        },
+        "enforcement-profile": "bme-rest-configure-service",
+        "description": "Onboarding: configure SEN65 exposed register map, alarm thresholds, and optional push to internal supervision (HTTP 8080) via /configureService"
+      }
+    ]
+  }
+}

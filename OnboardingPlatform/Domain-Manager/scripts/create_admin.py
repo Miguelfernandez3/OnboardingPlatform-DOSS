@@ -1,8 +1,9 @@
 # scripts/create_admin.py
 """
-Script to create the initial admin user.
+Script to create the initial admin user (as superadmin).
 Can be run manually or called during application startup.
 Automatically executed when the application starts.
+The initial user is created with role 'superadmin' so it cannot be deactivated or deleted.
 """
 import os
 import sys
@@ -22,8 +23,9 @@ from core.auth.password_service import hash_password
 
 def create_admin():
     """
-    Creates an admin user if it doesn't exist.
+    Creates the initial admin user as superadmin if it doesn't exist.
     Uses environment variables ADMIN_EMAIL and ADMIN_PASSWORD.
+    The user is created with role 'superadmin' (cannot be deactivated or deleted).
     """
     # Get admin credentials from environment variables
     admin_email = os.getenv('ADMIN_EMAIL', 'admin@doss.local')
@@ -40,26 +42,25 @@ def create_admin():
         # Check if admin already exists
         existing_user = db.getUser(admin_email)
         if existing_user:
-            if existing_user.role == 'admin':
-                logging.info(f"Admin user {admin_email} already exists")
-                print(f"Admin user {admin_email} already exists")
+            if existing_user.role == 'superadmin':
+                logging.info(f"Superadmin user {admin_email} already exists")
+                print(f"Superadmin user {admin_email} already exists")
                 return True
-            else:
-                # Update existing user to admin
-                logging.info(f"Updating user {admin_email} to admin role")
-                db.updateUserRole(existing_user.id, 'admin')
-                print(f"Updated user {admin_email} to admin role")
-                return True
+            # Upgrade existing user to superadmin (initial user protection)
+            logging.info(f"Upgrading user {admin_email} to superadmin role")
+            db.updateUserRole(existing_user.id, 'superadmin')
+            print(f"Updated user {admin_email} to superadmin role")
+            return True
         
-        # Create new admin user
-        user = db.createUser(admin_email, admin_password, role='admin')
+        # Create new user as superadmin
+        user = db.createUser(admin_email, admin_password, role='superadmin')
         if user:
-            logging.info(f"Admin user {admin_email} created successfully")
-            print(f"Admin user {admin_email} created successfully")
+            logging.info(f"Superadmin user {admin_email} created successfully")
+            print(f"Superadmin user {admin_email} created successfully")
             return True
         else:
-            logging.error(f"Failed to create admin user {admin_email}")
-            print(f"ERROR: Failed to create admin user {admin_email}")
+            logging.error(f"Failed to create superadmin user {admin_email}")
+            print(f"ERROR: Failed to create superadmin user {admin_email}")
             return False
     except Exception as e:
         logging.error(f"Error creating admin user: {e}", exc_info=True)

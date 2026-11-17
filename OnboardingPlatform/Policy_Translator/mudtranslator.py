@@ -7,6 +7,7 @@ from Policy_Translator import msplgenerator
 import pyangbind.lib.pybindJSON as pybindJSON
 import uuid
 import xmltodict
+from Policy_Translator.action_mapping import normalize_filtering_action
 
 def parse_args():
     parser = argparse.ArgumentParser(description='parser for mud translation module')
@@ -310,6 +311,47 @@ def extract_eth_rule(rule):
 def extract_icmp_rule(rule):
     return
 
+
+try:
+    from Policy_Translator.mud_normalize import normalize_mud_for_translate
+except ImportError:
+    from mud_normalize import normalize_mud_for_translate
+
+
+def _make_mud_abstraction_placeholder_rule(ace_name, abstraction_key, ace, todevice):
+    """
+    Build a minimal MSPL rule when matches only contain ietf-mud:mud abstractions
+    (my-controller, local-networks, same-manufacturer). Packet filter condition
+    is left mostly unset; name encodes abstraction for downstream tooling.
+    """
+    direction = "INBOUND" if todevice else "OUTBOUND"
+    actions = ace.get("actions") or {}
+    forwarding = actions.get("forwarding", "accept")
+    action = normalize_filtering_action(forwarding)
+
+    crule = msplObject.yc_configuration_rule_mspl__configuration_rule_set_configuration_configuration_rule()
+    ca = msplObject.yc_configuration_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action()
+    fa = msplObject.yc_filtering_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action_filtering_action()
+    fa.filtering_action_type = action
+    ca.filtering_action = fa
+    cc = msplObject.yc_configuration_condition_mspl__configuration_rule_set_configuration_configuration_rule_configuration_condition()
+    # Placeholder: direction only; no L4 match (enforcement may map by name)
+    fc = msplgenerator.createFILTERINGCONFCONDITION(
+        msplgenerator.createPACKETFILTERcondition(None, None, None, None, None, direction, None, None)
+    )
+    cc.filtering_configuration_condition = fc
+    # Unique key for add_rule_to_configurationrule (avoid overwrites across ACLs)
+    crule.name = "mud-abstraction-%s-%s-%s" % (
+        abstraction_key.replace("-", "_"),
+        ace_name.replace("-", "_"),
+        uuid.uuid4().hex[:8],
+    )
+    crule.configuration_action = ca
+    crule.configuration_condition = cc
+    crule.external_data.priority = 1
+    return crule
+
+
 def extract_rule(ace, todevice):
     #to device true if the direction of packets is to device
     #false if the direction from packets is from device
@@ -365,10 +407,7 @@ def extract_rule(ace, todevice):
             direction = "OUTBOUND"
         
         actions = ace["actions"]
-        action = actions["forwarding"]
-        if actions["forwarding"] == "accept":
-            action = "allow"
-            #print("yes")
+        action = normalize_filtering_action(actions["forwarding"])
         crule = msplObject.yc_configuration_rule_mspl__configuration_rule_set_configuration_configuration_rule()
         ca = msplObject.yc_configuration_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action()
         fa = msplObject.yc_filtering_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action_filtering_action()
@@ -398,10 +437,7 @@ def extract_rule(ace, todevice):
             direction = "OUTBOUND"
         
         actions = ace["actions"]
-        action = actions["forwarding"]
-        if actions["forwarding"] == "accept":
-            action = "allow"
-            #print("yes")
+        action = normalize_filtering_action(actions["forwarding"])
         crule = msplObject.yc_configuration_rule_mspl__configuration_rule_set_configuration_configuration_rule()
         ca = msplObject.yc_configuration_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action()
         fa = msplObject.yc_filtering_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action_filtering_action()
@@ -433,10 +469,7 @@ def extract_rule(ace, todevice):
             direction = "OUTBOUND"
         
         actions = ace["actions"]
-        action = actions["forwarding"]
-        if actions["forwarding"] == "accept":
-            action = "allow"
-            #print("yes")
+        action = normalize_filtering_action(actions["forwarding"])
         crule = msplObject.yc_configuration_rule_mspl__configuration_rule_set_configuration_configuration_rule()
         ca = msplObject.yc_configuration_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action()
         fa = msplObject.yc_filtering_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action_filtering_action()
@@ -468,10 +501,7 @@ def extract_rule(ace, todevice):
             direction = "OUTBOUND"
         
         actions = ace["actions"]
-        action = actions["forwarding"]
-        if actions["forwarding"] == "accept":
-            action = "allow"
-            #print("yes")
+        action = normalize_filtering_action(actions["forwarding"])
         crule = msplObject.yc_configuration_rule_mspl__configuration_rule_set_configuration_configuration_rule()
         ca = msplObject.yc_configuration_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action()
         fa = msplObject.yc_filtering_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action_filtering_action()
@@ -503,10 +533,7 @@ def extract_rule(ace, todevice):
             direction = "OUTBOUND"
         
         actions = ace["actions"]
-        action = actions["forwarding"]
-        if actions["forwarding"] == "accept":
-            action = "allow"
-            #print("yes")
+        action = normalize_filtering_action(actions["forwarding"])
         crule = msplObject.yc_configuration_rule_mspl__configuration_rule_set_configuration_configuration_rule()
         ca = msplObject.yc_configuration_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action()
         fa = msplObject.yc_filtering_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action_filtering_action()
@@ -538,10 +565,7 @@ def extract_rule(ace, todevice):
             direction = "OUTBOUND"
         
         actions = ace["actions"]
-        action = actions["forwarding"]
-        if actions["forwarding"] == "accept":
-            action = "allow"
-            #print("yes")
+        action = normalize_filtering_action(actions["forwarding"])
         crule = msplObject.yc_configuration_rule_mspl__configuration_rule_set_configuration_configuration_rule()
         ca = msplObject.yc_configuration_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action()
         fa = msplObject.yc_filtering_action_mspl__configuration_rule_set_configuration_configuration_rule_configuration_action_filtering_action()
@@ -563,6 +587,21 @@ def extract_rule(ace, todevice):
         #print(msplgenerator.dicttoxml(json.loads(pybindJSON.dumps(crule))))
         return crule
 
+    # ACE with only ietf-mud:mud abstractions (no L4 match) -> placeholder rule
+    mud_block = matches.get("ietf-mud:mud") or matches.get("mud")
+    if mud_block and isinstance(mud_block, dict):
+        for key in (
+            MUD_MY_CONTROLLER,
+            MUD_LOCAL_NETWORKS,
+            MUD_SAME_MANUFACTURER,
+            MUD_CONTROLLER,
+            MUD_MANUFACTURER,
+        ):
+            if key in mud_block:
+                return _make_mud_abstraction_placeholder_rule(name, key, ace, todevice)
+    return None
+
+
 def extract_from_mspl_module(jsonmodule):
     mspls_xml = []
     try:
@@ -582,6 +621,15 @@ def threatmudtranslate():
 
 
 def translate(mud):
+    """
+    MUD JSON -> list of MSPL XML strings.
+    Normalizes shape when ietf-access-control-list:acls is nested under
+    ietf-mud:mud (exporter quirk). ACE with only ietf-mud:mud abstractions
+    (my-controller, local-networks, same-manufacturer) become placeholder
+    rules (direction + allow) keyed by mud-abstraction-* names.
+    """
+    if isinstance(mud, dict):
+        mud = normalize_mud_for_translate(mud)
     access_control_list = mud['ietf-access-control-list:acls']
     acls = access_control_list['acl']
     # for index, acl in enumerate(access_control_list['acl']):
@@ -650,6 +698,8 @@ def translate(mud):
 #ietf-mud:mud, ietf-access-control-list:acls, #ietf-threatmud:mud, umu-mspl-list:mspls({mspl[]})
 
 def translate_mud(mud):
+    if isinstance(mud, dict):
+        mud = normalize_mud_for_translate(mud)
     if 'ietf-access-control-list:acls' in mud:
         #translate acls
         access_control_list = mud['ietf-access-control-list:acls']

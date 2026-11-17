@@ -1,0 +1,149 @@
+{
+  "ietf-threatmud:mud": {
+    "threat-mud-version": 1,
+    "threat-mud-url": "https://ThreatMudServer/smart-lamp-threatmud",
+    "threat-id": "smart-lamp-threatmud",
+    "last-update": "2026-07-10T09:00:00Z",
+    "cache-validity": 48,
+    "is-supported": true,
+    "models-affected": "LB01-15W-E27",
+    "systeminfo": "Block access to smart lamp",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_smart_lamp_fr_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "ha-block-smart-lamp-mitigation"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_smart_lamp_to_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "ha-block-smart-lamp-mitigation"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:acls": {
+    "acl": [
+      {
+        "name": "threatmud_smart_lamp_to_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "to_my_controller_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [null]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "to_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [null]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "to_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [null]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "threatmud_smart_lamp_fr_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "fr_my_controller_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [null]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [null]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [null]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "umu-mspl-list:mspls": {
+    "mspl": [
+      {
+        "name": "ha-block-smart-lamp-mitigation",
+        "type": "homeassistant-rest-command-mspl-type",
+        "configuration": {
+          "capability": "access-restriction"
+        },
+        "enforcement-profile": "ha-block-smart-lamp",
+        "description": "Block access to smart lamp — POST :8123/api/webhook/-nyXcg5w6Hfzmg0yz514OZygS"
+      }
+    ]
+  }
+}

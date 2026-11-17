@@ -23,4 +23,21 @@ export const queryKeys = {
       ['users', page, limit, filters] as const,
     detail: (id: string) => ['users', id] as const,
   },
+  enforcement: {
+    profiles: ['enforcement', 'profiles'] as const,
+    mappings: ['enforcement', 'mappings'] as const,
+    secrets: ['enforcement', 'secrets'] as const,
+    executions: (filters?: Record<string, unknown>) =>
+      ['enforcement', 'executions', { ...filters }] as const,
+    all: ['enforcement'] as const,
+  },
+  notifications: {
+    all: ['notifications'] as const,
+    list: (readState: 'unread' | 'read', page: number, perPage: number) =>
+      ['notifications', 'list', readState, page, perPage] as const,
+    unreadCount: ['notifications', 'unread-count'] as const,
+  },
+  settings: {
+    notification: ['settings', 'notification'] as const,
+  },
 };

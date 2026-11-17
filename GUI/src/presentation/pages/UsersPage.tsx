@@ -100,6 +100,14 @@ export default function UsersPage(): JSX.Element {
     }
   };
 
+  const getRoleLabel = (role: string): string => {
+    if (role === 'superadmin') return t('users.superadmin');
+    if (role === 'admin') return t('users.admin');
+    return t('users.user');
+  };
+
+  const isSuperadmin = (user: UserData): boolean => user.role === 'superadmin';
+
   if (loading) {
     return (
       <AdminRoute>
@@ -186,13 +194,13 @@ export default function UsersPage(): JSX.Element {
                     <span style={{
                       padding: '0.25rem 0.5rem',
                       borderRadius: '4px',
-                      backgroundColor: user.role === 'admin' ? '#007bff' : '#6c757d',
+                      backgroundColor: user.role === 'superadmin' ? '#6f42c1' : user.role === 'admin' ? '#007bff' : '#6c757d',
                       color: 'white',
                       fontSize: '0.75rem',
                       marginTop: '0.25rem',
                       display: 'inline-block'
                     }}>
-                      {user.role === 'admin' ? t('users.admin') : t('users.user')}
+                      {getRoleLabel(user.role)}
                     </span>
                   </div>
                   <span style={{
@@ -210,34 +218,49 @@ export default function UsersPage(): JSX.Element {
                   <div><strong>{t('users.createdAt')}:</strong> {formatDate(user.createdAt)}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <select
-                    value={user.role}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    style={{
+                  {isSuperadmin(user) ? (
+                    <span style={{
                       padding: '0.5rem',
                       borderRadius: '4px',
                       border: '1px solid #dee2e6',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    <option value="user">{t('users.user')}</option>
-                    <option value="admin">{t('users.admin')}</option>
-                  </select>
-                  <button
-                    onClick={() => handleToggleActive(user)}
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '4px',
-                      border: 'none',
-                      backgroundColor: user.isActive ? '#ffc107' : '#28a745',
-                      color: user.isActive ? '#212529' : 'white',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {user.isActive ? t('users.deactivate') : t('users.activate')}
-                  </button>
-                  {!user.isActive && (
+                      fontSize: '0.875rem',
+                      color: '#6f42c1',
+                      fontWeight: 500
+                    }}>
+                      {getRoleLabel(user.role)}
+                    </span>
+                  ) : (
+                    <select
+                      value={user.role}
+                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                      style={{
+                        padding: '0.5rem',
+                        borderRadius: '4px',
+                        border: '1px solid #dee2e6',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      <option value="user">{t('users.user')}</option>
+                      <option value="admin">{t('users.admin')}</option>
+                    </select>
+                  )}
+                  {!isSuperadmin(user) && (
+                    <button
+                      onClick={() => handleToggleActive(user)}
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '4px',
+                        border: 'none',
+                        backgroundColor: user.isActive ? '#ffc107' : '#28a745',
+                        color: user.isActive ? '#212529' : 'white',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      {user.isActive ? t('users.deactivate') : t('users.activate')}
+                    </button>
+                  )}
+                  {!user.isActive && !isSuperadmin(user) && (
                     <button
                       onClick={() => setDeleteModal({ isOpen: true, user })}
                       style={{
@@ -280,20 +303,32 @@ export default function UsersPage(): JSX.Element {
                   <tr key={user.id} style={{ borderBottom: '1px solid #dee2e6' }}>
                     <td style={{ padding: '0.75rem' }}>{user.email}</td>
                     <td style={{ padding: '0.75rem' }}>
-                      <select
-                        value={user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        style={{
-                          padding: '0.375rem 0.5rem',
+                      {isSuperadmin(user) ? (
+                        <span style={{
+                          padding: '0.25rem 0.5rem',
                           borderRadius: '4px',
-                          border: '1px solid #dee2e6',
-                          backgroundColor: user.role === 'admin' ? '#e7f1ff' : 'white',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <option value="user">{t('users.user')}</option>
-                        <option value="admin">{t('users.admin')}</option>
-                      </select>
+                          backgroundColor: '#6f42c1',
+                          color: 'white',
+                          fontSize: '0.875rem'
+                        }}>
+                          {getRoleLabel(user.role)}
+                        </span>
+                      ) : (
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          style={{
+                            padding: '0.375rem 0.5rem',
+                            borderRadius: '4px',
+                            border: '1px solid #dee2e6',
+                            backgroundColor: user.role === 'admin' ? '#e7f1ff' : 'white',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="user">{t('users.user')}</option>
+                          <option value="admin">{t('users.admin')}</option>
+                        </select>
+                      )}
                     </td>
                     <td style={{ padding: '0.75rem' }}>
                       <span style={{
@@ -310,21 +345,23 @@ export default function UsersPage(): JSX.Element {
                     <td style={{ padding: '0.75rem' }}>{formatDate(user.createdAt)}</td>
                     <td style={{ padding: '0.75rem' }}>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                          onClick={() => handleToggleActive(user)}
-                          style={{
-                            padding: '0.375rem 0.75rem',
-                            borderRadius: '4px',
-                            border: 'none',
-                            backgroundColor: user.isActive ? '#ffc107' : '#28a745',
-                            color: user.isActive ? '#212529' : 'white',
-                            cursor: 'pointer',
-                            fontSize: '0.875rem'
-                          }}
-                        >
-                          {user.isActive ? t('users.deactivate') : t('users.activate')}
-                        </button>
-                        {!user.isActive && (
+                        {!isSuperadmin(user) && (
+                          <button
+                            onClick={() => handleToggleActive(user)}
+                            style={{
+                              padding: '0.375rem 0.75rem',
+                              borderRadius: '4px',
+                              border: 'none',
+                              backgroundColor: user.isActive ? '#ffc107' : '#28a745',
+                              color: user.isActive ? '#212529' : 'white',
+                              cursor: 'pointer',
+                              fontSize: '0.875rem'
+                            }}
+                          >
+                            {user.isActive ? t('users.deactivate') : t('users.activate')}
+                          </button>
+                        )}
+                        {!user.isActive && !isSuperadmin(user) && (
                           <button
                             onClick={() => setDeleteModal({ isOpen: true, user })}
                             style={{

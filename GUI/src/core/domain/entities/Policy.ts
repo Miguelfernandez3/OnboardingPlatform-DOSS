@@ -13,6 +13,7 @@ export interface PolicyData {
   policyType?: string;
   source?: string;
   canEnforce?: boolean;
+  enforcementBlockers?: { missing?: Array<Record<string, unknown>> } | null;
 }
 
 export class Policy {
@@ -26,6 +27,7 @@ export class Policy {
   policyType?: string;
   source?: string;
   canEnforce: boolean;
+  enforcementBlockers?: { missing?: Array<Record<string, unknown>> } | null;
 
   constructor({
     id,
@@ -37,7 +39,8 @@ export class Policy {
     enforcementStatus = 'pending',
     policyType,
     source,
-    canEnforce = true
+    canEnforce = true,
+    enforcementBlockers
   }: PolicyData) {
     this.id = id;
     this.deviceId = deviceId;
@@ -49,6 +52,7 @@ export class Policy {
     this.policyType = policyType;
     this.source = source;
     this.canEnforce = canEnforce;
+    this.enforcementBlockers = enforcementBlockers;
   }
 
   static fromJSON(json: PolicyData): Policy {
@@ -66,7 +70,8 @@ export class Policy {
       enforcementStatus: this.enforcementStatus,
       policyType: this.policyType,
       source: this.source,
-      canEnforce: this.canEnforce
+      canEnforce: this.canEnforce,
+      enforcementBlockers: this.enforcementBlockers
     };
   }
 }

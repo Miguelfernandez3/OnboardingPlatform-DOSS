@@ -47,7 +47,9 @@ export default function ThreatList({ threats, loading, error }: ThreatListProps)
 
   return (
     <div style={{ padding: isMobile ? '0.5rem' : '1rem' }}>
-      <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>{t('device.threats.title')}</h2>
+      <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', marginBottom: isMobile ? '0.75rem' : '1rem' }}>
+        {t('device.threats.title')}
+      </h2>
       
       {isMobile ? (
         // Vista de tarjetas para móvil
@@ -103,66 +105,98 @@ export default function ThreatList({ threats, loading, error }: ThreatListProps)
           ))}
         </div>
       ) : (
-        // Tabla con scroll horizontal para desktop
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginTop: '1rem',
-            minWidth: '500px'
-          }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.id')}</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('device.threats.identifier')}</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('device.threats.threatMudUrl')}</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {threats.map((threat) => (
-                <tr 
-                  key={threat.id}
-                  style={{ borderBottom: '1px solid #dee2e6' }}
+        // Vista tipo tarjeta alineada horizontalmente para desktop
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+          {threats.map((threat) => (
+            <div
+              key={threat.id}
+              style={{
+                border: '1px solid #dee2e6',
+                borderRadius: '8px',
+                padding: '0.75rem 1rem',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+              }}
+            >
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(220px, 1.7fr) minmax(260px, 2fr) auto',
+                  columnGap: '1rem',
+                  rowGap: '0.25rem',
+                  alignItems: 'center'
+                }}
+              >
+                {/* Identificador + ID */}
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                    title={threat.identifier}
+                  >
+                    {t('device.threats.identifier')}: {threat.identifier}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#6c757d', marginTop: '0.15rem' }}>
+                    <strong>{t('common.id')}:</strong> {threat.id}
+                  </div>
+                </div>
+
+                {/* Threat MUD URL */}
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    color: '#495057',
+                    wordBreak: 'break-all'
+                  }}
                 >
-                  <td style={{ padding: '0.75rem' }}>{threat.id}</td>
-                  <td style={{ padding: '0.75rem' }}>{threat.identifier}</td>
-                  <td style={{ padding: '0.75rem' }}>
-                    {threat.threat_mud_url ? (
-                      <a 
-                        href={threat.threat_mud_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        style={{ color: '#007bff' }}
-                      >
-                        {threat.threat_mud_url}
-                      </a>
-                    ) : (
-                      '-'
-                    )}
-                  </td>
-                  <td style={{ padding: '0.75rem' }}>
-                    {threat.threat_mud_file && (
-                      <button
-                        onClick={() => setSelectedThreat(threat)}
-                        style={{
-                          padding: '0.25rem 0.5rem',
-                          backgroundColor: '#007bff',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem'
-                        }}
-                      >
-                        {t('device.threats.viewMud')}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <strong>{t('device.threats.threatMudUrl')}:</strong>{' '}
+                  {threat.threat_mud_url ? (
+                    <a
+                      href={threat.threat_mud_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#007bff' }}
+                    >
+                      {threat.threat_mud_url}
+                    </a>
+                  ) : (
+                    '-'
+                  )}
+                </div>
+
+                {/* Botón ver MUD */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}
+                >
+                  {threat.threat_mud_file && (
+                    <button
+                      onClick={() => setSelectedThreat(threat)}
+                      style={{
+                        padding: '0.45rem 1rem',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {t('device.threats.viewMud')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

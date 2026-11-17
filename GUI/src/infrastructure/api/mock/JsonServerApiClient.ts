@@ -2,7 +2,27 @@ import { BaseApiClient } from '../base/BaseApiClient';
 import { ConfigProvider } from '../../../core/adapters/config/ConfigProvider';
 import { jsonServerConfig } from './json-server.config';
 import { Device, DeviceData, Policy, PolicyData, MUD, MUDData, Passport, PassportData, Threat, ThreatData, Mitigation, MitigationData } from '../../../core/domain';
-import { ApplyResult, EnforcementStatus, AuthResponse, UserData, UsersResponse, UserFilters } from '../../../core/ports';
+import {
+  ApplyResult,
+  EnforcementStatus,
+  AuthResponse,
+  UserData,
+  UsersResponse,
+  UserFilters,
+  CreateDeviceFromDSPInput,
+  EnforcementProfileData,
+  EnforcementMappingData,
+  EnforcementSecretMetadata,
+  EnforcementExecutionLog,
+  EnforcementTestRequest,
+  EnforcementTestResponse,
+  DeviceLogsResponse,
+  NotificationSettings,
+  NotificationsListResponse,
+  UnreadNotificationsCountResponse,
+  TelegramLinkTokenResponse,
+  UserUiSettings
+} from '../../../core/ports';
 
 /**
  * JsonServerApiClient - Implementación para JSON Server
@@ -23,6 +43,28 @@ export class JsonServerApiClient extends BaseApiClient {
     }
 
     return devices.map(device => Device.fromJSON(device));
+  }
+
+  async createDeviceFromDSP(data: CreateDeviceFromDSPInput): Promise<Device> {
+    const now = new Date().toISOString();
+    const payload: DeviceData = {
+      id: data.deviceId,
+      identifier: data.deviceId,
+      name: data.name || data.model || data.deviceId,
+      model: data.model ?? '',
+      type: data.type || '',
+      manufacturer: data.manufacturer || '',
+      status: 'active',
+      ip: data.ip,
+      mac: data.mac,
+      inventory_id: data.idspId,
+      edk: data.edk,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    const createdDevice = await this.post<DeviceData>('registerDsp', payload);
+    return Device.fromJSON(createdDevice);
   }
 
   async getDevice(id: string): Promise<Device> {
@@ -176,7 +218,11 @@ export class JsonServerApiClient extends BaseApiClient {
     return statuses[0];
   }
 
-  async enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult> {
+  async enforcePolicy(
+    deviceId: string,
+    policyId: string,
+    _options?: { extraContext?: Record<string, unknown> }
+  ): Promise<ApplyResult> {
     const existingPolicy = await this.request<PolicyData>(`/policies/${policyId}`, {
       method: 'GET'
     });
@@ -202,6 +248,30 @@ export class JsonServerApiClient extends BaseApiClient {
     };
   }
 
+  async getPolicyEnforcementGaps(
+    _deviceId: string,
+    _policyId: string
+  ): Promise<{
+    mode: string;
+    profileId: string | null;
+    missing: Array<Record<string, unknown>>;
+    warnings: string[];
+  }> {
+    return { mode: 'rest', profileId: null, missing: [], warnings: [] };
+  }
+
+  async postDeviceEnforcementGaps(
+    _deviceId: string,
+    _body: { msplXml: string; extraContext?: Record<string, unknown> }
+  ): Promise<{
+    mode: string;
+    profileId: string | null;
+    missing: Array<Record<string, unknown>>;
+    warnings: string[];
+  }> {
+    return { mode: 'rest', profileId: null, missing: [], warnings: [] };
+  }
+
   async getDeviceThreats(deviceId: string): Promise<Threat[]> {
     // JSON Server devuelve directamente el array filtrado
     const threats = await this.get<ThreatData[]>('threats', { deviceId });
@@ -221,10 +291,29 @@ export class JsonServerApiClient extends BaseApiClient {
       return [];
     }
 
-    return mitigations.map(mitigation => Mitigation.fromJSON(mitigation));
+    return mitigations.map((mitigation) =>
+      Mitigation.fromJSON({
+        ...mitigation,
+        enforcementGaps: mitigation.enforcementGaps ?? {
+          missing: [],
+          warnings: [],
+          ready: true
+        }
+      } as MitigationData)
+    );
   }
 
-  async enforceMitigation(deviceId: string, mitigationId: string): Promise<Mitigation> {
+  async getDeviceLogs(_deviceId: string): Promise<DeviceLogsResponse> {
+    // Mock: no hay implementación real de onboarding timeline en json-server.
+    // Se devuelve vacío para permitir que la UI compile/funcione sin romper flujos.
+    return { onboardings: [] };
+  }
+
+  async enforceMitigation(
+    deviceId: string,
+    mitigationId: string,
+    _options?: { extraContext?: Record<string, unknown> }
+  ): Promise<Mitigation> {
     // Obtener la mitigación actual directamente por ID usando request con endpoint relativo
     const mitigation = await this.request<MitigationData>(
       `/mitigations/${mitigationId}`,
@@ -282,10 +371,15 @@ export class JsonServerApiClient extends BaseApiClient {
       throw new Error(`Device with id ${deviceId} not found`);
     }
 
-    // Preparar datos de actualización
+    // Preparar datos de actualización (incl. bearerToken en instancia Device)
+    const src = data as Record<string, unknown> & { toJSON?: () => Record<string, unknown> };
+    const merged: Record<string, unknown> = typeof src.toJSON === 'function' ? { ...src.toJSON() } : { ...src };
+    if ('bearerToken' in src) {
+      merged.bearerToken = src.bearerToken;
+    }
     const updateData: Partial<DeviceData> = {
       ...currentDevice,
-      ...(data.toJSON ? data.toJSON() : data),
+      ...merged,
       updatedAt: new Date().toISOString()
     };
 
@@ -440,4 +534,207 @@ export class JsonServerApiClient extends BaseApiClient {
     const updatedUser = await this.put<UserData>('user', { ...currentUser, isActive: false }, { id });
     return updatedUser;
   }
+
+  async getEnforcementProfiles(_includeInactive: boolean = true): Promise<EnforcementProfileData[]> {
+    return [];
+  }
+
+  async createEnforcementProfile(
+    payload: Partial<EnforcementProfileData> & { name: string; mode: 'rest' | 'era' }
+  ): Promise<EnforcementProfileData> {
+    return {
+      id: `profile_${Date.now()}`,
+      name: payload.name,
+      mode: payload.mode,
+      method: payload.method || 'POST',
+      endpointTemplate: payload.endpointTemplate,
+      headersTemplate: payload.headersTemplate,
+      payloadTemplate: payload.payloadTemplate,
+      timeoutSeconds: payload.timeoutSeconds || 10,
+      dryRun: payload.dryRun ?? false,
+      isDefault: payload.isDefault ?? false,
+      isActive: payload.isActive ?? true,
+      autoEnforceOnRegistration: payload.autoEnforceOnRegistration ?? false,
+      authType: payload.authType || 'none',
+      authSecretId: payload.authSecretId ?? null,
+      allowMsplToken: payload.allowMsplToken ?? false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async updateEnforcementProfile(
+    id: string,
+    payload: Partial<EnforcementProfileData>
+  ): Promise<EnforcementProfileData> {
+    return {
+      id,
+      name: payload.name || `Profile ${id}`,
+      mode: payload.mode || 'rest',
+      method: payload.method || 'POST',
+      endpointTemplate: payload.endpointTemplate,
+      headersTemplate: payload.headersTemplate,
+      payloadTemplate: payload.payloadTemplate,
+      timeoutSeconds: payload.timeoutSeconds || 10,
+      dryRun: payload.dryRun ?? false,
+      isDefault: payload.isDefault ?? false,
+      isActive: payload.isActive ?? true,
+      autoEnforceOnRegistration: payload.autoEnforceOnRegistration ?? false,
+      authType: payload.authType || 'none',
+      authSecretId: payload.authSecretId ?? null,
+      allowMsplToken: payload.allowMsplToken ?? false,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async deleteEnforcementProfile(_id: string): Promise<void> {}
+
+  async getEnforcementMappings(_includeInactive: boolean = true): Promise<EnforcementMappingData[]> {
+    return [];
+  }
+
+  async createEnforcementMapping(
+    payload: Partial<EnforcementMappingData> & {
+      matchKind: 'explicitProfile' | 'policyType' | 'capability';
+      matchValue: string;
+      profileId: number;
+    }
+  ): Promise<EnforcementMappingData> {
+    return {
+      id: `mapping_${Date.now()}`,
+      matchKind: payload.matchKind,
+      matchValue: payload.matchValue,
+      profileId: payload.profileId,
+      priority: payload.priority || 100,
+      isActive: payload.isActive ?? true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async updateEnforcementMapping(
+    id: string,
+    payload: Partial<EnforcementMappingData>
+  ): Promise<EnforcementMappingData> {
+    return {
+      id,
+      matchKind: payload.matchKind || 'policyType',
+      matchValue: payload.matchValue || '',
+      profileId: payload.profileId || 0,
+      priority: payload.priority || 100,
+      isActive: payload.isActive ?? true,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async deleteEnforcementMapping(_id: string): Promise<void> {}
+
+  async getEnforcementSecrets(): Promise<EnforcementSecretMetadata[]> {
+    return [];
+  }
+
+  async createEnforcementSecret(name: string, _value: string): Promise<EnforcementSecretMetadata> {
+    return {
+      id: `secret_${Date.now()}`,
+      name,
+      keyVersion: 'mock-v1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async updateEnforcementSecret(
+    id: string,
+    payload: { name?: string; value?: string }
+  ): Promise<EnforcementSecretMetadata> {
+    return {
+      id,
+      name: payload.name || `secret_${id}`,
+      keyVersion: 'mock-v1',
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async deleteEnforcementSecret(_id: string): Promise<void> {}
+
+  async testEnforcementProfile(payload: EnforcementTestRequest): Promise<EnforcementTestResponse> {
+    return {
+      status: 'completed',
+      profileId: String(payload.profileId),
+      execution: {
+        mode: payload.runMode,
+        message: 'Mock execution'
+      }
+    };
+  }
+
+  async getEnforcementExecutions(_filters?: {
+    from?: string;
+    to?: string;
+    result?: string;
+    deviceId?: string;
+    isTest?: boolean;
+    profileId?: number;
+    limit?: number;
+  }): Promise<EnforcementExecutionLog[]> {
+    return [];
+  }
+
+  async getUserUiSettings(): Promise<UserUiSettings> {
+    return { language: 'es' };
+  }
+
+  async putUserUiSettings(data: { language: string }): Promise<UserUiSettings> {
+    return { language: data.language };
+  }
+
+  async getNotificationSettings(): Promise<NotificationSettings> {
+    return {
+      language: 'es',
+      telegramEnabled: false,
+      telegramLinked: false,
+      inAppNotificationsEnabled: true
+    };
+  }
+
+  async putNotificationSettings(data: Partial<{
+    telegramEnabled: boolean;
+    inAppNotificationsEnabled: boolean;
+  }>): Promise<NotificationSettings> {
+    const cur = await this.getNotificationSettings();
+    return {
+      ...cur,
+      telegramEnabled: data.telegramEnabled ?? cur.telegramEnabled,
+      inAppNotificationsEnabled: data.inAppNotificationsEnabled ?? cur.inAppNotificationsEnabled
+    };
+  }
+
+  async getNotifications(
+    _page = 1,
+    _perPage = 20,
+    _status?: string,
+    _readState?: 'unread' | 'read'
+  ): Promise<NotificationsListResponse> {
+    return { notifications: [], pagination: { page: 1, perPage: 20, total: 0, pages: 0 } };
+  }
+
+  async getUnreadNotificationsCount(): Promise<UnreadNotificationsCountResponse> {
+    return { count: 0 };
+  }
+
+  async markNotificationRead(_id: number): Promise<void> {}
+
+  async markAllNotificationsRead(): Promise<{ updated: number }> {
+    return { updated: 0 };
+  }
+
+  async createTelegramLinkToken(): Promise<TelegramLinkTokenResponse> {
+    return {
+      botUsername: 'mock',
+      startUrl: 'https://t.me/mock',
+      expiresAt: new Date().toISOString()
+    };
+  }
+
+  async deleteTelegramLink(): Promise<void> {}
 }

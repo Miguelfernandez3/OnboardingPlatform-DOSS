@@ -16,3 +16,5 @@ dicttoxml==1.7.16
 xmltodict==1.0.2
 PyJWT==2.8.0
 bcrypt==4.0.1
+redis==5.0.1
+rq==1.16.2

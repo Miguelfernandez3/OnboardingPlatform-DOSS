@@ -5,3 +5,4 @@
 export * from './schemaUtils';
 export * from './xmlParser';
 export * from './xmlBuilder';
+export * from './builderConfig';

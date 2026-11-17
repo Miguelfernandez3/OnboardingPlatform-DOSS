@@ -6,6 +6,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { User } from '../../core/domain/entities/User';
 import { authService } from '../../infrastructure/services/authService';
 import { getAccessToken, getRefreshToken, isTokenExpired } from '../../infrastructure/utils/tokenStorage';
+import { syncUiLanguageFromServer } from '../../infrastructure/services/userSettingsService';
 
 interface AuthContextType {
   user: User | null;
@@ -29,7 +30,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const isAuthenticated = user !== null;
-  const isAdmin = user?.role === 'admin' || false;
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || false;
 
   /**
    * Verifica y refresca el token si es necesario
@@ -49,10 +50,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await authService.refreshToken(refreshToken);
         const userData = await authService.getCurrentUser();
         setUser(User.fromJSON(userData));
+        await syncUiLanguageFromServer();
       } else {
         // Solo obtener el usuario si el token es válido
         const userData = await authService.getCurrentUser();
         setUser(User.fromJSON(userData));
+        await syncUiLanguageFromServer();
       }
     } catch (error) {
       console.error('Error refreshing auth:', error);
@@ -81,6 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Obtener el usuario actual
         const userData = await authService.getCurrentUser();
         setUser(User.fromJSON(userData));
+        await syncUiLanguageFromServer();
       }
     } catch (error) {
       console.error('Error checking auth:', error);
@@ -99,6 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authService.login(email, password);
       const userData = response.user;
       setUser(User.fromJSON(userData));
+      await syncUiLanguageFromServer();
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;

@@ -1,0 +1,27 @@
+{
+  "doss-dsp": {
+    "uuid": "11111111-1111-1111-1111-111111111111",
+    "metadata": {
+      "title": "Fake-FEAM sample InsDSP",
+      "version": "1.0.0",
+      "links": [
+        {
+          "href": "bbae8107-3deb-599c-909a-bb60ab37aae1",
+          "rel": "Generic DSP",
+          "text": "bbae8107-3deb-599c-909a-bb60ab37aae1"
+        }
+      ]
+    },
+    "local-definitions": {
+      "components": [
+        {
+          "uuid": "22222222-2222-2222-2222-222222222222",
+          "type": "this-system",
+          "title": "Sample instance",
+          "links": [],
+          "status": { "state": "operational" }
+        }
+      ]
+    }
+  }
+}

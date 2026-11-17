@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus } from '../../../core/ports';
+import { IConfigProvider, IApiClient, ApplyResult, EnforcementStatus, CreateDeviceFromDSPInput } from '../../../core/ports';
 import { Device, Policy, MUD, Passport } from '../../../core/domain';
 import { setupAuthInterceptor } from '../interceptors/authInterceptor';
 import { setupErrorInterceptor } from '../interceptors/errorInterceptor';
@@ -139,6 +139,7 @@ export abstract class BaseApiClient extends IApiClient {
 
   // Métodos abstractos que deben ser implementados por las clases hijas
   abstract getDevices(): Promise<Device[]>;
+  abstract createDeviceFromDSP(data: CreateDeviceFromDSPInput): Promise<Device>;
   abstract getDevice(id: string): Promise<Device>;
   abstract getDevicePassport(id: string): Promise<Passport>;
   abstract getDeviceMUD(id: string): Promise<MUD>;
@@ -146,5 +147,27 @@ export abstract class BaseApiClient extends IApiClient {
   abstract applyIDSP2(deviceId: string, idsp2Id: string): Promise<ApplyResult>;
   abstract applyPolicy(deviceId: string, msplXml: string, name?: string): Promise<ApplyResult>;
   abstract getEnforcementStatus(deviceId: string): Promise<EnforcementStatus>;
-  abstract enforcePolicy(deviceId: string, policyId: string): Promise<ApplyResult>;
+  abstract enforcePolicy(
+    deviceId: string,
+    policyId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ): Promise<ApplyResult>;
+  abstract getPolicyEnforcementGaps(
+    deviceId: string,
+    policyId: string
+  ): Promise<{
+    mode: string;
+    profileId: string | null;
+    missing: Array<Record<string, unknown>>;
+    warnings: string[];
+  }>;
+  abstract postDeviceEnforcementGaps(
+    deviceId: string,
+    body: { msplXml: string; extraContext?: Record<string, unknown> }
+  ): Promise<{
+    mode: string;
+    profileId: string | null;
+    missing: Array<Record<string, unknown>>;
+    warnings: string[];
+  }>;
 }

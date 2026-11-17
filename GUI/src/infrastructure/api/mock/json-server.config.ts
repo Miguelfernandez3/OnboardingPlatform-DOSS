@@ -9,6 +9,7 @@ export const jsonServerConfig: AdapterConfig = {
   adapterType: 'json-server',
   endpoints: {
     devices: '/devices',
+    registerDsp: '/devices',
     device: '/devices/:id',
     policies: '/policies?deviceId=:deviceId',
     passport: '/passports?deviceId=:deviceId',
@@ -30,6 +31,22 @@ export const jsonServerConfig: AdapterConfig = {
     users: '/users',
     user: '/users/:id',
     userRole: '/users/:id',
-    userActivate: '/users/:id'
+    userActivate: '/users/:id',
+    enforcementProfiles: '/admin/enforcement/profiles',
+    enforcementProfile: '/admin/enforcement/profiles/:id',
+    enforcementMappings: '/admin/enforcement/mappings',
+    enforcementMapping: '/admin/enforcement/mappings/:id',
+    enforcementSecrets: '/admin/enforcement/secrets',
+    enforcementSecret: '/admin/enforcement/secrets/:id',
+    enforcementTest: '/admin/enforcement/test',
+    enforcementExecutions: '/admin/enforcement/executions',
+    userMeSettings: '/users/me/settings',
+    notificationSettings: '/users/me/notification-settings',
+    myNotifications: '/users/me/notifications',
+    notificationsUnreadCount: '/users/me/notifications/unread-count',
+    notificationsReadAll: '/users/me/notifications/read-all',
+    notificationRead: '/users/me/notifications/:nid/read',
+    telegramLinkToken: '/users/me/telegram/link-token',
+    telegramUnlink: '/users/me/telegram'
   }
 };

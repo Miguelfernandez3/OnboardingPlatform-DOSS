@@ -3,7 +3,7 @@
 Registration of all API blueprints.
 """
 from flask import Blueprint
-from api import devices, policies, threats, mitigations, auth, users
+from api import devices, policies, threats, mitigations, auth, users, enforcement_admin, me_notifications, me_settings, telegram_webhook
 
 def register_blueprints(app):
     """
@@ -19,4 +19,7 @@ def register_blueprints(app):
     app.register_blueprint(mitigations.mitigations_bp)
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(users.users_bp)
-
+    app.register_blueprint(enforcement_admin.enforcement_admin_bp)
+    app.register_blueprint(me_settings.me_settings_bp)
+    app.register_blueprint(me_notifications.me_notifications_bp)
+    app.register_blueprint(telegram_webhook.telegram_webhook_bp)

@@ -62,23 +62,7 @@ class DeviceDomainManager:
         #self.start()
 
     def prepareFEAM(self):
-        url = f"{self.FEAM_server}/init"
-
-        payload = f'{{"sessionId": "{self.FEAM_sessionId}"}}'
-        headers = {
-            'user-agent': "vscode-restclient",
-            'content-type': "application/json"
-            }
-
-        logging.info("Initializing FEAM server")
-        response = requests.request("POST", url, data=payload, headers=headers)
-        if response.status_code == 200:
-            logging.info("FEAM server is prepared")
-        else:
-            logging.error("FEAM server is not prepared")
-            logging.error(response.text)
-            
-        print(response.text)
+        
 
         logging.info("Stopping Forget Pin Timer")
         url = f"{self.FEAM_server}/stopForgetPinTimer"
@@ -112,7 +96,7 @@ class DeviceDomainManager:
         self.FEAMcheckPIN()
         url = f"{self.FEAM_server}/callResourceServer"
 
-        payload = f"{{\"sessionId\": \"{self.FEAM_sessionId}\",\"functionId\":\"0bfae6a6-9281-4d38-ad18-b851ef9b86a0\",\"operationId\":\"0bfae6a6-4637-487c-a71a-9cba257304af\",\"extraValues\": [\"{{\\\"id\\\":\\\"{dsp_id}\\\",\\\"version\\\":\\\"1.0.0\\\"}}\"]}}"
+        payload = f"{{\"sessionId\": \"{self.FEAM_sessionId}\",\"functionId\":\"1bfae6a6-9281-4d38-ad18-b851ef9b86a0\",\"operationId\":\"1bfae6a6-4637-487c-a71a-9cba257304af\",\"extraValues\": [\"{{\\\"id\\\":\\\"{dsp_id}\\\",\\\"version\\\":\\\"1.0.0\\\"}}\"]}}"
         headers = {
             'user-agent': "vscode-restclient",
             'content-type': "application/json"
@@ -564,10 +548,22 @@ def device_to_dict(device):
         created_at = created_at_val.isoformat()
     if updated_at_val:
         updated_at = updated_at_val.isoformat()
-    
+
+    enc_ctx = getattr(device, 'enforcement_context', None)
+    enc_keys = []
+    if enc_ctx and str(enc_ctx).strip():
+        try:
+            parsed = json.loads(str(enc_ctx))
+            if isinstance(parsed, dict):
+                enc_keys = list(parsed.keys())
+        except (json.JSONDecodeError, TypeError, ValueError):
+            enc_keys = []
+
     return {
+        # Para el API, el "id" lógico es siempre identifier; si no existe, se usa el id interno
         'id': device.identifier or str(device.id),
-        'name': getattr(device, 'name', None) or device.model or '',
+        # No rellenar name con model; si no hay nombre explícito, se envía cadena vacía
+        'name': getattr(device, 'name', None) or '',
         'type': getattr(device, 'type', None) or '',
         'manufacturer': getattr(device, 'manufacturer', None) or '',
         'model': device.model or '',
@@ -581,7 +577,9 @@ def device_to_dict(device):
         'mudfile': device.mudfile,
         'mitigation_actions': device.mitigation_actions,
         'inventory_id': device.dsp_id,
-        'edk': getattr(device, 'edk', None)
+        'edk': getattr(device, 'edk', None),
+        'hasEnforcementContext': bool(enc_keys),
+        'enforcementContextKeys': enc_keys,
     }
 
 def parse_mitigation_xml(mitigation_xml):

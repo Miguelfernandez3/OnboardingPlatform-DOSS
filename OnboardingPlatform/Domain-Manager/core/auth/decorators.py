@@ -22,7 +22,8 @@ def require_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         try:
-            # Extraer token del request
+            # Solo validación de credenciales; el cuerpo del endpoint no debe
+            # capturarse aquí o cualquier error (p. ej. enforce) se atribuye mal a auth.
             token = get_token_from_request(request)
             if not token:
                 return jsonify({
@@ -30,11 +31,9 @@ def require_auth(f):
                     'code': 'AUTHENTICATION_REQUIRED',
                     'details': {}
                 }), 401
-            
-            # Verificar token
+
             payload = verify_token(token)
-            
-            # Verificar que el usuario existe y está activo
+
             dadm = get_dadm_instance()
             if dadm is None:
                 return jsonify({
@@ -42,7 +41,7 @@ def require_auth(f):
                     'code': 'INITIALIZATION_ERROR',
                     'details': {}
                 }), 500
-            
+
             user = dadm.db.getUserById(payload['user_id'])
             if user is None:
                 return jsonify({
@@ -50,22 +49,19 @@ def require_auth(f):
                     'code': 'USER_NOT_FOUND',
                     'details': {}
                 }), 401
-            
+
             if not user.is_active:
                 return jsonify({
                     'error': 'User account is inactive',
                     'code': 'USER_INACTIVE',
                     'details': {}
                 }), 401
-            
-            # Inyectar current_user en kwargs
+
             kwargs['current_user'] = {
                 'id': user.id,
                 'email': user.email,
                 'role': user.role
             }
-            
-            return f(*args, **kwargs)
         except TokenExpiredError as e:
             return jsonify({
                 'error': str(e.message),
@@ -81,10 +77,13 @@ def require_auth(f):
         except Exception as e:
             logging.error(f"Unexpected error in require_auth decorator: {e}", exc_info=True)
             return jsonify({
-                'error': 'Authentication failed',
-                'code': 'AUTHENTICATION_FAILED',
-                'details': {}
-            }), 401
+                'error': 'An error occurred while checking authentication. See server logs.',
+                'code': 'INTERNAL_ERROR',
+                'details': {'hint': 'Check server logs for the actual exception.'}
+            }), 500
+
+        return f(*args, **kwargs)
+
     return decorated_function
 
 def require_admin(f):
@@ -100,7 +99,6 @@ def require_admin(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         try:
-            # Extraer token del request
             token = get_token_from_request(request)
             if not token:
                 return jsonify({
@@ -108,19 +106,16 @@ def require_admin(f):
                     'code': 'AUTHENTICATION_REQUIRED',
                     'details': {}
                 }), 401
-            
-            # Verificar token
+
             payload = verify_token(token)
-            
-            # Verificar rol de administrador
-            if payload.get('role') != 'admin':
+
+            if payload.get('role') not in ('admin', 'superadmin'):
                 return jsonify({
                     'error': 'Admin access required',
                     'code': 'AUTHORIZATION_ERROR',
                     'details': {}
                 }), 403
-            
-            # Verificar que el usuario existe y está activo
+
             dadm = get_dadm_instance()
             if dadm is None:
                 return jsonify({
@@ -128,7 +123,7 @@ def require_admin(f):
                     'code': 'INITIALIZATION_ERROR',
                     'details': {}
                 }), 500
-            
+
             user = dadm.db.getUserById(payload['user_id'])
             if user is None:
                 return jsonify({
@@ -136,29 +131,26 @@ def require_admin(f):
                     'code': 'USER_NOT_FOUND',
                     'details': {}
                 }), 401
-            
+
             if not user.is_active:
                 return jsonify({
                     'error': 'User account is inactive',
                     'code': 'USER_INACTIVE',
                     'details': {}
                 }), 401
-            
-            if user.role != 'admin':
+
+            if user.role not in ('admin', 'superadmin'):
                 return jsonify({
                     'error': 'Admin access required',
                     'code': 'AUTHORIZATION_ERROR',
                     'details': {}
                 }), 403
-            
-            # Inyectar current_user en kwargs
+
             kwargs['current_user'] = {
                 'id': user.id,
                 'email': user.email,
                 'role': user.role
             }
-            
-            return f(*args, **kwargs)
         except TokenExpiredError as e:
             return jsonify({
                 'error': str(e.message),
@@ -174,10 +166,13 @@ def require_admin(f):
         except Exception as e:
             logging.error(f"Unexpected error in require_admin decorator: {e}", exc_info=True)
             return jsonify({
-                'error': 'Authentication failed',
-                'code': 'AUTHENTICATION_FAILED',
-                'details': {}
-            }), 401
+                'error': 'An error occurred while checking authentication. See server logs.',
+                'code': 'INTERNAL_ERROR',
+                'details': {'hint': 'Check server logs for the actual exception.'}
+            }), 500
+
+        return f(*args, **kwargs)
+
     return decorated_function
 
 def optional_auth(f):

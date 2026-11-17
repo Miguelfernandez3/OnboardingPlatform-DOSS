@@ -7,7 +7,7 @@ APIGateway:
 DeviceDomainManager:
   FEAM_server: "http://192.168.0.181:8181"
   Broker: "10.0.0.8:9092"
-  FEAM_sessionId: "f8cd0ed5-dd43-4032-919e-1c28c37fa472"
+  FEAM_sessionId: "89c0170d-2ab8-41ac-9fe3-17ab0a682d54"
   ThreatMUDManager_url: "http://localhost:8889"
   MUDManager_url: "http://localhost:8888"
 
@@ -17,42 +17,3 @@ Authentication:
   jwt_expiration_hours: 24
   jwt_refresh_expiration_hours: 168
   password_min_length: 8
-
-PolicyEnforcement:
-  default_profile: "era-default"
-  profiles:
-    era-default:
-      mode: "era"
-    homeassistant-rest-example:
-      mode: "rest"
-      dry_run: true
-      endpoint: "http://100.0.8:8123/api/services/rest_command/lock_bedroom_external"
-      method: "POST"
-      timeout_seconds: 10
-      headers:
-        Content-Type: "application/json"
-      auth:
-        type: "bearer"
-        token_env: "HOME_ASSISTANT_TOKEN"
-      payload_template:
-        entity_id: "{{automation-id}}"
-    homeassistant-rest-lock-bedroom-external:
-      mode: "rest"
-      dry_run: false
-      endpoint: "http://160.40.54.46:8123/api/services/rest_command/{{automation-id}}"
-      method: "POST"
-      timeout_seconds: 10
-      auth:
-        type: "bearer"
-        token_env: "HOME_ASSISTANT_TOKEN"
-      payload_template: ""
-
-  type_mappings:
-    homeassistant-rest-command-mspl-type: "homeassistant-rest-lock-bedroom-external"
-    homeassistant-automation-mspl-type: "homeassistant-rest-lock-bedroom-external"
-    homeassistant-mspl-type: "homeassistant-rest-lock-bedroom-external"
-    boostrapping-mspl-type: "era-default"
-    bootstrapping-mspl-type: "era-default"
-    ipv4-mspl-type: "era-default"
-    ipv6-mspl-type: "era-default"
-    software-mspl-type: "era-default"

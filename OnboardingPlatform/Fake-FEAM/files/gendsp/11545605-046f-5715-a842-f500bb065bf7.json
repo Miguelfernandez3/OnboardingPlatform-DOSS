@@ -1,0 +1,160 @@
+{
+  "doss-dsp": {
+    "uuid": "11545605-046f-5715-a842-f500bb065bf7",
+    "metadata": {
+      "title": "RuuviTag Smart Thermometer generic DSP",
+      "published": "2025-11-01T12:00:00Z",
+      "last-modified": "2025-11-01T12:00:00Z",
+      "version": "1.0.0",
+      "dsp-model-version": "1.0.0",
+      "revisions": [
+        {
+          "title": "Initial Release",
+          "published": "2025-11-01",
+          "description": "Initial version of the DSP document.",
+          "version": "1.0.0",
+          "dsp-model-version": "1.0.0",
+          "modified-by": {
+            "role-id": "manufacturer",
+            "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+          }
+        }
+      ],
+      "links": [
+        {
+          "href": "https://ruuvi.com/i/u/ruuvitag-tech-spec-2023-04.pdf",
+          "rel": "Technical documentation",
+          "text": "Official product page"
+        }
+      ],
+      "roles": [
+        {
+          "id": "manufacturer",
+          "title": "Manufacturer",
+          "description": "Creator of the device"
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8",
+          "type": "organization",
+          "name": "Ruuvi",
+          "remarks": "Manufacturer of RuuviTag smart thermometer"
+        }
+      ],
+      "responsible-parties": [
+        {
+          "role-id": "manufacturer",
+          "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "9932b157-b5f6-59d2-81a1-1cf2533e6088"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "5879e198-81f5-5606-94fe-83f7ea5c874c"
+        },
+        {
+          "role-id": "ObP",
+          "party-uuid": "d7d9410e-28da-502d-91e1-cd9da65af43c"
+        }
+      ]
+    },
+    "local-definitions": {
+      "components": [
+        {
+          "uuid": "7cdc71b8-a623-56a3-a57b-50180e5167bb",
+          "type": "this-system",
+          "title": "RuuviTag Smart Thermometer",
+          "description": "RuuviTag Sensor for Environmental Monitoring.",
+          "purpose": "Temperature measurement device.",
+          "props": [
+            {
+              "name": "vendor",
+              "value": "Ruuvi"
+            },
+            {
+              "name": "model",
+              "value": "RuuviTag"
+            },
+            {
+              "name": "version",
+              "value": "1.0.0"
+            },
+            {
+              "name": "git_url",
+              "value": "https://github.com/ruuvi/ruuvi.firmware.c"
+            },
+            {
+              "name": "language",
+              "value": "cpp"
+            },
+            {
+              "name": "token",
+              "value": ""
+            },
+            {
+              "name": "branch",
+              "value": "master"
+            },
+            {
+              "name": "commit_sha",
+              "value": ""
+            }
+          ],
+          "links": [
+            {
+              "href": "https://drive.google.com/uc?export=download&id=13YnkVhmDXgNHLnwq36ySfY37W1g5DJR1",
+              "rel": "SBOM file",
+              "media-type": "application/vnd.spdx+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/thermometer-mud",
+              "rel": "MUD file",
+              "media-type": "application/mud+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/thermometer-threatmud",
+              "rel": "threat mud",
+              "media-type": "application/json"
+            }
+          ],
+          "status": {
+            "state": "operational"
+          }
+        }
+      ],
+      "assessment-assets": {
+        "components": [],
+        "assessment-platforms": [
+          {
+            "uuid": "3f7a6c8e-1111-45b9-9ae8-4c6b1b7a9f8e",
+            "title": "CT-SAST"
+          },
+          {
+            "uuid": "3f7a6c8e-2222-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-VP"
+          },
+          {
+            "uuid": "f7a6c8e-3333-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-DAST"
+          },
+          {
+            "uuid": "3f7a6c8e-4444-45b9-9ae8-555555555555",
+            "title": "CT-IAST"
+          },
+          {
+            "uuid": "3f7a6c8e-5555-45b9-9ae8-555555555555",
+            "title": "CT-SPV"
+          },
+          {
+            "uuid": "3f7a6c8e-6666-45b9-9ae8-555555555555",
+            "title": "CT-firmware-fuzzing"
+          }
+        ]
+      },
+      "observations": []
+    }
+  }
+}

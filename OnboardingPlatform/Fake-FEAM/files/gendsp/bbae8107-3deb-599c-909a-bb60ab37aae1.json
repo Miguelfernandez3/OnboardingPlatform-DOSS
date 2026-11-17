@@ -1,0 +1,171 @@
+{
+  "doss-dsp": {
+    "uuid": "bbae8107-3deb-599c-909a-bb60ab37aae1",
+    "metadata": {
+      "title": "Home Assistant Green generic DSP",
+      "published": "2025-12-01T12:00:00Z",
+      "last-modified": "2026-03-01T12:00:00Z",
+      "version": "1.0.1",
+      "dsp-model-version": "1.0.0",
+      "revisions": [
+        {
+          "title": "Initial Release",
+          "published": "2025-12-01",
+          "description": "Initial version of the DSP document.",
+          "version": "1.0.0",
+          "dsp-model-version": "1.0.0",
+          "modified-by": {
+            "role-id": "manufacturer",
+            "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+          }
+        },
+        {
+          "title": "First revision",
+          "published": "2026-03-01",
+          "description": "Update branch name in the software repository of the component.",
+          "version": "1.0.1",
+          "dsp-model-version": "1.0.0",
+          "modified-by": {
+            "role-id": "manufacturer",
+            "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+          }
+        }
+      ],
+      "links": [
+        {
+          "href": "https://www.home-assistant.io/green/",
+          "rel": "Technical documentation",
+          "text": "Official product page"
+        }
+      ],
+      "roles": [
+        {
+          "id": "manufacturer",
+          "title": "Manufacturer",
+          "description": "Creator of the device"
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8",
+          "type": "organization",
+          "name": "Nabu Casa",
+          "remarks": "Manufacturer and official vendor of Home Assistant Green"
+        }
+      ],
+      "responsible-parties": [
+        {
+          "role-id": "manufacturer",
+          "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "9932b157-b5f6-59d2-81a1-1cf2533e6088"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "5879e198-81f5-5606-94fe-83f7ea5c874c"
+        },
+        {
+          "role-id": "ObP",
+          "party-uuid": "d7d9410e-28da-502d-91e1-cd9da65af43c"
+        }
+      ]
+    },
+    "local-definitions": {
+      "components": [
+        {
+          "uuid": "a7af2b1d-3d15-5e81-97af-f4142f75f4ad",
+          "type": "this-system",
+          "title": "Home Assistant Green Smart Home Hub",
+          "description": "Home Assistant Green is a plug-and-play smart home hub running Home Assistant OS, providing local, privacy-focused control of smart home devices.",
+          "purpose": "Core smart home controller and integration platform.",
+          "props": [
+            {
+              "name": "vendor",
+              "value": "Nabu Casa"
+            },
+            {
+              "name": "model",
+              "value": "Home Assistant Green"
+            },
+            {
+              "name": "version",
+              "value": "1.0.0"
+            },
+            {
+              "name": "git_url",
+              "value": "https://github.com/home-assistant/core"
+            },
+            {
+              "name": "language",
+              "value": "python"
+            },
+            {
+              "name": "token",
+              "value": ""
+            },
+            {
+              "name": "branch",
+              "value": "dev"
+            },
+            {
+              "name": "commit_sha",
+              "value": "280c25c"
+            }
+          ],
+          "links": [
+            {
+              "href": "https://drive.google.com/uc?export=download&id=1a4vyx9gZ4meYvNP9pXADQSBgMZZa0RMt",
+              "rel": "SBOM file",
+              "media-type": "application/vnd.spdx+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/home-assistant-mud",
+              "rel": "MUD file",
+              "media-type": "application/mud+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/home-assistant-threatmud",
+              "rel": "threat mud",
+              "media-type": "application/json"
+            }
+          ],
+          "status": {
+            "state": "operational"
+          }
+        }
+      ],
+      "assessment-assets": {
+        "components": [],
+        "assessment-platforms": [
+          {
+            "uuid": "3f7a6c8e-1111-45b9-9ae8-4c6b1b7a9f8e",
+            "title": "CT-SAST"
+          },
+          {
+            "uuid": "3f7a6c8e-2222-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-VP"
+          },
+          {
+            "uuid": "f7a6c8e-3333-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-DAST"
+          },
+          {
+            "uuid": "3f7a6c8e-4444-45b9-9ae8-555555555555",
+            "title": "CT-IAST"
+          },
+          {
+            "uuid": "3f7a6c8e-5555-45b9-9ae8-555555555555",
+            "title": "CT-SPV"
+          },
+          {
+            "uuid": "3f7a6c8e-6666-45b9-9ae8-555555555555",
+            "title": "CT-firmware-fuzzing"
+          }
+        ]
+      },
+      "observations": []
+    }
+  }
+}

@@ -64,6 +64,6 @@ export class User {
   }
 
   get isAdmin(): boolean {
-    return this.role === 'admin';
+    return this.role === 'admin' || this.role === 'superadmin';
   }
 }

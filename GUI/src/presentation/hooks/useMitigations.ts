@@ -7,7 +7,10 @@ interface UseMitigationsReturn {
   mitigations: Mitigation[];
   loading: boolean;
   error: string | null;
-  enforceMitigation: (mitigationId: string) => Promise<void>;
+  enforceMitigation: (
+    mitigationId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ) => Promise<void>;
   revokeMitigation: (mitigationId: string) => Promise<void>;
 }
 
@@ -32,16 +35,25 @@ export function useMitigations(deviceId: string | undefined): UseMitigationsRetu
       return mitigationService.getDeviceMitigations(deviceId);
     },
     enabled: !!deviceId,
-    staleTime: 1000 * 60 * 3, // 3 minutos
+    staleTime: 1000 * 30,
+    refetchInterval: 1000 * 10,
+    refetchIntervalInBackground: true,
   });
 
   // Mutation para aplicar (enforce) mitigación
   const enforceMutation = useMutation({
-    mutationFn: (mitigationId: string) => {
+    mutationFn: ({
+      mitigationId,
+      options,
+    }: {
+      mitigationId: string;
+      options?: { extraContext?: Record<string, unknown> };
+    }) => {
       if (!deviceId) throw new Error('Device ID is required');
-      return mitigationService.enforceMitigation(deviceId, mitigationId);
+      return mitigationService.enforceMitigation(deviceId, mitigationId, options);
     },
-    onMutate: async (mitigationId) => {
+    onMutate: async (variables) => {
+      const { mitigationId } = variables;
       // Cancelar queries en progreso
       await queryClient.cancelQueries({ queryKey: queryKeys.devices.mitigations(deviceId!) });
 
@@ -89,6 +101,8 @@ export function useMitigations(deviceId: string | undefined): UseMitigationsRetu
           return old.map((m) => (m.id === updatedMitigation.id ? updatedMitigation : m));
         }
       );
+      void queryClient.invalidateQueries({ queryKey: queryKeys.devices.mitigations(deviceId!) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.devices.detail(deviceId!) });
     },
   });
 
@@ -123,6 +137,7 @@ export function useMitigations(deviceId: string | undefined): UseMitigationsRetu
               is_enforced: false,
               last_enforced: undefined,
               enforcement_timestamp: undefined,
+              enforcementGaps: m.enforcementGaps,
             }) : m
           );
         }
@@ -149,23 +164,19 @@ export function useMitigations(deviceId: string | undefined): UseMitigationsRetu
           return old.map((m) => (m.id === updatedMitigation.id ? updatedMitigation : m));
         }
       );
+      void queryClient.invalidateQueries({ queryKey: queryKeys.devices.mitigations(deviceId!) });
     },
   });
 
-  const enforceMitigation = async (mitigationId: string): Promise<void> => {
-    try {
-      await enforceMutation.mutateAsync(mitigationId);
-    } catch (err) {
-      throw err;
-    }
+  const enforceMitigation = async (
+    mitigationId: string,
+    options?: { extraContext?: Record<string, unknown> }
+  ): Promise<void> => {
+    await enforceMutation.mutateAsync({ mitigationId, options });
   };
 
   const revokeMitigation = async (mitigationId: string): Promise<void> => {
-    try {
-      await revokeMutation.mutateAsync(mitigationId);
-    } catch (err) {
-      throw err;
-    }
+    await revokeMutation.mutateAsync(mitigationId);
   };
 
   return {

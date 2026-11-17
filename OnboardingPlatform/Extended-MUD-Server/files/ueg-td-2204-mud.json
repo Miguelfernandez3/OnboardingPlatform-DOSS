@@ -1,0 +1,274 @@
+{
+    "ietf-mud:mud": {
+      "mud-version": 1,
+      "cache-validity": 48,
+      "is-supported": true,
+      "last-change": "2026-05-04T10:15:00.000Z",
+      "mud-url": "https://example.com/ubuntu-edge-gateway/mud/ueg-td-2204.mud.json",
+      "mud-signature": "https://example.com/ubuntu-edge-gateway/mud/ueg-td-2204.mud.p7s",
+      "mfg-name": "DOSS Test Devices Ltd.",
+      "documentation": "https://example.com/ubuntu-edge-gateway/docs",
+      "systeminfo": "Ubuntu Edge Gateway Test Device for secure onboarding, local API exposure, telemetry collection and MUD policy validation",
+      "ietf-access-control-list:acls": {
+        "acl": [
+          {
+            "name": "toipv4-ueg-td-2204-base",
+            "type": "ipv4-acl-type",
+            "aces": {
+              "ace": [
+                {
+                  "name": "toace-allow-my-controller",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "my-controller": [
+                        null
+                      ]
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "toace-allow-local-tcp-management",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "local-networks": [
+                        null
+                      ]
+                    },
+                    "ipv4": {
+                      "protocol": 6
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "toace-allow-same-manufacturer",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "same-manufacturer": [
+                        null
+                      ]
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "fripv4-ueg-td-2204-base",
+            "type": "ipv4-acl-type",
+            "aces": {
+              "ace": [
+                {
+                  "name": "frace-allow-my-controller",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "my-controller": [
+                        null
+                      ]
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "frace-allow-local-tcp",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "local-networks": [
+                        null
+                      ]
+                    },
+                    "ipv4": {
+                      "protocol": 6
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "frace-allow-same-manufacturer",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "same-manufacturer": [
+                        null
+                      ]
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "toipv4-ueg-td-2204-services",
+            "type": "ipv4-acl-type",
+            "aces": {
+              "ace": [
+                {
+                  "name": "toace-allow-ssh-management",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "local-networks": [
+                        null
+                      ]
+                    },
+                    "ipv4": {
+                      "protocol": 6
+                    },
+                    "tcp": {
+                      "destination-port": {
+                        "operator": "eq",
+                        "port": 22
+                      }
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "toace-allow-local-api",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "local-networks": [
+                        null
+                      ]
+                    },
+                    "ipv4": {
+                      "protocol": 6
+                    },
+                    "tcp": {
+                      "destination-port": {
+                        "operator": "eq",
+                        "port": 8080
+                      }
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "toace-allow-prometheus-metrics",
+                  "matches": {
+                    "ietf-mud:mud": {
+                      "local-networks": [
+                        null
+                      ]
+                    },
+                    "ipv4": {
+                      "protocol": 6
+                    },
+                    "tcp": {
+                      "destination-port": {
+                        "operator": "eq",
+                        "port": 9100
+                      }
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "fripv4-ueg-td-2204-cloud-telemetry",
+            "type": "ipv4-acl-type",
+            "aces": {
+              "ace": [
+                {
+                  "name": "frace-allow-https-telemetry",
+                  "matches": {
+                    "ipv4": {
+                      "protocol": 6
+                    },
+                    "tcp": {
+                      "destination-port": {
+                        "operator": "eq",
+                        "port": 443
+                      }
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "frace-allow-dns",
+                  "matches": {
+                    "ipv4": {
+                      "protocol": 17
+                    },
+                    "udp": {
+                      "destination-port": {
+                        "operator": "eq",
+                        "port": 53
+                      }
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                },
+                {
+                  "name": "frace-allow-ntp",
+                  "matches": {
+                    "ipv4": {
+                      "protocol": 17
+                    },
+                    "udp": {
+                      "destination-port": {
+                        "operator": "eq",
+                        "port": 123
+                      }
+                    }
+                  },
+                  "actions": {
+                    "forwarding": "accept"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "from-device-policy": {
+        "access-lists": {
+          "access-list": [
+            {
+              "name": "fripv4-ueg-td-2204-base"
+            },
+            {
+              "name": "fripv4-ueg-td-2204-cloud-telemetry"
+            }
+          ]
+        }
+      },
+      "to-device-policy": {
+        "access-lists": {
+          "access-list": [
+            {
+              "name": "toipv4-ueg-td-2204-base"
+            },
+            {
+              "name": "toipv4-ueg-td-2204-services"
+            }
+          ]
+        }
+      }
+    }
+  }

@@ -10,14 +10,24 @@ import {
   getTypeDefinition,
   type Schema,
 } from './helpers';
+import {
+  createEmptyConfigurationRule,
+  DEFAULT_ACTION_OPTIONS,
+  getRuleSetFieldLabelKey,
+  isDefaultActionField,
+  isRepeatableField,
+  normalizeToArray,
+  readDefaultActionValue,
+  type DefaultActionValue,
+} from './helpers/builderConfig';
 
 interface PolicyBuilderProps {
   type: string;
   schema: Schema;
   data: Record<string, unknown>;
   onChange: (data: Record<string, unknown>) => void;
-  level?: number; // Nivel de indentación (para recursión)
-  path?: string; // Ruta del campo para identificar cambios
+  level?: number;
+  path?: string;
 }
 
 interface PendingSubType {
@@ -27,29 +37,27 @@ interface PendingSubType {
 
 /**
  * PolicyBuilder - Componente recursivo con desplegables para construir políticas MSPL
- * Versión mejorada con UI tipo accordion y indentación visual
  */
-export default function PolicyBuilder({ 
-  type, 
-  schema, 
-  data, 
-  onChange, 
+export default function PolicyBuilder({
+  type,
+  schema,
+  data,
+  onChange,
   level = 0,
-  path = 'root'
+  path = 'root',
 }: PolicyBuilderProps): JSX.Element {
   const { t } = useTranslation();
   const [expandedFields, setExpandedFields] = useState<Set<string>>(new Set());
   const [pendingSubType, setPendingSubType] = useState<PendingSubType | null>(null);
   const [subtypeOptions, setSubtypeOptions] = useState<string[]>([]);
 
-  // Tipo efectivo desde @xsi:type si existe
   const effectiveType = getEffectiveType(type, data);
   const typeDef = getTypeDefinition(schema, effectiveType);
-  
+
   if (!typeDef) return <p>{t('policyBuilder.noDefinition', { type: effectiveType })}</p>;
 
   const toggleField = (fieldName: string): void => {
-    setExpandedFields(prev => {
+    setExpandedFields((prev) => {
       const next = new Set(prev);
       if (next.has(fieldName)) {
         next.delete(fieldName);
@@ -69,8 +77,7 @@ export default function PolicyBuilder({
     const newData = { ...data };
     delete newData[fieldName];
     onChange(newData);
-    // Cerrar el desplegable si estaba abierto
-    setExpandedFields(prev => {
+    setExpandedFields((prev) => {
       const next = new Set(prev);
       next.delete(fieldName);
       return next;
@@ -82,11 +89,59 @@ export default function PolicyBuilder({
     onChange(newData);
   };
 
+  const getFieldDisplayName = (field: { name: string }): string => {
+    const labelKey = getRuleSetFieldLabelKey(field.name);
+    if (effectiveType === 'RuleSetConfiguration' && labelKey) {
+      return t(`policyBuilder.fieldLabels.${labelKey}`);
+    }
+    return cleanFieldName(field.name);
+  };
+
+  const createField = (
+    fieldName: string,
+    fieldType: string,
+    isComplex: boolean,
+    chosenSubtype: string | null = null
+  ): void => {
+    let initialValue: unknown;
+
+    if (isRepeatableField(fieldName)) {
+      initialValue = [createEmptyConfigurationRule()];
+      setExpandedFields((prev) => new Set(prev).add(fieldName));
+    } else if (isComplex) {
+      if (fieldType === 'ITResourceType') {
+        initialValue = {
+          id: `mspl_${crypto.randomUUID().replace(/-/g, '')}`,
+          orchestrationID: (data.id as string) || '',
+        };
+      } else {
+        initialValue = {};
+      }
+      if (chosenSubtype) {
+        (initialValue as Record<string, unknown>)['@xsi:type'] = chosenSubtype;
+      }
+      setExpandedFields((prev) => new Set(prev).add(fieldName));
+    } else {
+      initialValue = '';
+    }
+
+    onChange({ ...data, [fieldName]: initialValue });
+  };
+
   const handleAddField = (fieldName: string, isComplex: boolean, rawType: string): void => {
-    // Si el campo ya existe, expandirlo en lugar de recrearlo
+    if (isRepeatableField(fieldName)) {
+      const current = normalizeToArray(data[fieldName]);
+      onChange({
+        ...data,
+        [fieldName]: [...current, createEmptyConfigurationRule()],
+      });
+      setExpandedFields((prev) => new Set(prev).add(fieldName));
+      return;
+    }
+
     if (data[fieldName]) {
       if (isComplex) {
-        setExpandedFields(prev => new Set(prev).add(fieldName));
+        setExpandedFields((prev) => new Set(prev).add(fieldName));
       }
       return;
     }
@@ -104,31 +159,6 @@ export default function PolicyBuilder({
     createField(fieldName, cleanTypeName(rawType), isComplex);
   };
 
-  const createField = (fieldName: string, fieldType: string, isComplex: boolean, chosenSubtype: string | null = null): void => {
-    let initialValue: unknown;
-    
-    if (isComplex) {
-      if (fieldType === 'ITResourceType') {
-        initialValue = {
-          id: `mspl_${crypto.randomUUID().replace(/-/g, '')}`,
-          orchestrationID: (data.id as string) || '',
-        };
-      } else {
-        initialValue = {};
-      }
-      if (chosenSubtype) {
-        (initialValue as Record<string, unknown>)['@xsi:type'] = chosenSubtype;
-      }
-      // Auto-expandir campos complejos recién creados
-      setExpandedFields(prev => new Set(prev).add(fieldName));
-    } else {
-      initialValue = '';
-    }
-
-    const newData = { ...data, [fieldName]: initialValue };
-    onChange(newData);
-  };
-
   const handleSubtypeSelect = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const chosen = e.target.value;
     if (pendingSubType) {
@@ -138,10 +168,115 @@ export default function PolicyBuilder({
     }
   };
 
+  const handleRepeatableItemChange =
+    (fieldName: string, index: number) =>
+    (newItemData: Record<string, unknown>): void => {
+      const items = [...normalizeToArray(data[fieldName])];
+      items[index] = newItemData;
+      onChange({ ...data, [fieldName]: items });
+    };
+
+  const handleRemoveRepeatableItem = (fieldName: string, index: number): void => {
+    const items = normalizeToArray(data[fieldName]).filter((_, i) => i !== index);
+    if (items.length === 0) {
+      const newData = { ...data };
+      delete newData[fieldName];
+      onChange(newData);
+      return;
+    }
+    onChange({ ...data, [fieldName]: items });
+  };
+
+  const defaultActionField = typeDef.fields.find(
+    (f) => isDefaultActionField(f.name, effectiveType)
+  );
+
+  const handleDefaultActionChange = (value: DefaultActionValue): void => {
+    if (!defaultActionField) return;
+    if (!value) {
+      const newData = { ...data };
+      delete newData[defaultActionField.name];
+      onChange(newData);
+      return;
+    }
+    onChange({ ...data, [defaultActionField.name]: value });
+  };
+
+  const renderDefaultActionSelector = (): JSX.Element | null => {
+    if (!defaultActionField) return null;
+    const currentValue = readDefaultActionValue(data[defaultActionField.name]);
+
+    return (
+      <div className={`field-block field-level-${level} default-action-field`}>
+        <div className="field-header">
+          <span className="field-name">{t('policyBuilder.defaultAction')}</span>
+          <select
+            className="input-select"
+            value={currentValue}
+            onChange={(e) => handleDefaultActionChange(e.target.value as DefaultActionValue)}
+          >
+            <option value="">{t('policyBuilder.defaultActionNone')}</option>
+            {DEFAULT_ACTION_OPTIONS.filter((opt) => opt !== '').map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    );
+  };
+
+  const renderRepeatableField = (field: { name: string; type: string }): JSX.Element => {
+    const items = normalizeToArray(data[field.name]);
+    const fieldType = cleanTypeName(field.type);
+    const displayName = getFieldDisplayName(field);
+
+    return (
+      <div className={`field-block field-level-${level} repeatable-field-block`} key={field.name}>
+        <div className="field-header">
+          <span className="field-name">{displayName}</span>
+        </div>
+        {items.map((item, index) => (
+          <div className="repeatable-item" key={`${field.name}-${index}`}>
+            <div className="repeatable-item-header">
+              <span className="repeatable-item-title">
+                {t('policyBuilder.ruleN', { n: index + 1 })}
+              </span>
+              <button
+                type="button"
+                className="delete-button"
+                onClick={() => handleRemoveRepeatableItem(field.name, index)}
+                title={t('policyBuilder.removeRule')}
+              >
+                ×
+              </button>
+            </div>
+            <PolicyBuilder
+              type={fieldType}
+              schema={schema}
+              data={item}
+              onChange={handleRepeatableItemChange(field.name, index)}
+              level={level + 1}
+              path={`${path}.${field.name}[${index}]`}
+            />
+          </div>
+        ))}
+        <button
+          type="button"
+          className="add-button"
+          onClick={() => handleAddField(field.name, isComplexType(schema, fieldType), field.type)}
+        >
+          ➕ {t('policyBuilder.addRule')}
+        </button>
+      </div>
+    );
+  };
+
   const renderField = (field: { name: string; type: string }): JSX.Element => {
-    const fieldName = cleanFieldName(field.name);
     const fieldValue = data[field.name];
     const isExpanded = expandedFields.has(field.name);
+    const displayName = getFieldDisplayName(field);
 
     let fieldType = cleanTypeName(field.type);
     if (typeof fieldValue === 'object' && fieldValue && (fieldValue as Record<string, unknown>)['@xsi:type']) {
@@ -149,16 +284,16 @@ export default function PolicyBuilder({
     }
 
     const isComplex = isComplexType(schema, fieldType);
-    // Permitir borrar todos los campos excepto el ID en el nivel raíz
     const allowDelete = !(level === 0 && field.name === 'id');
 
     return (
       <div className={`field-block field-level-${level}`} key={field.name}>
         <div className="field-header">
-          <span className="field-name">{fieldName}</span>
+          <span className="field-name">{displayName}</span>
           {isComplex ? (
             <>
               <button
+                type="button"
                 className="expand-button"
                 onClick={() => toggleField(field.name)}
                 title={isExpanded ? t('policyBuilder.collapse') : t('policyBuilder.expand')}
@@ -167,6 +302,7 @@ export default function PolicyBuilder({
               </button>
               {allowDelete && (
                 <button
+                  type="button"
                   className="delete-button"
                   onClick={() => handleRemoveField(field.name)}
                   title={t('policyBuilder.removeField')}
@@ -185,6 +321,7 @@ export default function PolicyBuilder({
               />
               {allowDelete && (
                 <button
+                  type="button"
                   className="delete-button"
                   onClick={() => handleRemoveField(field.name)}
                   title={t('policyBuilder.removeField')}
@@ -195,7 +332,7 @@ export default function PolicyBuilder({
             </>
           )}
         </div>
-        
+
         {isComplex && isExpanded && fieldValue !== null && typeof fieldValue === 'object' && !Array.isArray(fieldValue) && (
           <div className="field-content">
             <PolicyBuilder
@@ -212,14 +349,32 @@ export default function PolicyBuilder({
     );
   };
 
-  const addedFields = Object.keys(data).filter(key => !key.startsWith('@') && !key.startsWith('xmlns') && key !== 'xsi:schemaLocation');
-  const missingFields = typeDef.fields.filter((f) => !addedFields.includes(f.name));
+  const addedFields = Object.keys(data).filter(
+    (key) => !key.startsWith('@') && !key.startsWith('xmlns') && key !== 'xsi:schemaLocation'
+  );
+
+  const isSpecialField = (field: { name: string }): boolean =>
+    isRepeatableField(field.name) || isDefaultActionField(field.name, effectiveType);
+
+  const visibleFields = typeDef.fields.filter(
+    (f) => addedFields.includes(f.name) && !isSpecialField(f)
+  );
+
+  const repeatableFieldsInUse = typeDef.fields.filter(
+    (f) => isRepeatableField(f.name) && addedFields.includes(f.name)
+  );
+
+  const missingFields = typeDef.fields.filter(
+    (f) => !addedFields.includes(f.name) && !isSpecialField(f)
+  );
+
+  const repeatableFieldsMissing = typeDef.fields.filter(
+    (f) => isRepeatableField(f.name) && !addedFields.includes(f.name)
+  );
 
   return (
     <div className={`policy-builder policy-level-${level}`}>
-      {level === 0 && (
-        <h3 className="builder-title">{effectiveType}</h3>
-      )}
+      {level === 0 && <h3 className="builder-title">{effectiveType}</h3>}
 
       {(effectiveType === 'ITResourceOrchestrationType' || effectiveType === 'ITResourceType') && level === 0 && (
         <div className="field-block field-level-0">
@@ -235,9 +390,13 @@ export default function PolicyBuilder({
         </div>
       )}
 
-      {typeDef.fields.filter((f) => addedFields.includes(f.name)).map(renderField)}
+      {visibleFields.map(renderField)}
 
-      {(missingFields.length > 0 || pendingSubType) && (
+      {effectiveType === 'RuleSetConfiguration' && renderDefaultActionSelector()}
+
+      {repeatableFieldsInUse.map(renderRepeatableField)}
+
+      {(missingFields.length > 0 || repeatableFieldsMissing.length > 0 || pendingSubType) && (
         <div className={`optional-fields optional-level-${level}`}>
           {pendingSubType && (
             <div className="subtype-selector">
@@ -245,18 +404,23 @@ export default function PolicyBuilder({
                 {t('policyBuilder.selectSubtype')} {cleanFieldName(pendingSubType.fieldName)}:
               </label>
               <select onChange={handleSubtypeSelect} defaultValue="">
-                <option value="" disabled>{t('policyBuilder.chooseOne')}</option>
+                <option value="" disabled>
+                  {t('policyBuilder.chooseOne')}
+                </option>
                 {subtypeOptions.map((st) => (
-                  <option key={st} value={st}>{st}</option>
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
                 ))}
               </select>
             </div>
           )}
           {missingFields.map((f) => {
-            const name = cleanFieldName(f.name);
+            const name = getFieldDisplayName(f);
             const isComplex = isComplexType(schema, f.type);
             return (
               <button
+                type="button"
                 className="add-button"
                 key={f.name}
                 onClick={() => handleAddField(f.name, isComplex, f.type)}
@@ -265,9 +429,22 @@ export default function PolicyBuilder({
               </button>
             );
           })}
+          {repeatableFieldsMissing.map((f) => {
+            const name = getFieldDisplayName(f);
+            const isComplex = isComplexType(schema, f.type);
+            return (
+              <button
+                type="button"
+                className="add-button"
+                key={f.name}
+                onClick={() => handleAddField(f.name, isComplex, f.type)}
+              >
+                ➕ {t('policyBuilder.addRule')} ({name})
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
-

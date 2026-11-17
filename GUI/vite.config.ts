@@ -15,7 +15,12 @@ export default defineConfig({
   },
   server: {
     port: 3001,
-    open: true
-  }
+    open: false,
+    allowedHosts: ['obp.perii.es']
+  },
+  preview: {
+    port: 3001,
+    allowedHosts: ['obp.perii.es']
+  },
 })
 

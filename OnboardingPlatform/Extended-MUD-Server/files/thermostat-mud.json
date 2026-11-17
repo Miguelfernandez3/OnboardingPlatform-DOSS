@@ -1,0 +1,121 @@
+{
+  "ietf-mud:mud": {
+    "mud-version": 1,
+    "cache-validity": 48,
+    "is-supported": true,
+    "last-change": "2026-07-10T09:00:00Z",
+    "mud-url": "https://MudServer/thermostat-mud",
+    "mud-signature": "https://example.com/mud/thermostat.p7s",
+    "systeminfo": "Thermostat connected to Home Assistant (HA)",
+    "ietf-access-control-list:acls": {
+      "acl": [
+        {
+          "name": "thermostat_toipv4_acl",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "to_my_controller_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "my-controller": [null]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "to_local_networks_tcp_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "local-networks": [null]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "to_same_manufacturer_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "same-manufacturer": [null]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "thermostat_fripv4_acl",
+          "type": "ipv4-acl-type",
+          "aces": {
+            "ace": [
+              {
+                "name": "fr_my_controller_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "my-controller": [null]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "fr_local_networks_tcp_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "local-networks": [null]
+                  },
+                  "ipv4": {
+                    "protocol": 6
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              },
+              {
+                "name": "fr_same_manufacturer_allow",
+                "matches": {
+                  "ietf-mud:mud": {
+                    "same-manufacturer": [null]
+                  }
+                },
+                "actions": {
+                  "forwarding": "accept"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "thermostat_fripv4_acl"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "thermostat_toipv4_acl"
+          }
+        ]
+      }
+    }
+  }
+}

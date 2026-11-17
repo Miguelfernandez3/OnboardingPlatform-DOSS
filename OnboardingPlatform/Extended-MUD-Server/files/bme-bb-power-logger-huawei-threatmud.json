@@ -1,0 +1,209 @@
+{
+  "ietf-threatmud:mud": {
+    "threat-mud-version": 1,
+    "threat-mud-url": "https://ThreatMudServer/bme-bb-power-logger-huawei-threatmud",
+    "threat-id": "bme-bb-power-logger-huawei-threatmud",
+    "last-update": "2026-04-17T12:00:00Z",
+    "cache-validity": 48,
+    "is-supported": true,
+    "models-affected": "bme-bb-power-logger-huawei",
+    "Threat-Intelligence-Providers": [
+      "Industrial IoT Demo (BeagleBone)",
+      "Vendor Security Advisory (demo)"
+    ],
+    "cvss-vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+    "systeminfo": "Power logger ThreatMUD (degraded service): keep my-controller + local Modbus server path (TCP 502); block outbound MySQL 3306 and inverter TCP 501; retain single client path to inverter on 502; MSPL disables remote export",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_bme_bb_pl_fr_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-pl-degraded-mitigation"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "threatmud_bme_bb_pl_to_restrict"
+          }
+        ]
+      },
+      "mspl-list": {
+        "mspls": [
+          {
+            "name": "bme-bb-pl-degraded-mitigation"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:acls": {
+    "acl": [
+      {
+        "name": "threatmud_bme_bb_pl_to_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "to_allow_controller_modbus_tcp_502",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 502
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "to_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "to_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "threatmud_bme_bb_pl_fr_restrict",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "fr_drop_mysql_tcp_3306",
+              "matches": {
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 3306
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_drop_inverter_tcp_501",
+              "matches": {
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 501
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_my_controller_allow",
+              "matches": {
+                "ietf-mud:mud": {
+                  "my-controller": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "fr_local_networks_tcp_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "local-networks": [
+                    null
+                  ]
+                },
+                "ipv4": {
+                  "protocol": 6
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            },
+            {
+              "name": "fr_same_manufacturer_deny",
+              "matches": {
+                "ietf-mud:mud": {
+                  "same-manufacturer": [
+                    null
+                  ]
+                }
+              },
+              "actions": {
+                "forwarding": "drop"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "umu-mspl-list:mspls": {
+    "mspl": [
+      {
+        "name": "bme-bb-pl-degraded-mitigation",
+        "type": "bme-rest-configure-service-mspl-type",
+        "configuration": {
+          "capability": "service-configuration"
+        },
+        "enforcement-profile": "bme-rest-configure-service",
+        "description": "Mitigation (demo): push degraded profile — disable MySQL export, pause Modbus client to inverter port 501, retain local Modbus server and single inverter path on 502 until firmware patch"
+      }
+    ]
+  }
+}

@@ -20,7 +20,17 @@ export interface DeviceData {
   mudfile?: string;
   mitigation_actions?: string;
   inventory_id?: string;
+  dsp_id?: string;
+  idspId?: string;
   edk?: string;
+  /** Contexto de enforcement (placeholders) persistido en el Domain-Manager */
+  enforcementContext?: Record<string, unknown>;
+  hasEnforcementContext?: boolean;
+  enforcementContextKeys?: string[];
+  /** Servidor: hay token Bearer cifrado guardado (nunca se devuelve el valor) */
+  bearerTokenConfigured?: boolean;
+  /** Solo cliente → PUT: enviar una vez; el servidor no lo devuelve en GET */
+  bearerToken?: string;
 }
 
 export class Device {
@@ -41,6 +51,11 @@ export class Device {
   mitigation_actions?: string;
   inventory_id?: string;
   edk?: string;
+  enforcementContext?: Record<string, unknown>;
+  hasEnforcementContext?: boolean;
+  enforcementContextKeys?: string[];
+  bearerTokenConfigured?: boolean;
+  bearerToken?: string;
 
   constructor({
     id,
@@ -59,7 +74,12 @@ export class Device {
     mudfile,
     mitigation_actions,
     inventory_id,
-    edk
+    edk,
+    enforcementContext,
+    hasEnforcementContext,
+    enforcementContextKeys,
+    bearerTokenConfigured,
+    bearerToken
   }: DeviceData) {
     this.id = id;
     this.name = name;
@@ -78,6 +98,11 @@ export class Device {
     this.mitigation_actions = mitigation_actions;
     this.inventory_id = inventory_id;
     this.edk = edk;
+    this.enforcementContext = enforcementContext;
+    this.hasEnforcementContext = hasEnforcementContext;
+    this.enforcementContextKeys = enforcementContextKeys;
+    this.bearerTokenConfigured = bearerTokenConfigured;
+    this.bearerToken = bearerToken;
   }
 
   static fromJSON(json: DeviceData | any): Device {
@@ -105,8 +130,16 @@ export class Device {
       mudurl: json.mudurl || json.mud_url,
       mudfile: json.mudfile || json.mud_file,
       mitigation_actions: json.mitigation_actions,
-      inventory_id: json.inventory_id || json.inventoryId,
-      edk: json.edk
+      inventory_id: json.inventory_id || json.inventoryId || json.idsp_id || json.idspId,
+      edk: json.edk,
+      enforcementContext:
+        json.enforcementContext && typeof json.enforcementContext === 'object'
+          ? (json.enforcementContext as Record<string, unknown>)
+          : undefined,
+      hasEnforcementContext: json.hasEnforcementContext,
+      enforcementContextKeys: json.enforcementContextKeys,
+      bearerTokenConfigured: Boolean(json.bearerTokenConfigured ?? json.bearer_token_configured),
+      bearerToken: undefined
     });
   }
 
@@ -128,8 +161,14 @@ export class Device {
       mudfile: this.mudfile,
       mitigation_actions: this.mitigation_actions,
       inventory_id: this.inventory_id,
-      edk: this.edk
+      edk: this.edk,
+      enforcementContext: this.enforcementContext,
+      hasEnforcementContext: this.hasEnforcementContext,
+      enforcementContextKeys: this.enforcementContextKeys,
+      bearerTokenConfigured: this.bearerTokenConfigured,
+      ...(this.bearerToken !== undefined && this.bearerToken !== null
+        ? { bearerToken: this.bearerToken }
+        : {})
     };
   }
 }
-

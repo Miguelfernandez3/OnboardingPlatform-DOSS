@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
@@ -5,16 +6,21 @@ import { useDevices, useIsMobile } from '../hooks';
 import { queryKeys } from '../../infrastructure/query/queryKeys';
 import { deviceService } from '../../infrastructure/services/deviceService';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { DeviceCreateForm } from '../components';
+import { useToast } from '../../infrastructure/notifications/useToast';
+import { CreateDeviceFromDSPInput } from '../../core/ports';
 
 /**
  * DeviceList - Página que lista todos los dispositivos
  */
 export default function DeviceList(): JSX.Element {
   const { t } = useTranslation();
-  const { devices, loading, error } = useDevices();
+  const { devices, loading, error, createDeviceFromDSP } = useDevices();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const { showTranslated } = useToast();
+  const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
 
   // Prefetch device data on hover
   const handleDevicePrefetch = (deviceId: string) => {
@@ -23,6 +29,13 @@ export default function DeviceList(): JSX.Element {
       queryFn: () => deviceService.getDevice(deviceId),
       staleTime: 1000 * 60 * 5, // 5 minutos
     });
+  };
+
+  const handleCreateDevice = async (data: CreateDeviceFromDSPInput): Promise<void> => {
+    const createdDevice = await createDeviceFromDSP(data);
+    setShowCreateForm(false);
+    showTranslated('device.create.success', 'success');
+    navigate(`/devices/${createdDevice.id}`);
   };
 
   if (loading) {
@@ -47,7 +60,30 @@ export default function DeviceList(): JSX.Element {
 
   return (
     <div style={{ padding: isMobile ? '1rem' : '2rem' }}>
-      <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem' }}>{t('devices.title')}</h1>
+      <div style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        justifyContent: 'space-between',
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: '1rem'
+      }}>
+        <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem', margin: 0 }}>{t('devices.title')}</h1>
+        <button
+          onClick={() => setShowCreateForm(true)}
+          style={{
+            padding: '0.75rem 1rem',
+            backgroundColor: '#198754',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '0.95rem',
+            fontWeight: 600
+          }}
+        >
+          {t('devices.addDevice')}
+        </button>
+      </div>
       {devices.length === 0 ? (
         <p>{t('devices.noDevices')}</p>
       ) : isMobile ? (
@@ -77,9 +113,9 @@ export default function DeviceList(): JSX.Element {
                 </span>
               </div>
               <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
-                <div><strong>{t('common.type')}:</strong> {device.type}</div>
-                <div><strong>{t('common.manufacturer')}:</strong> {device.manufacturer}</div>
-                <div><strong>{t('common.model')}:</strong> {device.model}</div>
+                <div><strong>{t('common.type')}:</strong> {device.type || '-'}</div>
+                <div><strong>{t('common.manufacturer')}:</strong> {device.manufacturer || '-'}</div>
+                <div><strong>{t('common.model')}:</strong> {device.model || '-'}</div>
               </div>
               <button
                 onMouseEnter={() => handleDevicePrefetch(device.id)}
@@ -127,10 +163,10 @@ export default function DeviceList(): JSX.Element {
                   style={{ borderBottom: '1px solid #dee2e6' }}
                 >
                   <td style={{ padding: '0.75rem' }}>{device.id}</td>
-                  <td style={{ padding: '0.75rem' }}>{device.name}</td>
-                  <td style={{ padding: '0.75rem' }}>{device.type}</td>
-                  <td style={{ padding: '0.75rem' }}>{device.manufacturer}</td>
-                  <td style={{ padding: '0.75rem' }}>{device.model}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.name || '-'}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.type || '-'}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.manufacturer || '-'}</td>
+                  <td style={{ padding: '0.75rem' }}>{device.model || '-'}</td>
                   <td style={{ padding: '0.75rem' }}>
                     <span style={{
                       padding: '0.25rem 0.5rem',
@@ -164,7 +200,13 @@ export default function DeviceList(): JSX.Element {
           </table>
         </div>
       )}
+
+      {showCreateForm && (
+        <DeviceCreateForm
+          onCreate={handleCreateDevice}
+          onCancel={() => setShowCreateForm(false)}
+        />
+      )}
     </div>
   );
 }
-

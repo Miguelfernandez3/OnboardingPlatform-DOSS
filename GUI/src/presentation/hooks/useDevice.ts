@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../infrastructure/query/queryKeys';
 import { deviceService } from '../../infrastructure/services/deviceService';
@@ -9,6 +10,8 @@ interface UseDeviceReturn {
   error: string | null;
   updateDevice: (data: Partial<Device>) => Promise<Device>;
   deleteDevice: () => Promise<void>;
+  /** Tras borrar con éxito: desactiva refetch del detalle y permite apagar el resto de hooks del dispositivo. */
+  isDeviceDeleted: boolean;
 }
 
 /**
@@ -17,6 +20,30 @@ interface UseDeviceReturn {
  */
 export function useDevice(deviceId: string | undefined): UseDeviceReturn {
   const queryClient = useQueryClient();
+
+  // Mutation para eliminar dispositivo (definida antes del query para usar isSuccess en enabled)
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      if (!deviceId) throw new Error('Device ID is required');
+      return deviceService.deleteDevice(deviceId);
+    },
+    onSuccess: () => {
+      if (!deviceId) return;
+      void queryClient.cancelQueries({
+        predicate: (q) =>
+          Array.isArray(q.queryKey) && q.queryKey[0] === 'devices' && q.queryKey[1] === deviceId,
+      });
+      queryClient.removeQueries({ queryKey: ['devices', deviceId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.all, exact: true });
+    },
+    onError: (err) => {
+      console.error('Error al eliminar dispositivo:', err);
+    },
+  });
+
+  useEffect(() => {
+    deleteMutation.reset();
+  }, [deviceId]); // eslint-disable-line react-hooks/exhaustive-deps -- reset al cambiar de dispositivo en la ruta
 
   // Query para obtener el dispositivo
   const {
@@ -30,7 +57,10 @@ export function useDevice(deviceId: string | undefined): UseDeviceReturn {
       if (!deviceId) throw new Error('Device ID is required');
       return deviceService.getDevice(deviceId);
     },
-    enabled: !!deviceId,
+    enabled: !!deviceId && !deleteMutation.isSuccess,
+    staleTime: 1000 * 15,
+    refetchInterval: 1000 * 15,
+    refetchIntervalInBackground: true,
   });
 
   // Mutation para actualizar dispositivo
@@ -42,26 +72,10 @@ export function useDevice(deviceId: string | undefined): UseDeviceReturn {
     onSuccess: (updatedDevice) => {
       // Invalidar y actualizar cache
       queryClient.setQueryData(queryKeys.devices.detail(deviceId!), updatedDevice);
-      queryClient.invalidateQueries({ queryKey: queryKeys.devices.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.all, exact: true });
     },
     onError: (err) => {
       console.error('Error al actualizar dispositivo:', err);
-    },
-  });
-
-  // Mutation para eliminar dispositivo
-  const deleteMutation = useMutation({
-    mutationFn: () => {
-      if (!deviceId) throw new Error('Device ID is required');
-      return deviceService.deleteDevice(deviceId);
-    },
-    onSuccess: () => {
-      // Invalidar lista de dispositivos y remover cache del dispositivo
-      queryClient.invalidateQueries({ queryKey: queryKeys.devices.all });
-      queryClient.removeQueries({ queryKey: queryKeys.devices.detail(deviceId!) });
-    },
-    onError: (err) => {
-      console.error('Error al eliminar dispositivo:', err);
     },
   });
 
@@ -87,6 +101,6 @@ export function useDevice(deviceId: string | undefined): UseDeviceReturn {
     error: isError ? (error as Error)?.message || 'Error al cargar dispositivo' : null,
     updateDevice,
     deleteDevice,
+    isDeviceDeleted: deleteMutation.isSuccess,
   };
 }
-

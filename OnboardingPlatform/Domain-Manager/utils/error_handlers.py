@@ -6,6 +6,7 @@ from functools import wraps
 from flask import jsonify
 from Database import DatabaseError
 from core.auth.exceptions import AuthenticationError, AuthorizationError, TokenExpiredError, InvalidCredentialsError
+from services.policy_enforcement_service import EnforcementPrerequisitesError, EnforcementDependencyError
 import logging
 from utils.app_context import get_dadm_instance
 
@@ -63,6 +64,38 @@ def handle_api_errors(f):
                     'original_error': str(e.original_error) if e.original_error else None
                 }
             }), 500
+        except EnforcementPrerequisitesError as e:
+            logging.info(
+                "Enforcement prerequisites in %s: %s missing=%s",
+                f.__name__,
+                e,
+                getattr(e, "missing", None),
+            )
+            return jsonify({
+                'error': 'Enforcement prerequisites not satisfied',
+                'code': 'ENFORCEMENT_PREREQUISITES',
+                'missing': list(getattr(e, 'missing', None) or []),
+                'details': {},
+            }), 409
+        except EnforcementDependencyError as e:
+            logging.warning(
+                "Enforcement dependency failed in %s: %s status=%s url=%s",
+                f.__name__,
+                e,
+                e.downstream_status,
+                e.downstream_url,
+            )
+            return jsonify({
+                'error': str(e) or 'Downstream enforcement service returned an error',
+                'code': 'ENFORCEMENT_DEPENDENCY_FAILED',
+                'details': {
+                    'downstreamStatus': e.downstream_status,
+                    'downstreamUrl': e.downstream_url,
+                    'responseExcerpt': (e.response_excerpt or '')[:500],
+                    'replicableRequest': e.replicable_request,
+                    'replicableCurl': e.replicable_curl,
+                },
+            }), 424
         except Exception as e:
             logging.error(f"Unexpected error in {f.__name__}: {e}", exc_info=True)
             return jsonify({

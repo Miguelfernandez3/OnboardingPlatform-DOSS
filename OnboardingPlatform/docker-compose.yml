@@ -1,6 +1,16 @@
 name: onboarding-platform
 
 services:
+  fake-feam:
+    build:
+      context: .
+      dockerfile: Fake-FEAM/Dockerfile
+    ports:
+      - "8185:8181"
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
   mud-manager:
     build:
       context: .
@@ -46,7 +56,15 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       MUD_SERVER_REQUIRE_AUTH: ${MUD_SERVER_REQUIRE_AUTH:-false}
     ports:
-      - "8091:8091"
+      - "80:8091"
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
     restart: unless-stopped
     networks:
       - onboarding-net
@@ -56,36 +74,73 @@ services:
       context: .
       dockerfile: Domain-Manager/Dockerfile
     depends_on:
+      fake-feam:
+        condition: service_started
       mud-manager:
         condition: service_started
       threat-mud-manager:
         condition: service_started
       mud-server:
         condition: service_started
+      redis:
+        condition: service_started
     env_file:
       - .env.compose
     environment:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      FEAM_SERVER_URL: ${FEAM_SERVER_URL:-http://host.docker.internal:8181}
+      FEAM_SERVER_URL: ${FEAM_SERVER_URL:-http://fake-feam:8181}
       MUD_MANAGER_URL: http://mud-manager:8888
       THREAT_MUD_MANAGER_URL: http://threat-mud-manager:8889
+      DADM_DATABASE_PATH: ${DADM_DATABASE_PATH:-/var/lib/onboardingplatform/domain-manager/DeviceDomainManager.db}
+      REDIS_URL: redis://redis:6379/0
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      NOTIFICATIONS_ENABLED: ${NOTIFICATIONS_ENABLED:-true}
+      TELEGRAM_NOTIFICATIONS_ENABLED: ${TELEGRAM_NOTIFICATIONS_ENABLED:-true}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "4321:4321"
+    volumes:
+      - domain-manager-data:/var/lib/onboardingplatform/domain-manager
+    restart: unless-stopped
+    networks:
+      - onboarding-net
+
+  domain-manager-notification-worker:
+    build:
+      context: .
+      dockerfile: Domain-Manager/Dockerfile
+    depends_on:
+      redis:
+        condition: service_started
+      domain-manager:
+        condition: service_started
+    env_file:
+      - .env.compose
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DADM_DATABASE_PATH: ${DADM_DATABASE_PATH:-/var/lib/onboardingplatform/domain-manager/DeviceDomainManager.db}
+      REDIS_URL: redis://redis:6379/0
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      NOTIFICATIONS_ENABLED: ${NOTIFICATIONS_ENABLED:-true}
+      TELEGRAM_NOTIFICATIONS_ENABLED: ${TELEGRAM_NOTIFICATIONS_ENABLED:-true}
+      # RQ imports jobs as services.*; ensure Domain-Manager root is on path when not using app.py cwd
+      PYTHONPATH: /opt/onboardingplatform/Domain-Manager
+    volumes:
+      - domain-manager-data:/var/lib/onboardingplatform/domain-manager
+    command: ["python", "scripts/run_notification_worker.py"]
     restart: unless-stopped
     networks:
       - onboarding-net
 
   gui:
     build:
-      context: ../../onboarding_platform_gui
+      context: ../GUI
       dockerfile: Dockerfile
       args:
         VITE_API_ADAPTER: ${GUI_VITE_API_ADAPTER:-doss}
-        VITE_API_BASE_URL: ${GUI_VITE_API_BASE_URL:-http://localhost:4321/api}
+        VITE_API_BASE_URL: ${GUI_VITE_API_BASE_URL:-/api}
         VITE_ENV: ${GUI_VITE_ENV:-production}
     depends_on:
       domain-manager:
@@ -99,3 +154,6 @@ services:
 networks:
   onboarding-net:
     driver: bridge
+
+volumes:
+  domain-manager-data:

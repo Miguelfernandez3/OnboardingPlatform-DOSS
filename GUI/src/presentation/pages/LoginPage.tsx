@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useIsMobile } from '../hooks';
-import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useToast } from '../../infrastructure/notifications/useToast';
 
 export default function LoginPage(): JSX.Element {
@@ -129,23 +128,44 @@ export default function LoginPage(): JSX.Element {
           <button
             type="submit"
             disabled={isLoading}
+            aria-busy={isLoading}
             style={{
               width: '100%',
-              padding: '0.75rem',
-              backgroundColor: isLoading ? '#6c757d' : '#007bff',
+              height: '48px',
+              padding: '0 0.75rem',
+              position: 'relative',
+              boxSizing: 'border-box',
+              backgroundColor: isLoading ? '#0056b3' : '#007bff',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
               fontSize: '1rem',
               fontWeight: '500',
+              lineHeight: 1,
               cursor: isLoading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s'
+              transition: 'background-color 0.2s',
+              overflow: 'hidden',
             }}
           >
-            {isLoading ? (
-              <LoadingSpinner message={t('auth.submitting') || 'Iniciando sesión...'} />
-            ) : (
-              t('auth.submit')
+            <span style={{ opacity: isLoading ? 0 : 1 }}>
+              {t('auth.submit')}
+            </span>
+            {isLoading && (
+              <>
+                <span
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  aria-hidden
+                >
+                  <span className="loading-spinner-ring loading-spinner-ring--sm loading-spinner-ring--light" />
+                </span>
+                <span className="visually-hidden">{t('auth.submitting')}</span>
+              </>
             )}
           </button>
         </form>

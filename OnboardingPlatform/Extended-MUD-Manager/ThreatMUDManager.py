@@ -37,6 +37,10 @@ manager = None
 from Policy_Translator import mudtranslator
 
 
+def _decode_mitigation_actions(raw_value):
+    return Database.deserialize_mspl(raw_value)
+
+
 def _env_flag(name: str, default: str = "false") -> bool:
     """Parse common boolean env values."""
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
@@ -353,7 +357,7 @@ def get_all_threats(current_user=None):
                 'identifier': tmud.device_identifier,
                 'threat_mud_url': tmud.tmudurl,
                 'threat_mud_file': tmud.tmudfile,
-                'mitigation_actions': tmud.mspl
+                'mitigation_actions': _decode_mitigation_actions(tmud.mspl)
             })
         
         return jsonify({'threats': threats}), 200
@@ -383,7 +387,7 @@ def get_threats_by_device(device_identifier, current_user=None):
                     'identifier': tmud.device_identifier,
                     'threat_mud_url': tmud.tmudurl,
                     'threat_mud_file': tmud.tmudfile,
-                    'mitigation_actions': tmud.mspl
+                    'mitigation_actions': _decode_mitigation_actions(tmud.mspl)
                 })
         
         return jsonify({'threats': threats}), 200
@@ -417,7 +421,7 @@ def get_threat_by_id(threat_id, current_user=None):
                     'identifier': tmud.device_identifier,
                     'threat_mud_url': tmud.tmudurl,
                     'threat_mud_file': tmud.tmudfile,
-                    'mitigation_actions': tmud.mspl
+                    'mitigation_actions': _decode_mitigation_actions(tmud.mspl)
                 }), 200
         
         return jsonify({

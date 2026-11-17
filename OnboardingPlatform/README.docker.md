@@ -18,11 +18,14 @@ Desde `doss/OnboardingPlatform`:
 cp .env.compose.example .env.compose
 ```
 
+**No hace falta crear un `.env` aparte**: las variables se cargan desde `.env.compose` (los servicios usan `env_file: .env.compose`). Para que la sustitución en el `docker-compose.yml` también use ese fichero, levanta con `--env-file .env.compose` (ver apartado 2).
+
 Edita al menos:
 
 - `JWT_SECRET_KEY`
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
+- `DADM_DATABASE_PATH` si quieres mover la SQLite a otra ruta dentro del contenedor
 
 Recomendado para enforcement Home Assistant:
 
@@ -56,6 +59,22 @@ docker-compose --env-file .env.compose up --build
 - MUD Manager: `http://localhost:8888`
 - Threat MUD Manager: `http://localhost:8889`
 - MUD Server: `http://localhost:8091`
+
+## Persistencia de datos
+
+- El `domain-manager` persiste su SQLite en el volumen Docker `domain-manager-data`.
+- La ruta por defecto dentro del contenedor es `/var/lib/onboardingplatform/domain-manager/DeviceDomainManager.db`.
+- Si necesitas reinicializar completamente la base de datos, para los servicios y elimina el volumen:
+
+```bash
+docker compose --env-file .env.compose down -v
+```
+
+Después vuelve a levantar:
+
+```bash
+docker compose --env-file .env.compose up --build
+```
 
 ## 4) Parar servicios
 

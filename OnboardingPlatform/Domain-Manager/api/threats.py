@@ -26,10 +26,10 @@ def get_device_threats(device_id, device, current_user):
             'threats': []
         }), 200
     
-    # Get threats from ThreatMUDManager via REST API
+    # Get threats using local matching (URL discovered in DSP, model and identifier)
     dadm = get_dadm_instance()
-    logging.debug(f"Calling get_threats_from_threatmud_manager with identifier: {device.identifier}")
-    threats_data = dadm.get_threats_from_threatmud_manager(device.identifier)
+    logging.debug("Calling get_matching_threats for device identifier=%s model=%s", device.identifier, device.model)
+    threats_data = dadm.threat_service.get_matching_threats(device)
     logging.debug(f"Received threats_data: type={type(threats_data)}, length={len(threats_data) if isinstance(threats_data, list) else 'N/A'}")
     
     # Validate that threats_data is a list
@@ -71,4 +71,3 @@ def newThreat(current_user):
     data = request.get_json()
     logging.info(f"Received new threat: {data}")
     return jsonify({'status': 'success', 'message': 'New threat received'}), 200
-

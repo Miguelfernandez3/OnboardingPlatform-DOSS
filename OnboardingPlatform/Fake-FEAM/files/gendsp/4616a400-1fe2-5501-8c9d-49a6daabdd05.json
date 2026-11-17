@@ -1,0 +1,160 @@
+{
+  "doss-dsp": {
+    "uuid": "4616a400-1fe2-5501-8c9d-49a6daabdd05",
+    "metadata": {
+      "title": "SONOFF TH16 Smart Thermostat generic DSP",
+      "published": "2025-11-01T12:00:00Z",
+      "last-modified": "2025-11-01T12:00:00Z",
+      "version": "1.0.0",
+      "dsp-model-version": "1.0.0",
+      "revisions": [
+        {
+          "title": "Initial Release",
+          "published": "2025-11-01",
+          "description": "Initial version of the DSP document.",
+          "version": "1.0.0",
+          "dsp-model-version": "1.0.0",
+          "modified-by": {
+            "role-id": "manufacturer",
+            "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+          }
+        }
+      ],
+      "links": [
+        {
+          "href": "https://sonoff.tech/en-eu/products/sonoff-th-origin-smart-temperature-and-humidity-monitoring-switch?srsltid=AfmBOorkprzrOlFHIiaAxwyKaWKQwiO_ibu0LkweZvvGHuqyUFi1G3Su",
+          "rel": "Technical documentation",
+          "text": "Official product page"
+        }
+      ],
+      "roles": [
+        {
+          "id": "manufacturer",
+          "title": "Manufacturer",
+          "description": "Creator of the device"
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8",
+          "type": "organization",
+          "name": "SONOFF",
+          "remarks": "Manufacturer of SONOFF TH16 smart thermostat"
+        }
+      ],
+      "responsible-parties": [
+        {
+          "role-id": "manufacturer",
+          "party-uuid": "d26858b4-7b49-57dc-815a-ab289039c4d8"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "9932b157-b5f6-59d2-81a1-1cf2533e6088"
+        },
+        {
+          "role-id": "ComponentTester",
+          "party-uuid": "5879e198-81f5-5606-94fe-83f7ea5c874c"
+        },
+        {
+          "role-id": "ObP",
+          "party-uuid": "d7d9410e-28da-502d-91e1-cd9da65af43c"
+        }
+      ]
+    },
+    "local-definitions": {
+      "components": [
+        {
+          "uuid": "ec374ee1-3e2b-5e09-9ce6-7e35fee451c0",
+          "type": "this-system",
+          "title": "SONOFF TH16 Smart Thermostat",
+          "description": "SONOFF TH16 WiFi enabled, remotely controllable smart relay.",
+          "purpose": "Temperature/humidity control device.",
+          "props": [
+            {
+              "name": "vendor",
+              "value": "SONOFF"
+            },
+            {
+              "name": "model",
+              "value": "SONOFF TH16"
+            },
+            {
+              "name": "version",
+              "value": "1.0.0"
+            },
+            {
+              "name": "git_url",
+              "value": "https://github.com/arendst/Tasmota"
+            },
+            {
+              "name": "language",
+              "value": "cpp"
+            },
+            {
+              "name": "token",
+              "value": ""
+            },
+            {
+              "name": "branch",
+              "value": "development"
+            },
+            {
+              "name": "commit_sha",
+              "value": "64491d2"
+            }
+          ],
+          "links": [
+            {
+              "href": "https://drive.google.com/uc?export=download&id=1KVGUjFliLJJor8gdMjM4Ibh43XH-91VV",
+              "rel": "SBOM file",
+              "media-type": "application/vnd.spdx+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/thermostat-mud",
+              "rel": "MUD file",
+              "media-type": "application/mud+json"
+            },
+            {
+              "href": "http://doss-mud-registry.eu/thermostat-threatmud",
+              "rel": "threat mud",
+              "media-type": "application/json"
+            }
+          ],
+          "status": {
+            "state": "operational"
+          }
+        }
+      ],
+      "assessment-assets": {
+        "components": [],
+        "assessment-platforms": [
+          {
+            "uuid": "3f7a6c8e-1111-45b9-9ae8-4c6b1b7a9f8e",
+            "title": "CT-SAST"
+          },
+          {
+            "uuid": "3f7a6c8e-2222-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-VP"
+          },
+          {
+            "uuid": "f7a6c8e-3333-45b9-9ae8-4c6a1b7a9f8a",
+            "title": "CT-DAST"
+          },
+          {
+            "uuid": "3f7a6c8e-4444-45b9-9ae8-555555555555",
+            "title": "CT-IAST"
+          },
+          {
+            "uuid": "3f7a6c8e-5555-45b9-9ae8-555555555555",
+            "title": "CT-SPV"
+          },
+          {
+            "uuid": "3f7a6c8e-6666-45b9-9ae8-555555555555",
+            "title": "CT-firmware-fuzzing"
+          }
+        ]
+      },
+      "observations": []
+    }
+  }
+}
