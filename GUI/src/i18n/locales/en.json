@@ -18,6 +18,7 @@
     "type": "Type",
     "model": "Model",
     "manufacturer": "Manufacturer",
+    "onboardingDate": "Onboarding date",
     "optional": "optional"
   },
   "errors": {
@@ -53,6 +54,21 @@
     "language": "Language",
     "languageSaveError": "Could not save language on the server",
     "savingLanguage": "Saving…"
+  },
+  "serviceLogs": {
+    "title": "Service logs",
+    "toggle": "Logs",
+    "loading": "Loading logs…",
+    "empty": "No lines to show.",
+    "unavailable": "Service unavailable.",
+    "live": "Live",
+    "close": "Close",
+    "services": {
+      "domain-manager": "Domain Manager",
+      "fdo": "FDO",
+      "mud-manager": "MUD Manager",
+      "threat-mud-manager": "Threat MUD Manager"
+    }
   },
   "settings": {
     "title": "Settings",

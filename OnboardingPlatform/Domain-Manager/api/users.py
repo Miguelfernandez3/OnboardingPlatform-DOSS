@@ -5,7 +5,7 @@ Endpoints related to user management (admin only).
 from flask import Blueprint, jsonify, request
 from utils.error_handlers import handle_api_errors
 from utils.app_context import get_dadm_instance
-from utils.formatters import user_to_dict
+from utils.formatters import user_to_dict, access_rule_to_dict
 from core.auth.decorators import require_admin
 from core.auth.password_service import hash_password, validate_password_strength
 from core.config import Config
@@ -448,4 +448,51 @@ def deactivate_user(current_user, user_id):
             'code': 'DATABASE_ERROR',
             'details': {}
         }), 500
+
+
+ACCESS_RULE_KINDS = ('device', 'manufacturer', 'idsp')
+
+
+@users_bp.route('/api/users/<int:user_id>/access-rules', methods=['GET'])
+@handle_api_errors
+@require_admin
+def list_access_rules(current_user, user_id):
+    """Lists a user's device-access rules (admin only)."""
+    dadm = get_dadm_instance()
+    if dadm.db.getUserById(user_id) is None:
+        return jsonify({'error': f'User with id {user_id} not found', 'code': 'USER_NOT_FOUND', 'details': {}}), 404
+    rules = dadm.db.getAccessRulesForUser(user_id)
+    return jsonify({'rules': [access_rule_to_dict(r) for r in rules]}), 200
+
+
+@users_bp.route('/api/users/<int:user_id>/access-rules', methods=['POST'])
+@handle_api_errors
+@require_admin
+def create_access_rule(current_user, user_id):
+    """Grants a user access to devices matching a rule (admin only)."""
+    dadm = get_dadm_instance()
+    if dadm.db.getUserById(user_id) is None:
+        return jsonify({'error': f'User with id {user_id} not found', 'code': 'USER_NOT_FOUND', 'details': {}}), 404
+
+    data = request.get_json() or {}
+    match_kind = data.get('matchKind')
+    match_value = (data.get('matchValue') or '').strip()
+    if match_kind not in ACCESS_RULE_KINDS:
+        return jsonify({'error': f'matchKind must be one of {ACCESS_RULE_KINDS}', 'code': 'INVALID_REQUEST', 'details': {}}), 400
+    if not match_value:
+        return jsonify({'error': 'matchValue is required', 'code': 'INVALID_REQUEST', 'details': {}}), 400
+
+    rule = dadm.db.createAccessRule(user_id, match_kind, match_value)
+    return jsonify({'rule': access_rule_to_dict(rule)}), 201
+
+
+@users_bp.route('/api/users/<int:user_id>/access-rules/<int:rule_id>', methods=['DELETE'])
+@handle_api_errors
+@require_admin
+def delete_access_rule(current_user, user_id, rule_id):
+    """Revokes a device-access rule (admin only)."""
+    dadm = get_dadm_instance()
+    if not dadm.db.deleteAccessRule(user_id, rule_id):
+        return jsonify({'error': 'Access rule not found', 'code': 'RULE_NOT_FOUND', 'details': {}}), 404
+    return jsonify({}), 200
 

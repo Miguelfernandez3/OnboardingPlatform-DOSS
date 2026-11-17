@@ -10,6 +10,8 @@ import {
   UserData,
   UsersResponse,
   UserFilters,
+  DeviceAccessRule,
+  AccessRuleKind,
   CreateDeviceFromDSPInput,
   EnforcementProfileData,
   EnforcementMappingData,
@@ -18,6 +20,7 @@ import {
   EnforcementTestRequest,
   EnforcementTestResponse,
   DeviceLogsResponse,
+  ServiceLogsResponse,
   NotificationSettings,
   NotificationsListResponse,
   UnreadNotificationsCountResponse,
@@ -391,6 +394,20 @@ export class DossApiAdapter extends BaseApiClient {
     return { onboardings };
   }
 
+  async getServiceLogs(service: string, tail = 200): Promise<ServiceLogsResponse> {
+    const data = await this.request<ServiceLogsResponse>(
+      `/logs/${encodeURIComponent(service)}?tail=${tail}`,
+      { method: 'GET' }
+    );
+    return {
+      service: data.service ?? service,
+      displayName: data.displayName ?? service,
+      available: Boolean(data.available),
+      lines: Array.isArray(data.lines) ? data.lines : [],
+      truncated: Boolean(data.truncated),
+    };
+  }
+
   async getDeviceMitigations(deviceId: string): Promise<Mitigation[]> {
     const data = await this.get<MitigationsApiResponse>('mitigations', { id: deviceId });
     const mitigations = data.mitigations || data.data || [];
@@ -589,6 +606,33 @@ export class DossApiAdapter extends BaseApiClient {
       throw new Error(`User with id ${id} not found`);
     }
     return user;
+  }
+
+  async getAccessRules(userId: string): Promise<DeviceAccessRule[]> {
+    const data = await this.request<{ rules: DeviceAccessRule[] }>(
+      `/users/${userId}/access-rules`,
+      { method: 'GET' }
+    );
+    return data.rules || [];
+  }
+
+  async createAccessRule(
+    userId: string,
+    matchKind: AccessRuleKind,
+    matchValue: string
+  ): Promise<DeviceAccessRule> {
+    const data = await this.request<{ rule: DeviceAccessRule }>(
+      `/users/${userId}/access-rules`,
+      { method: 'POST', data: { matchKind, matchValue } }
+    );
+    if (!data.rule) {
+      throw new Error('Failed to create access rule');
+    }
+    return data.rule;
+  }
+
+  async deleteAccessRule(userId: string, ruleId: number): Promise<void> {
+    await this.request<void>(`/users/${userId}/access-rules/${ruleId}`, { method: 'DELETE' });
   }
 
   async getEnforcementProfiles(includeInactive: boolean = true): Promise<EnforcementProfileData[]> {

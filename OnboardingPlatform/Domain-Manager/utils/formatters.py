@@ -154,6 +154,16 @@ def enforcement_mapping_to_dict(mapping):
     }
 
 
+def access_rule_to_dict(rule):
+    return {
+        'id': rule.id,
+        'userId': rule.user_id,
+        'matchKind': rule.match_kind,
+        'matchValue': rule.match_value,
+        'createdAt': rule.created_at.isoformat() if getattr(rule, 'created_at', None) else None,
+    }
+
+
 def enforcement_secret_to_dict(secret):
     return {
         'id': secret.id,

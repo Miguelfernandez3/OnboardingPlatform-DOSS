@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 from clients.threat_mud_client import ThreatMUDClient
 
@@ -30,92 +30,9 @@ class ThreatService:
         self.db = db
 
     @staticmethod
-    def _normalize_value(value: Any) -> str:
-        return str(value or "").strip().lower()
-
-    @staticmethod
-    def _load_json_document(raw_value: Any) -> Optional[Dict[str, Any]]:
-        if isinstance(raw_value, dict):
-            return raw_value
-        if not isinstance(raw_value, str) or not raw_value.strip():
-            return None
-        try:
-            parsed = json.loads(raw_value)
-        except json.JSONDecodeError:
-            return None
-        return parsed if isinstance(parsed, dict) else None
-
-    @staticmethod
-    def _split_selector_values(raw_value: Any) -> List[str]:
-        values: List[str] = []
-        if raw_value is None:
-            return values
-        if isinstance(raw_value, list):
-            items = raw_value
-        else:
-            items = [raw_value]
-
-        for item in items:
-            if item is None:
-                continue
-            if isinstance(item, str):
-                parts = [part.strip() for part in item.split(",")]
-            else:
-                parts = [str(item).strip()]
-            for part in parts:
-                if part:
-                    values.append(part)
-        return values
-
-    @staticmethod
-    def _read_selector_values(node: Dict[str, Any], keys: List[str]) -> Set[str]:
-        collected: Set[str] = set()
-        for key in keys:
-            if key not in node:
-                continue
-            for value in ThreatService._split_selector_values(node.get(key)):
-                collected.add(ThreatService._normalize_value(value))
-        return collected
-
-    def _extract_selectors_from_threat_file(self, threat_data: Dict[str, Any]) -> Dict[str, Set[str]]:
-        """
-        Extracts selector values from the raw Threat MUD JSON when available.
-
-        TODO: align these heuristics with the real Threat MUD schema once the
-        manufacturer shares a real DSP/TMUD payload.
-        """
-        selectors = {
-            "models": set(),
-            "identifiers": set(),
-        }
-
-        threat_file = self._load_json_document(threat_data.get("threat_mud_file"))
-        if not threat_file:
-            return selectors
-
-        mud_node = threat_file.get("ietf-threatmud:mud")
-        if not isinstance(mud_node, dict):
-            return selectors
-
-        selectors["models"].update(
-            self._read_selector_values(
-                mud_node,
-                ["models-affected", "model-affected", "affected-models"],
-            )
-        )
-        selectors["identifiers"].update(
-            self._read_selector_values(
-                mud_node,
-                [
-                    "identifiers-affected",
-                    "identifier-affected",
-                    "device-identifiers",
-                    "device-identifier",
-                    "devices-affected",
-                ],
-            )
-        )
-        return selectors
+    def _normalize_url(value: Any) -> str:
+        """Canonical form for TMUD URL comparison (tolerant to trailing slash)."""
+        return str(value or "").strip().rstrip("/")
 
     def _get_discovered_threat_urls(self, device) -> List[str]:
         raw_value = getattr(device, "discovered_threat_mud_urls", None)
@@ -180,24 +97,15 @@ class ThreatService:
         return self.get_threats()
 
     def _matches_device(self, threat_data: Dict[str, Any], device, discovered_urls: List[str]) -> bool:
-        device_model = self._normalize_value(getattr(device, "model", None))
-        device_identifier = self._normalize_value(getattr(device, "identifier", None))
-        threat_url = str(threat_data.get("threat_mud_url") or "").strip()
-
-        if threat_url and threat_url in discovered_urls:
-            return True
-
-        selectors = self._extract_selectors_from_threat_file(threat_data)
-        if device_model and device_model in selectors["models"]:
-            return True
-        if device_identifier and device_identifier in selectors["identifiers"]:
-            return True
-
-        remote_identifier = self._normalize_value(threat_data.get("identifier"))
-        if remote_identifier and remote_identifier in {device_model, device_identifier}:
-            return True
-
-        return False
+        """
+        A threat applies to a device only if the device's DSP (or its genDSP hop)
+        declares the threat's TMUD URL. Detection is strictly DSP-driven: no DSP
+        TMUD link means no threat/mitigation; adding one to the DSP makes it appear.
+        """
+        threat_url = self._normalize_url(threat_data.get("threat_mud_url"))
+        if not threat_url:
+            return False
+        return threat_url in {self._normalize_url(url) for url in discovered_urls}
 
     def get_matching_threats(self, device) -> List[Dict]:
         """

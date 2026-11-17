@@ -11,12 +11,15 @@ import {
   UserFilters,
   CreateDeviceFromDSPInput,
   EnforcementProfileData,
+  DeviceAccessRule,
+  AccessRuleKind,
   EnforcementMappingData,
   EnforcementSecretMetadata,
   EnforcementExecutionLog,
   EnforcementTestRequest,
   EnforcementTestResponse,
   DeviceLogsResponse,
+  ServiceLogsResponse,
   NotificationSettings,
   NotificationsListResponse,
   UnreadNotificationsCountResponse,
@@ -309,6 +312,22 @@ export class JsonServerApiClient extends BaseApiClient {
     return { onboardings: [] };
   }
 
+  async getServiceLogs(service: string, _tail = 200): Promise<ServiceLogsResponse> {
+    // Mock: líneas de ejemplo para desarrollo sin backend.
+    const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    return {
+      service,
+      displayName: service,
+      available: true,
+      lines: [
+        { ts: now, level: 'INFO', message: `[${service}] service started` },
+        { ts: now, level: 'INFO', message: 'ready to accept connections' },
+        { ts: now, level: 'WARNING', message: 'sample warning line' },
+      ],
+      truncated: false,
+    };
+  }
+
   async enforceMitigation(
     deviceId: string,
     mitigationId: string,
@@ -533,6 +552,22 @@ export class JsonServerApiClient extends BaseApiClient {
     const currentUser = await this.getUser(id);
     const updatedUser = await this.put<UserData>('user', { ...currentUser, isActive: false }, { id });
     return updatedUser;
+  }
+
+  async getAccessRules(_userId: string): Promise<DeviceAccessRule[]> {
+    return [];
+  }
+
+  async createAccessRule(
+    _userId: string,
+    _matchKind: AccessRuleKind,
+    _matchValue: string
+  ): Promise<DeviceAccessRule> {
+    throw new Error('Not implemented in mock');
+  }
+
+  async deleteAccessRule(_userId: string, _ruleId: number): Promise<void> {
+    // no-op in mock
   }
 
   async getEnforcementProfiles(_includeInactive: boolean = true): Promise<EnforcementProfileData[]> {

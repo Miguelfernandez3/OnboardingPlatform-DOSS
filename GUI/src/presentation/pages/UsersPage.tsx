@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile, useUsers, useCreateUser, useUpdateUserRole, useDeleteUser, useActivateUser, useDeactivateUser } from '../hooks';
 import { AdminRoute } from '../components/auth';
-import { CreateUserModal, ConfirmDeleteModal } from '../components/users';
+import { CreateUserModal, ConfirmDeleteModal, AccessRulesModal } from '../components/users';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { UserData } from '../../core/ports';
 import { useToast } from '../../infrastructure/notifications/useToast';
@@ -36,6 +36,7 @@ export default function UsersPage(): JSX.Element {
     isOpen: false,
     user: null,
   });
+  const [accessModalUser, setAccessModalUser] = useState<UserData | null>(null);
 
   // Calculate pagination info
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
@@ -218,6 +219,17 @@ export default function UsersPage(): JSX.Element {
                   <div><strong>{t('users.createdAt')}:</strong> {formatDate(user.createdAt)}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {user.role === 'user' && (
+                    <button
+                      onClick={() => setAccessModalUser(user)}
+                      style={{
+                        padding: '0.5rem 0.75rem', borderRadius: '4px', border: 'none',
+                        backgroundColor: '#0d6efd', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                      }}
+                    >
+                      {t('users.accessRules', 'Accesos')}
+                    </button>
+                  )}
                   {isSuperadmin(user) ? (
                     <span style={{
                       padding: '0.5rem',
@@ -345,6 +357,17 @@ export default function UsersPage(): JSX.Element {
                     <td style={{ padding: '0.75rem' }}>{formatDate(user.createdAt)}</td>
                     <td style={{ padding: '0.75rem' }}>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {user.role === 'user' && (
+                          <button
+                            onClick={() => setAccessModalUser(user)}
+                            style={{
+                              padding: '0.375rem 0.75rem', borderRadius: '4px', border: 'none',
+                              backgroundColor: '#0d6efd', color: 'white', cursor: 'pointer', fontSize: '0.875rem'
+                            }}
+                          >
+                            {t('users.accessRules', 'Accesos')}
+                          </button>
+                        )}
                         {!isSuperadmin(user) && (
                           <button
                             onClick={() => handleToggleActive(user)}
@@ -451,6 +474,12 @@ export default function UsersPage(): JSX.Element {
           onClose={() => setDeleteModal({ isOpen: false, user: null })}
           onConfirm={handleDeleteUser}
           isLoading={deleteUserMutation.isPending}
+        />
+
+        <AccessRulesModal
+          isOpen={accessModalUser !== null}
+          user={accessModalUser}
+          onClose={() => setAccessModalUser(null)}
         />
       </div>
     </AdminRoute>

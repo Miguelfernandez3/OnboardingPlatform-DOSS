@@ -127,7 +127,18 @@ def require_device(f):
                 'code': 'DEVICE_NOT_FOUND',
                 'details': {}
             }), 404
-        
+
+        # Per-user access control. Return 404 (not 403) so users can't probe which
+        # device ids exist. current_user is injected by require_auth (outer decorator);
+        # if absent (unauthenticated route), skip the check.
+        current_user = kwargs.get('current_user')
+        if current_user is not None and not dadm.db.userCanAccessDevice(current_user, device):
+            return jsonify({
+                'error': f'Device with id {device_id} not found',
+                'code': 'DEVICE_NOT_FOUND',
+                'details': {}
+            }), 404
+
         return f(device_id, device, *args, **kwargs)
     return decorated_function
 

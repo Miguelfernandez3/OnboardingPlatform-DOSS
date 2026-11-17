@@ -52,6 +52,16 @@ export interface UserFilters {
   isActive?: boolean;
 }
 
+export type AccessRuleKind = 'device' | 'manufacturer' | 'idsp';
+
+export interface DeviceAccessRule {
+  id: number;
+  userId: number;
+  matchKind: AccessRuleKind;
+  matchValue: string;
+  createdAt: string | null;
+}
+
 export interface EnforcementProfileData {
   id: string;
   name: string;
@@ -136,6 +146,20 @@ export interface DeviceLogGroup {
 
 export interface DeviceLogsResponse {
   onboardings: DeviceLogGroup[];
+}
+
+export interface ServiceLogLine {
+  ts: string | null;
+  level: string | null;
+  message: string;
+}
+
+export interface ServiceLogsResponse {
+  service: string;
+  displayName: string;
+  available: boolean;
+  lines: ServiceLogLine[];
+  truncated: boolean;
 }
 
 export interface EnforcementTestRequest {
@@ -296,6 +320,11 @@ export abstract class IApiClient {
   abstract getDeviceLogs(deviceId: string): Promise<DeviceLogsResponse>;
 
   /**
+   * Obtiene las últimas líneas de log (limpias y redactadas) de un servicio de la plataforma.
+   */
+  abstract getServiceLogs(service: string, tail?: number): Promise<ServiceLogsResponse>;
+
+  /**
    * Aplica (enforce) una mitigación. Opcionalmente `extraContext` (fusionado con threat_id internos).
    */
   abstract enforceMitigation(
@@ -373,6 +402,13 @@ export abstract class IApiClient {
    * Usuarios: Desactiva un usuario (solo admin)
    */
   abstract deactivateUser(id: string): Promise<UserData>;
+
+  /** Accesos: lista las reglas de acceso a dispositivos de un usuario (solo admin) */
+  abstract getAccessRules(userId: string): Promise<DeviceAccessRule[]>;
+  /** Accesos: crea una regla de acceso para un usuario (solo admin) */
+  abstract createAccessRule(userId: string, matchKind: AccessRuleKind, matchValue: string): Promise<DeviceAccessRule>;
+  /** Accesos: elimina una regla de acceso (solo admin) */
+  abstract deleteAccessRule(userId: string, ruleId: number): Promise<void>;
 
   abstract getEnforcementProfiles(includeInactive?: boolean): Promise<EnforcementProfileData[]>;
   abstract createEnforcementProfile(
