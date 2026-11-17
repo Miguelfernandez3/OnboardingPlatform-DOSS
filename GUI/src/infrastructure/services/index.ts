@@ -7,3 +7,4 @@ export * from './threatService';
 export * from './authService';
 export * from './userService';
 export * from './enforcementAdminService';
+export * from './serviceLogsService';

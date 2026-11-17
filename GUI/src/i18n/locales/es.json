@@ -18,6 +18,7 @@
     "type": "Tipo",
     "model": "Modelo",
     "manufacturer": "Fabricante",
+    "onboardingDate": "Fecha de onboarding",
     "optional": "opcional"
   },
   "errors": {
@@ -53,6 +54,21 @@
     "language": "Idioma",
     "languageSaveError": "No se pudo guardar el idioma en el servidor",
     "savingLanguage": "Guardando…"
+  },
+  "serviceLogs": {
+    "title": "Logs de servicios",
+    "toggle": "Logs",
+    "loading": "Cargando logs…",
+    "empty": "Sin líneas para mostrar.",
+    "unavailable": "Servicio no disponible.",
+    "live": "En vivo",
+    "close": "Cerrar",
+    "services": {
+      "domain-manager": "Domain Manager",
+      "fdo": "FDO",
+      "mud-manager": "MUD Manager",
+      "threat-mud-manager": "Threat MUD Manager"
+    }
   },
   "settings": {
     "title": "Ajustes",

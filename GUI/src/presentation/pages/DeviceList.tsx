@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,8 +14,21 @@ import { CreateDeviceFromDSPInput } from '../../core/ports';
  * DeviceList - Página que lista todos los dispositivos
  */
 export default function DeviceList(): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { devices, loading, error, createDeviceFromDSP } = useDevices();
+
+  // Orden por fecha de onboarding (createdAt), más reciente primero; sin fecha al final.
+  const sortedDevices = useMemo(
+    () => [...devices].sort((a, b) => {
+      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return tb - ta;
+    }),
+    [devices]
+  );
+
+  const formatOnboardingDate = (iso?: string): string =>
+    iso ? new Date(iso).toLocaleDateString(i18n.language, { dateStyle: 'medium' }) : '-';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
@@ -89,7 +102,7 @@ export default function DeviceList(): JSX.Element {
       ) : isMobile ? (
         // Vista de tarjetas para móvil
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-          {devices.map((device) => (
+          {sortedDevices.map((device) => (
             <div
               key={device.id}
               style={{
@@ -116,6 +129,7 @@ export default function DeviceList(): JSX.Element {
                 <div><strong>{t('common.type')}:</strong> {device.type || '-'}</div>
                 <div><strong>{t('common.manufacturer')}:</strong> {device.manufacturer || '-'}</div>
                 <div><strong>{t('common.model')}:</strong> {device.model || '-'}</div>
+                <div><strong>{t('common.onboardingDate')}:</strong> {formatOnboardingDate(device.createdAt)}</div>
               </div>
               <button
                 onMouseEnter={() => handleDevicePrefetch(device.id)}
@@ -153,11 +167,12 @@ export default function DeviceList(): JSX.Element {
                 <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.manufacturer')}</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.model')}</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.status')}</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.onboardingDate')}</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
-              {devices.map((device) => (
+              {sortedDevices.map((device) => (
                 <tr 
                   key={device.id}
                   style={{ borderBottom: '1px solid #dee2e6' }}
@@ -178,6 +193,7 @@ export default function DeviceList(): JSX.Element {
                       {device.status === 'active' ? t('devices.active') : t('devices.inactive')}
                     </span>
                   </td>
+                  <td style={{ padding: '0.75rem', whiteSpace: 'nowrap' }}>{formatOnboardingDate(device.createdAt)}</td>
                   <td style={{ padding: '0.75rem' }}>
                     <button
                       onMouseEnter={() => handleDevicePrefetch(device.id)}

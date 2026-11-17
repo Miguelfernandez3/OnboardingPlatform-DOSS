@@ -64,9 +64,12 @@ def _register_device_from_dsp_payload():
 @handle_api_errors
 @require_auth
 def get_devices(current_user):
-    """Gets the list of all devices"""
+    """Gets the list of devices the current user may access (all of them for admins)."""
     dadm = get_dadm_instance()
-    devices = dadm.db.getAllDevices()
+    if current_user.get('role') in ('admin', 'superadmin'):
+        devices = dadm.db.getAllDevices()
+    else:
+        devices = dadm.db.getDevicesForUser(current_user['id'])
     if devices is None:
         devices = []
     
@@ -456,6 +459,12 @@ def apply_idsp2(device_id, current_user):
         }), 400
     
     device = dadm.db.getDevice(device_id)
+    if device is not None and not dadm.db.userCanAccessDevice(current_user, device):
+        return jsonify({
+            'error': f'Device with id {device_id} not found',
+            'code': 'DEVICE_NOT_FOUND',
+            'details': {}
+        }), 404
     if device is None:
         # If device doesn't exist, create a new one
         device = dadm.db.parseDeviceJson({
@@ -505,7 +514,9 @@ def post_DSP():
 @handle_api_errors
 @require_auth
 def printDevices(current_user):
-    """Legacy endpoint for listing devices"""
+    """Legacy endpoint for listing devices (admin only — leaks the full device list)"""
+    if current_user.get('role') not in ('admin', 'superadmin'):
+        return jsonify({'error': 'Forbidden', 'code': 'FORBIDDEN', 'details': {}}), 403
     dadm = get_dadm_instance()
     devices = dadm.printAllDevices()
     return jsonify({'status': 'success', 'message': 'Devices printed to console', 'data': devices}), 200

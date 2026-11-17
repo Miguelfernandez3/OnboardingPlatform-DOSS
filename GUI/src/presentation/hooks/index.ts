@@ -6,6 +6,7 @@ export * from './useMitigations';
 export * from './usePolicies';
 export * from './useThreats';
 export * from './useDeviceLogs';
+export * from './useServiceLogs';
 export * from './useUsers';
 export * from './useNotifications';
 export * from './useNotificationSettings';

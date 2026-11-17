@@ -1,5 +1,5 @@
 import { apiClient } from '../../config';
-import { UserData, UsersResponse, UserFilters } from '../../core/ports';
+import { UserData, UsersResponse, UserFilters, DeviceAccessRule, AccessRuleKind } from '../../core/ports';
 
 /**
  * User Service - Funciones para operaciones con usuarios
@@ -53,5 +53,24 @@ export const userService = {
    */
   deactivateUser: async (id: string): Promise<UserData> => {
     return await apiClient.deactivateUser(id);
+  },
+
+  /** Lista las reglas de acceso a dispositivos de un usuario (solo admin) */
+  getAccessRules: async (userId: string): Promise<DeviceAccessRule[]> => {
+    return await apiClient.getAccessRules(userId);
+  },
+
+  /** Crea una regla de acceso para un usuario (solo admin) */
+  createAccessRule: async (
+    userId: string,
+    matchKind: AccessRuleKind,
+    matchValue: string
+  ): Promise<DeviceAccessRule> => {
+    return await apiClient.createAccessRule(userId, matchKind, matchValue);
+  },
+
+  /** Elimina una regla de acceso (solo admin) */
+  deleteAccessRule: async (userId: string, ruleId: number): Promise<void> => {
+    return await apiClient.deleteAccessRule(userId, ruleId);
   },
 };

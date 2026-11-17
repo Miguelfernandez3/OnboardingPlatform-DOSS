@@ -181,6 +181,22 @@ class User(Base):
     in_app_notifications_enabled = Column(Boolean, default=True, nullable=False)
 
 
+class DeviceAccessRule(Base):
+    """
+    Per-user device access grant. A non-admin user sees/manages a device only if
+    at least one of their rules matches it. No rules => sees nothing (deny by default).
+    Rules are evaluated at query time, so a newly-registered device that matches an
+    existing manufacturer/idsp rule appears automatically — nothing to reapply.
+    """
+    __tablename__ = 'device_access_rule'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
+    match_kind = Column(String, nullable=False, index=True)   # 'device' | 'manufacturer' | 'idsp'
+    match_value = Column(String, nullable=False)              # identifier | manufacturer | dsp_id
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
 class Notification(Base):
     __tablename__ = 'notification'
     __table_args__ = (UniqueConstraint('deduplication_key', name='uq_notification_dedup_key'),)
@@ -493,6 +509,76 @@ class Database():
             raise DatabaseError("Error retrieving all devices", e)
         except Exception as e:
             raise DatabaseError("Unexpected error retrieving all devices", e)
+
+    def getDevicesForUser(self, user_id):
+        """Devices a non-admin user may see/manage, per their access rules.
+        Empty list if the user has no rules (deny by default)."""
+        try:
+            rules = self.session.query(DeviceAccessRule).filter_by(user_id=user_id).all()
+            idents = [r.match_value for r in rules if r.match_kind == 'device']
+            manufs = [r.match_value for r in rules if r.match_kind == 'manufacturer']
+            idsps = [r.match_value for r in rules if r.match_kind == 'idsp']
+            if not (idents or manufs or idsps):
+                return []
+            conditions = []
+            if idents:
+                conditions.append(Device.identifier.in_(idents))
+            if manufs:
+                conditions.append(Device.manufacturer.in_(manufs))
+            if idsps:
+                conditions.append(Device.dsp_id.in_(idsps))
+            return self.session.query(Device).filter(or_(*conditions)).all()
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error retrieving devices for user {user_id}", e)
+
+    def userCanAccessDevice(self, user, device):
+        """True if the user (current_user dict) may access the given Device object.
+        Admins and superadmins can access everything."""
+        if user and user.get('role') in ('admin', 'superadmin'):
+            return True
+        if not user or device is None:
+            return False
+        try:
+            return self.session.query(DeviceAccessRule).filter_by(user_id=user['id']).filter(or_(
+                and_(DeviceAccessRule.match_kind == 'device', DeviceAccessRule.match_value == device.identifier),
+                and_(DeviceAccessRule.match_kind == 'manufacturer', DeviceAccessRule.match_value == device.manufacturer),
+                and_(DeviceAccessRule.match_kind == 'idsp', DeviceAccessRule.match_value == device.dsp_id),
+            )).first() is not None
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error checking device access for user {user.get('id')}", e)
+
+    def getAccessRulesForUser(self, user_id):
+        try:
+            return self.session.query(DeviceAccessRule).filter_by(user_id=user_id).order_by(
+                DeviceAccessRule.created_at.desc()).all()
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Error retrieving access rules for user {user_id}", e)
+
+    def createAccessRule(self, user_id, match_kind, match_value):
+        try:
+            existing = self.session.query(DeviceAccessRule).filter_by(
+                user_id=user_id, match_kind=match_kind, match_value=match_value).first()
+            if existing is not None:
+                return existing
+            rule = DeviceAccessRule(user_id=user_id, match_kind=match_kind, match_value=match_value)
+            self.session.add(rule)
+            self.session.commit()
+            return rule
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error creating access rule for user {user_id}", e)
+
+    def deleteAccessRule(self, user_id, rule_id):
+        try:
+            rule = self.session.query(DeviceAccessRule).filter_by(id=rule_id, user_id=user_id).first()
+            if rule is None:
+                return False
+            self.session.delete(rule)
+            self.session.commit()
+            return True
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise DatabaseError(f"Error deleting access rule {rule_id} for user {user_id}", e)
 
     def getAllThreats(self):
         try:
@@ -1075,6 +1161,7 @@ class Database():
             if user_to_delete:
                 self.session.query(Notification).filter_by(user_id=user_id).delete(synchronize_session=False)
                 self.session.query(TelegramLinkToken).filter_by(user_id=user_id).delete(synchronize_session=False)
+                self.session.query(DeviceAccessRule).filter_by(user_id=user_id).delete(synchronize_session=False)
                 self.session.delete(user_to_delete)
                 self.session.commit()
                 return True
